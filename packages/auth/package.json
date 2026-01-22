@@ -1,0 +1,26 @@
+{
+  "name": "@cyberk-flow/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@cyberk-flow/db": "workspace:*",
+    "@cyberk-flow/env": "workspace:*",
+    "@polar-sh/better-auth": "catalog:",
+    "@polar-sh/sdk": "^0.42.2",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cyberk-flow/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

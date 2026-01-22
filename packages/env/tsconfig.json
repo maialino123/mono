@@ -1,0 +1,3 @@
+{
+  "extends": "@cyberk-flow/config/tsconfig.base.json"
+}
