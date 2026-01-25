@@ -3,6 +3,20 @@
     "shadcn-studio-mcp": {
       "command": "npx",
       "args": ["-y", "shadcn-studio-mcp"]
+    },
+    "gkg": {
+      "type": "http",
+      "url": "http://localhost:27495/mcp",
+      "includeTools": [
+        "list_projects",
+        "repo_map",
+        "search_codebase_definitions",
+        "index_project",
+        "get_references",
+        "get_definition",
+        "read_definitions",
+        "repo_map"
+      ]
     }
   }
 }
