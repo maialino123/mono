@@ -16,6 +16,7 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 - **Drizzle** - TypeScript-first ORM
 - **PostgreSQL** - Database engine
 - **Authentication** - Better-Auth
+- **Biome** - Linting and formatting
 - **Husky** - Git hooks for code quality
 - **Turborepo** - Optimized monorepo build system
 
@@ -53,6 +54,7 @@ The API is running at [http://localhost:3000](http://localhost:3000).
 ## Git Hooks and Formatting
 
 - Initialize hooks: `bun run prepare`
+- Format and lint fix: `bun run check`
 
 ## Project Structure
 
@@ -78,3 +80,4 @@ cyberk-flow/
 - `bun run dev:native`: Start the React Native/Expo development server
 - `bun run db:push`: Push schema changes to database
 - `bun run db:studio`: Open database studio UI
+- `bun run check`: Run Biome formatting and linting
