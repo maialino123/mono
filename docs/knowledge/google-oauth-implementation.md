@@ -22,12 +22,12 @@ Implementation of Google OAuth login using `better-auth` in the cyberk-flow mono
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| [`packages/auth/src/index.ts`](file:///Users/huybuidac/Projects/cyberk/cyberk-flow/packages/auth/src/index.ts#L18-L25) | Backend auth config with socialProviders |
-| [`packages/env/src/server.ts`](file:///Users/huybuidac/Projects/cyberk/cyberk-flow/packages/env/src/server.ts) | Environment validation for Google credentials |
-| [`apps/web/src/components/sign-in-form.tsx`](file:///Users/huybuidac/Projects/cyberk/cyberk-flow/apps/web/src/components/sign-in-form.tsx#L159-L163) | Frontend Google sign-in trigger |
-| [`docs/google-auth-setup.md`](file:///Users/huybuidac/Projects/cyberk/cyberk-flow/docs/google-auth-setup.md) | Setup guide for GCP OAuth |
+| File                                                                                             | Purpose                                       |
+| ------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| [`packages/auth/src/index.ts`](packages/auth/src/index.ts#L18-L25)                               | Backend auth config with socialProviders      |
+| [`packages/env/src/server.ts`](packages/env/src/server.ts)                                       | Environment validation for Google credentials |
+| [`apps/web/src/components/sign-in-form.tsx`](apps/web/src/components/sign-in-form.tsx#L159-L163) | Frontend Google sign-in trigger               |
+| [`docs/google-auth-setup.md`](docs/google-auth-setup.md)                                         | Setup guide for GCP OAuth                     |
 
 ## Patterns
 
@@ -65,7 +65,7 @@ GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
 // ❌ BUG: Relative callbackURL
 authClient.signIn.social({
   provider: "google",
-  callbackURL: "/dashboard",  // → Redirects to API domain!
+  callbackURL: "/dashboard", // → Redirects to API domain!
 });
 ```
 
@@ -88,37 +88,42 @@ authClient.signIn.social({
 ```
 
 **Why `window.location.origin`?**
+
 - Automatically adapts to the environment (localhost, staging, production)
 - No need for additional `NEXT_PUBLIC_WEB_URL` env variable
 - Client-side only, safe for SSR
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GOOGLE_CLIENT_ID` | Optional | OAuth Client ID from GCP |
-| `GOOGLE_CLIENT_SECRET` | Optional | OAuth Client Secret from GCP |
-| `BETTER_AUTH_URL` | Required | Auth server URL (for redirect URI config) |
+| Variable               | Required | Description                               |
+| ---------------------- | -------- | ----------------------------------------- |
+| `GOOGLE_CLIENT_ID`     | Optional | OAuth Client ID from GCP                  |
+| `GOOGLE_CLIENT_SECRET` | Optional | OAuth Client Secret from GCP              |
+| `BETTER_AUTH_URL`      | Required | Auth server URL (for redirect URI config) |
 
 ## GCP Configuration
 
 ### Redirect URI Format
+
 ```
 {BETTER_AUTH_URL}/api/auth/callback/google
 ```
 
 ### OAuth Scopes
+
 - `email`
-- `profile`  
+- `profile`
 - `openid`
 
 ## Troubleshooting
 
 ### "redirect_uri_mismatch"
+
 - Check redirect URI in GCP Console matches exactly with `{BETTER_AUTH_URL}/api/auth/callback/google`
 - Verify no trailing slash differences
 
 ### Redirect to wrong domain after login
+
 - Check if `callbackURL` uses an absolute URL
 - Must use `window.location.origin` or full URL
 
