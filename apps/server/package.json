@@ -14,6 +14,7 @@
     "@ai-sdk/google": "^3.0.1",
     "@cyberk-flow/api": "workspace:*",
     "@cyberk-flow/auth": "workspace:*",
+    "@cyberk-flow/cache": "workspace:*",
     "@cyberk-flow/db": "workspace:*",
     "@cyberk-flow/env": "workspace:*",
     "@orpc/openapi": "catalog:",

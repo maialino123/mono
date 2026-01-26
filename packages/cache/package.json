@@ -1,0 +1,31 @@
+{
+  "name": "@cyberk-flow/cache",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "check-types": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@cyberk-flow/db": "workspace:*",
+    "@orpc/server": "catalog:",
+    "hono": "catalog:"
+  },
+  "devDependencies": {
+    "@cyberk-flow/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "ioredis": "^5.6.1",
+    "typescript": "catalog:",
+    "vitest": "^3.2.4"
+  }
+}

@@ -19,5 +19,23 @@ services:
       retries: 5
     restart: unless-stopped
 
+  redis:
+    image: redis/redis-stack:latest
+    container_name: cyberk-flow-redis
+    environment:
+      REDIS_ARGS: "--requirepass password"
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    volumes:
+      - cyberk-flow_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "password", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
 volumes:
   cyberk-flow_postgres_data:
+  cyberk-flow_redis_data:

@@ -12,6 +12,7 @@
   "scripts": {},
   "dependencies": {
     "@cyberk-flow/auth": "workspace:*",
+    "@cyberk-flow/cache": "workspace:*",
     "@cyberk-flow/db": "workspace:*",
     "@cyberk-flow/env": "workspace:*",
     "@orpc/client": "catalog:",

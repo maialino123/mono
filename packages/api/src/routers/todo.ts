@@ -1,4 +1,5 @@
 import { db } from "@cyberk-flow/db";
+import { cacheMiddleware } from "@cyberk-flow/cache";
 import { todo } from "@cyberk-flow/db/schema/todo";
 import { eq } from "drizzle-orm";
 import z from "zod";
@@ -6,9 +7,11 @@ import z from "zod";
 import { publicProcedure } from "../index";
 
 export const todoRouter = {
-  getAll: publicProcedure.handler(async () => {
-    return await db.select().from(todo);
-  }),
+  getAll: publicProcedure
+    .use(cacheMiddleware({ ttl: 2 }))
+    .handler(async () => {
+      return await db.select().from(todo);
+    }),
 
   create: publicProcedure
     .input(z.object({ text: z.string().min(1) }))

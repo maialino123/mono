@@ -23,6 +23,7 @@
     "@cyberk-flow/env": "workspace:*",
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",
+    "ioredis": "^5.6.1",
     "pg": "^8.17.1",
     "zod": "catalog:"
   },

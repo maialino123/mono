@@ -77,6 +77,7 @@ After deployment, create separate PR to:
 
 - Move `changes/[name]/` → `changes/archive/YYYY-MM-DD-[name]/`
 - Update `specs/` if capabilities changed
+- Run `knowledge` skill to capture knowledge about features and bugs encountered
 - Use `openspec archive <change-id> --skip-specs --yes` for tooling-only changes (always pass the change ID explicitly)
 - Run `openspec validate --strict --no-interactive` to confirm the archived change passes checks
 
