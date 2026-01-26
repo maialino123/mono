@@ -11,10 +11,9 @@
   },
   "scripts": {},
   "dependencies": {
+    "@better-auth/expo": "catalog:",
     "@cyberk-flow/db": "workspace:*",
     "@cyberk-flow/env": "workspace:*",
-    "@polar-sh/better-auth": "catalog:",
-    "@polar-sh/sdk": "^0.42.2",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
     "zod": "catalog:"

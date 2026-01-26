@@ -6,6 +6,8 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 
 - **TypeScript** - For type safety and improved developer experience
 - **Next.js** - Full-stack React framework
+- **React Native** - Build mobile apps using React
+- **Expo** - Tools for React Native development
 - **TailwindCSS** - Utility-first CSS for rapid UI development
 - **shadcn/ui** - Reusable UI components
 - **Hono** - Lightweight, performant server framework
@@ -14,6 +16,7 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 - **Drizzle** - TypeScript-first ORM
 - **PostgreSQL** - Database engine
 - **Authentication** - Better-Auth
+- **Husky** - Git hooks for code quality
 - **Turborepo** - Optimized monorepo build system
 
 ## Getting Started
@@ -44,7 +47,12 @@ bun run dev
 ```
 
 Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
+Use the Expo Go app to run the mobile application.
 The API is running at [http://localhost:3000](http://localhost:3000).
+
+## Git Hooks and Formatting
+
+- Initialize hooks: `bun run prepare`
 
 ## Project Structure
 
@@ -52,6 +60,7 @@ The API is running at [http://localhost:3000](http://localhost:3000).
 cyberk-flow/
 ├── apps/
 │   ├── web/         # Frontend application (Next.js)
+│   ├── native/      # Mobile application (React Native, Expo)
 │   └── server/      # Backend API (Hono, ORPC)
 ├── packages/
 │   ├── api/         # API layer / business logic
@@ -66,5 +75,6 @@ cyberk-flow/
 - `bun run dev:web`: Start only the web application
 - `bun run dev:server`: Start only the server
 - `bun run check-types`: Check TypeScript types across all apps
+- `bun run dev:native`: Start the React Native/Expo development server
 - `bun run db:push`: Push schema changes to database
 - `bun run db:studio`: Open database studio UI
