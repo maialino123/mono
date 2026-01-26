@@ -3,16 +3,16 @@ import { env } from "@cyberk-flow/env/native";
 import { Ionicons } from "@expo/vector-icons";
 import { DefaultChatTransport } from "ai";
 import { fetch as expoFetch } from "expo/fetch";
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
+  View,
 } from "react-native";
 
 import { Container } from "@/components/container";
@@ -43,7 +43,7 @@ export default function AIScreen() {
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
-  }, [messages]);
+  }, []);
 
   function onSubmit() {
     const value = input.trim();
@@ -60,12 +60,13 @@ export default function AIScreen() {
           <View
             style={[
               styles.errorCard,
-              { backgroundColor: theme.notification + "20", borderColor: theme.notification },
+              {
+                backgroundColor: `${theme.notification}20`,
+                borderColor: theme.notification,
+              },
             ]}
           >
-            <Text style={[styles.errorTitle, { color: theme.notification }]}>
-              Error: {error.message}
-            </Text>
+            <Text style={[styles.errorTitle, { color: theme.notification }]}>Error: {error.message}</Text>
             <Text style={[styles.errorText, { color: theme.text, opacity: 0.7 }]}>
               Please check your connection and try again.
             </Text>
@@ -77,22 +78,13 @@ export default function AIScreen() {
 
   return (
     <Container>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
+      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={[styles.headerTitle, { color: theme.text }]}>AI Chat</Text>
-            <Text style={[styles.headerSubtitle, { color: theme.text, opacity: 0.7 }]}>
-              Chat with our AI assistant
-            </Text>
+            <Text style={[styles.headerSubtitle, { color: theme.text, opacity: 0.7 }]}>Chat with our AI assistant</Text>
           </View>
-          <ScrollView
-            ref={scrollViewRef}
-            style={styles.scrollView}
-            showsVerticalScrollIndicator={false}
-          >
+          <ScrollView ref={scrollViewRef} style={styles.scrollView} showsVerticalScrollIndicator={false}>
             {messages.length === 0 ? (
               <View style={styles.emptyContainer}>
                 <Text style={[styles.emptyText, { color: theme.text, opacity: 0.7 }]}>
@@ -107,8 +99,7 @@ export default function AIScreen() {
                     style={[
                       styles.messageCard,
                       {
-                        backgroundColor:
-                          message.role === "user" ? theme.primary + "20" : theme.card,
+                        backgroundColor: message.role === "user" ? `${theme.primary}20` : theme.card,
                         borderColor: theme.border,
                         alignSelf: message.role === "user" ? "flex-end" : "flex-start",
                         marginLeft: message.role === "user" ? 32 : 0,
@@ -122,17 +113,11 @@ export default function AIScreen() {
                     <View style={styles.messageParts}>
                       {message.parts.map((part, i) =>
                         part.type === "text" ? (
-                          <Text
-                            key={`${message.id}-${i}`}
-                            style={[styles.messageText, { color: theme.text }]}
-                          >
+                          <Text key={`${message.id}-${i}`} style={[styles.messageText, { color: theme.text }]}>
                             {part.text}
                           </Text>
                         ) : (
-                          <Text
-                            key={`${message.id}-${i}`}
-                            style={[styles.messageText, { color: theme.text }]}
-                          >
+                          <Text key={`${message.id}-${i}`} style={[styles.messageText, { color: theme.text }]}>
                             {JSON.stringify(part)}
                           </Text>
                         ),

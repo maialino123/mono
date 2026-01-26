@@ -34,9 +34,7 @@ const DrawerLayout = () => {
         options={{
           headerTitle: "Home",
           drawerLabel: "Home",
-          drawerIcon: ({ size, color }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
+          drawerIcon: ({ size, color }) => <Ionicons name="home-outline" size={size} color={color} />,
         }}
       />
       <Drawer.Screen
@@ -44,9 +42,7 @@ const DrawerLayout = () => {
         options={{
           headerTitle: "Tabs",
           drawerLabel: "Tabs",
-          drawerIcon: ({ size, color }) => (
-            <MaterialIcons name="border-bottom" size={size} color={color} />
-          ),
+          drawerIcon: ({ size, color }) => <MaterialIcons name="border-bottom" size={size} color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>
               <HeaderButton />
@@ -59,9 +55,7 @@ const DrawerLayout = () => {
         options={{
           headerTitle: "Todos",
           drawerLabel: "Todos",
-          drawerIcon: ({ size, color }) => (
-            <Ionicons name="checkbox-outline" size={size} color={color} />
-          ),
+          drawerIcon: ({ size, color }) => <Ionicons name="checkbox-outline" size={size} color={color} />,
         }}
       />
       <Drawer.Screen
@@ -69,9 +63,7 @@ const DrawerLayout = () => {
         options={{
           headerTitle: "AI",
           drawerLabel: "AI",
-          drawerIcon: ({ size, color }) => (
-            <Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />
-          ),
+          drawerIcon: ({ size, color }) => <Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />,
         }}
       />
     </Drawer>

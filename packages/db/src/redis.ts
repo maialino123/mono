@@ -1,5 +1,5 @@
-import Redis from "ioredis";
 import { env } from "@cyberk-flow/env/server";
+import Redis from "ioredis";
 
 let client: Redis | null = null;
 

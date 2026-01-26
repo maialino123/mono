@@ -81,10 +81,7 @@ export default function TodosPage() {
           ) : (
             <ul className="space-y-2">
               {todos.data?.map((todo) => (
-                <li
-                  key={todo.id}
-                  className="flex items-center justify-between rounded-md border p-2"
-                >
+                <li key={todo.id} className="flex items-center justify-between rounded-md border p-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       checked={todo.completed}
@@ -93,7 +90,7 @@ export default function TodosPage() {
                     />
                     <label
                       htmlFor={`todo-${todo.id}`}
-                      className={`${todo.completed ? "line-through text-muted-foreground" : ""}`}
+                      className={`${todo.completed ? "text-muted-foreground line-through" : ""}`}
                     >
                       {todo.text}
                     </label>

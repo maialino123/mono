@@ -2,8 +2,8 @@ export { cache } from "./http";
 export { cacheMiddleware } from "./orpc";
 export type {
   BaseCacheOptions,
-  HTTPCacheOptions,
   HTTPCacheKeyGenerator,
-  ORPCCacheOptions,
+  HTTPCacheOptions,
   ORPCCacheKeyGenerator,
+  ORPCCacheOptions,
 } from "./types";

@@ -1,6 +1,6 @@
-import { createMiddleware } from "hono/factory";
-import type { Env } from "hono";
 import { getRedis } from "@cyberk-flow/db/redis";
+import type { Env } from "hono";
+import { createMiddleware } from "hono/factory";
 import type { HTTPCacheOptions } from "./types";
 
 const DEFAULT_TTL = 2;
@@ -15,11 +15,7 @@ export function cache<E extends Env = Env>(options: HTTPCacheOptions<E> = {}) {
       return next();
     }
 
-    const key = options.key
-      ? typeof options.key === "function"
-        ? await options.key(c)
-        : options.key
-      : c.req.url;
+    const key = options.key ? (typeof options.key === "function" ? await options.key(c) : options.key) : c.req.url;
 
     const redis = getRedis();
     const cachedValue = await redis.get(key);

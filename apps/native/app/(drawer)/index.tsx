@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { Container } from "@/components/container";
 import { SignIn } from "@/components/sign-in";
@@ -7,7 +7,7 @@ import { SignUp } from "@/components/sign-up";
 import { authClient } from "@/lib/auth-client";
 import { NAV_THEME } from "@/lib/constants";
 import { useColorScheme } from "@/lib/use-color-scheme";
-import { queryClient, orpc } from "@/utils/orpc";
+import { orpc, queryClient } from "@/utils/orpc";
 
 export default function Home() {
   const { colorScheme } = useColorScheme();
@@ -25,17 +25,13 @@ export default function Home() {
           <Text style={[styles.title, { color: theme.text }]}>BETTER T STACK</Text>
 
           {session?.user ? (
-            <View
-              style={[styles.userCard, { backgroundColor: theme.card, borderColor: theme.border }]}
-            >
+            <View style={[styles.userCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
               <View style={styles.userHeader}>
                 <Text style={[styles.userText, { color: theme.text }]}>
                   Welcome, <Text style={styles.userName}>{session.user.name}</Text>
                 </Text>
               </View>
-              <Text style={[styles.userEmail, { color: theme.text, opacity: 0.7 }]}>
-                {session.user.email}
-              </Text>
+              <Text style={[styles.userEmail, { color: theme.text, opacity: 0.7 }]}>{session.user.email}</Text>
               <TouchableOpacity
                 style={[styles.signOutButton, { backgroundColor: theme.notification }]}
                 onPress={() => {
@@ -48,36 +44,20 @@ export default function Home() {
             </View>
           ) : null}
 
-          <View
-            style={[styles.statusCard, { backgroundColor: theme.card, borderColor: theme.border }]}
-          >
+          <View style={[styles.statusCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <Text style={[styles.cardTitle, { color: theme.text }]}>System Status</Text>
             <View style={styles.statusRow}>
-              <View
-                style={[
-                  styles.statusIndicator,
-                  { backgroundColor: isConnected ? "#10b981" : "#ef4444" },
-                ]}
-              />
+              <View style={[styles.statusIndicator, { backgroundColor: isConnected ? "#10b981" : "#ef4444" }]} />
               <View style={styles.statusContent}>
                 <Text style={[styles.statusTitle, { color: theme.text }]}>ORPC Backend</Text>
                 <Text style={[styles.statusText, { color: theme.text, opacity: 0.7 }]}>
-                  {isLoading
-                    ? "Checking connection..."
-                    : isConnected
-                      ? "Connected to API"
-                      : "API Disconnected"}
+                  {isLoading ? "Checking connection..." : isConnected ? "Connected to API" : "API Disconnected"}
                 </Text>
               </View>
             </View>
           </View>
 
-          <View
-            style={[
-              styles.privateDataCard,
-              { backgroundColor: theme.card, borderColor: theme.border },
-            ]}
-          >
+          <View style={[styles.privateDataCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <Text style={[styles.cardTitle, { color: theme.text }]}>Private Data</Text>
             {privateData && (
               <Text style={[styles.privateDataText, { color: theme.text, opacity: 0.7 }]}>

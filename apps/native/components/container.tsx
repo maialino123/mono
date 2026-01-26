@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -7,8 +7,7 @@ import { useColorScheme } from "@/lib/use-color-scheme";
 
 export function Container({ children }: { children: React.ReactNode }) {
   const { colorScheme } = useColorScheme();
-  const backgroundColor =
-    colorScheme === "dark" ? NAV_THEME.dark.background : NAV_THEME.light.background;
+  const backgroundColor = colorScheme === "dark" ? NAV_THEME.dark.background : NAV_THEME.light.background;
 
   return <SafeAreaView style={[styles.container, { backgroundColor }]}>{children}</SafeAreaView>;
 }

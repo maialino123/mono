@@ -1,4 +1,4 @@
-import { ScrollView, Text, View, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { Container } from "@/components/container";
 import { NAV_THEME } from "@/lib/constants";

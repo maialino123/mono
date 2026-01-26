@@ -16,12 +16,13 @@ export const auth = betterAuth({
     enabled: true,
   },
   socialProviders: {
-    google: env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
-      ? {
-          clientId: env.GOOGLE_CLIENT_ID,
-          clientSecret: env.GOOGLE_CLIENT_SECRET,
-        }
-      : undefined,
+    google:
+      env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+        ? {
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
+          }
+        : undefined,
   },
   advanced: {
     defaultCookieAttributes: {

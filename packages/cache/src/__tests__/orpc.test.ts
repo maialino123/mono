@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { os } from "@orpc/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockGet = vi.fn();
 const mockSetex = vi.fn();
@@ -54,11 +54,7 @@ describe("oRPC cache middleware", () => {
 
     expect(result).toEqual({ data: "fresh" });
     expect(handlerCalled).toBe(true);
-    expect(mockSetex).toHaveBeenCalledWith(
-      expect.any(String),
-      2,
-      JSON.stringify({ data: "fresh" })
-    );
+    expect(mockSetex).toHaveBeenCalledWith(expect.any(String), 2, JSON.stringify({ data: "fresh" }));
   });
 
   it("should use default key from path and input", async () => {

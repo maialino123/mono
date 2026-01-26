@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  StyleSheet,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import { authClient } from "@/lib/auth-client";
 import { NAV_THEME } from "@/lib/constants";
@@ -54,7 +47,7 @@ function SignIn() {
       <Text style={[styles.title, { color: theme.text }]}>Sign In</Text>
 
       {error ? (
-        <View style={[styles.errorContainer, { backgroundColor: theme.notification + "20" }]}>
+        <View style={[styles.errorContainer, { backgroundColor: `${theme.notification}20` }]}>
           <Text style={[styles.errorText, { color: theme.notification }]}>{error}</Text>
         </View>
       ) : null}
@@ -62,7 +55,11 @@ function SignIn() {
       <TextInput
         style={[
           styles.input,
-          { color: theme.text, borderColor: theme.border, backgroundColor: theme.background },
+          {
+            color: theme.text,
+            borderColor: theme.border,
+            backgroundColor: theme.background,
+          },
         ]}
         placeholder="Email"
         placeholderTextColor={theme.text}
@@ -75,7 +72,11 @@ function SignIn() {
       <TextInput
         style={[
           styles.input,
-          { color: theme.text, borderColor: theme.border, backgroundColor: theme.background },
+          {
+            color: theme.text,
+            borderColor: theme.border,
+            backgroundColor: theme.background,
+          },
         ]}
         placeholder="Password"
         placeholderTextColor={theme.text}

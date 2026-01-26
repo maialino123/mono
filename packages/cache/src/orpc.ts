@@ -1,12 +1,10 @@
-import { os } from "@orpc/server";
 import { getRedis } from "@cyberk-flow/db/redis";
+import { os } from "@orpc/server";
 import type { ORPCCacheOptions } from "./types";
 
 const DEFAULT_TTL = 2;
 
-export function cacheMiddleware<TInput = unknown>(
-  options: ORPCCacheOptions<TInput> = {}
-) {
+export function cacheMiddleware<TInput = unknown>(options: ORPCCacheOptions<TInput> = {}) {
   return os.middleware(async ({ next, path }, input: TInput, output) => {
     const key = options.key
       ? typeof options.key === "function"

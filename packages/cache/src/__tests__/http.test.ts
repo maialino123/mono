@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockGet = vi.fn();
 const mockSetex = vi.fn();
@@ -38,11 +38,7 @@ describe("HTTP cache middleware", () => {
     expect(res.headers.get("X-Cache")).toBe("MISS");
     expect(handlerCalled).toBe(true);
     expect(mockGet).toHaveBeenCalledWith("http://localhost/test");
-    expect(mockSetex).toHaveBeenCalledWith(
-      "http://localhost/test",
-      2,
-      expect.any(String)
-    );
+    expect(mockSetex).toHaveBeenCalledWith("http://localhost/test", 2, expect.any(String));
   });
 
   it("should return HIT on cache hit and skip handler", async () => {
@@ -81,10 +77,8 @@ describe("HTTP cache middleware", () => {
     mockGet.mockResolvedValue(null);
     mockSetex.mockResolvedValue("OK");
 
-    app.get(
-      "/users/:id",
-      cache({ key: (c) => `users:${c.req.param("id")}` }),
-      (c) => c.json({ id: c.req.param("id") })
+    app.get("/users/:id", cache({ key: (c) => `users:${c.req.param("id")}` }), (c) =>
+      c.json({ id: c.req.param("id") }),
     );
 
     await app.request("/users/123");
@@ -105,14 +99,10 @@ describe("HTTP cache middleware", () => {
   });
 
   it("should skip cache when condition returns false", async () => {
-    app.get(
-      "/test",
-      cache({ condition: (c) => !c.req.header("Authorization") }),
-      (c) => {
-        handlerCalled = true;
-        return c.json({ data: "test" });
-      }
-    );
+    app.get("/test", cache({ condition: (c) => !c.req.header("Authorization") }), (c) => {
+      handlerCalled = true;
+      return c.json({ data: "test" });
+    });
 
     const res = await app.request("/test", {
       headers: { Authorization: "Bearer token" },

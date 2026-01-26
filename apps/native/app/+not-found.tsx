@@ -1,5 +1,5 @@
 import { Link, Stack } from "expo-router";
-import { Text, View, StyleSheet } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { Container } from "@/components/container";
 import { NAV_THEME } from "@/lib/constants";
@@ -24,7 +24,10 @@ export default function NotFoundScreen() {
               <Text
                 style={[
                   styles.link,
-                  { color: theme.primary, backgroundColor: `${theme.primary}1a` },
+                  {
+                    color: theme.primary,
+                    backgroundColor: `${theme.primary}1a`,
+                  },
                 ]}
               >
                 Go to Home
