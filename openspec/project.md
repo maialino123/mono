@@ -7,8 +7,8 @@ CyberK Flow is a full-stack monorepo project including both backend and frontend
 1. **Continuous Technology Adoption** - Always adopt the latest technologies to keep up with the rapidly evolving software industry
 2. **AI-Driven Development** - Integrate AI tools to optimize the development workflow:
    - **Spec Management**: OpenSpec for requirements and change proposal management
-   - **Task Management**: Beads for git-native, AI-friendly issue tracking
-   - **Knowledge Management**: N/A (planned)
+   - **Task Management**: OpenSpec (using open spec to manage tasks)
+   - **Knowledge Management**: Knowledge Skill (temporary)
    - **Code Intelligence**: MCP GKG for querying indexed source code locally
 
 ## Tech Stack
@@ -21,7 +21,7 @@ CyberK Flow is a full-stack monorepo project including both backend and frontend
 - **Authentication**: better-auth
 - **AI**: AI SDK with Google Gemini integration
 - **UI Components**: shadcn/ui, Lucide icons
-- **Issue Tracking**: Beads (git-native, AI-friendly)
+- **Issue Tracking**: OpenSpec
 
 ## Project Conventions
 
@@ -65,8 +65,6 @@ CyberK Flow is a full-stack monorepo project including both backend and frontend
 ### Git Workflow
 
 - Conventional commits: `feat:`, `fix:`, `chore:`, etc.
-- Use Beads (`bd`) for issue tracking
-- Always sync before push: `bd sync` then `git push`
 
 ## Domain Context
 
