@@ -1,3 +1,4 @@
+import type { InferSelectModel } from "drizzle-orm";
 import { boolean, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
 export const todo = pgTable("todo", {
@@ -6,3 +7,5 @@ export const todo = pgTable("todo", {
   completed: boolean("completed").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export type Todo = InferSelectModel<typeof todo>;

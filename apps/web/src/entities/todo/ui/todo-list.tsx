@@ -1,13 +1,6 @@
+import type { Todo } from "@cyberk-flow/db/schema/todo";
 import { Loader2 } from "lucide-react";
-
 import { TodoItem } from "./todo-item";
-
-export interface Todo {
-  id: number;
-  text: string;
-  completed: boolean;
-  createdAt: string;
-}
 
 export interface TodoListProps {
   todos: Todo[] | undefined;

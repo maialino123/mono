@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@cyberk-flow/config": "workspace:*",
+    "@cyberk-flow/db": "workspace:*",
     "@tailwindcss/postcss": "^4.1.10",
     "@tanstack/react-query-devtools": "^5.91.1",
     "@types/node": "^20",
