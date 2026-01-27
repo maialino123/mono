@@ -21,25 +21,32 @@ bun run db:start
 ### HTTP (Hono Middleware)
 
 ```typescript
-import { cache } from "@cyberk-flow/cache";
+import { httpCache, httpInvalidate } from "@cyberk-flow/cache";
 
-// Default key = c.req.url, default TTL = 2s
-app.get("/users", cache(), handler);
+// Cache: default key = c.req.url, default TTL = 2s
+app.get("/users", httpCache(), handler);
 
-// Custom key and TTL
+// Cache: custom key and TTL
 app.get("/users/:id", 
-  cache({ 
+  httpCache({ 
     key: (c) => `users:${c.req.param("id")}`,
     ttl: 300 
   }), 
   handler
 );
 
-// Conditional caching
+// Cache: conditional caching
 app.get("/public",
-  cache({
+  httpCache({
     condition: (c) => !c.req.header("Authorization"),
   }),
+  handler
+);
+
+// Invalidate: delete cache on mutation
+app.post("/users", httpInvalidate({ keys: "users:list" }), handler);
+app.delete("/users/:id", 
+  httpInvalidate({ keys: (c) => `users:${c.req.param("id")}` }), 
   handler
 );
 ```
@@ -47,25 +54,40 @@ app.get("/public",
 ### oRPC (Middleware)
 
 ```typescript
-import { cacheMiddleware } from "@cyberk-flow/cache";
+import { orpcCache, orpcInvalidate } from "@cyberk-flow/cache";
+
+const CACHE_KEYS = {
+  todoList: "todo/getAll{}",
+};
 
 const todoRouter = {
-  // Default key = path + JSON.stringify(input), default TTL = 2s
+  // Cache with explicit key
   getAll: publicProcedure
-    .use(cacheMiddleware())
+    .use(orpcCache({ key: CACHE_KEYS.todoList, ttl: 2 }))
     .handler(async () => db.select().from(todo)),
 
-  // Custom TTL
-  getById: publicProcedure
+  // Invalidate on mutation
+  create: publicProcedure
+    .use(orpcInvalidate({ keys: CACHE_KEYS.todoList }))
+    .input(z.object({ text: z.string() }))
+    .handler(async ({ input }) => db.insert(todo).values(input)),
+
+  // Invalidate multiple keys
+  deleteAll: publicProcedure
+    .use(orpcInvalidate({ keys: [CACHE_KEYS.todoList, "todo:count"] }))
+    .handler(async () => db.delete(todo)),
+
+  // Dynamic key invalidation
+  delete: publicProcedure
+    .use(orpcInvalidate({ keys: (input) => `todo:${input.id}` }))
     .input(z.object({ id: z.number() }))
-    .use(cacheMiddleware({ ttl: 300 }))
-    .handler(async ({ input }) => ...),
+    .handler(async ({ input }) => db.delete(todo).where(eq(todo.id, input.id))),
 };
 ```
 
 ## API
 
-### `cache(options?)` - HTTP Middleware
+### `httpCache(options?)` - HTTP Cache Middleware
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -77,9 +99,25 @@ const todoRouter = {
 
 **Behavior:** Only caches GET requests with successful responses.
 
-### `cacheMiddleware(options?)` - oRPC Middleware
+### `httpInvalidate(options)` - HTTP Invalidation Middleware
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `keys` | `string \| string[] \| (c) => string \| string[]` | Cache keys to invalidate |
+
+**Behavior:** Deletes cache entries when response is successful (2xx).
+
+### `orpcCache(options?)` - oRPC Cache Middleware
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `key` | `string \| (input, path) => string` | `path.join('/') + JSON.stringify(input)` | Cache key |
 | `ttl` | `number` | `2` | TTL in seconds |
+
+### `orpcInvalidate(options)` - oRPC Invalidation Middleware
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `keys` | `string \| string[] \| (input) => string \| string[]` | Cache keys to invalidate |
+
+**Behavior:** Deletes cache entries when handler returns output (not undefined/null).

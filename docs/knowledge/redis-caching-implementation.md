@@ -1,11 +1,14 @@
 # Redis Caching Implementation Knowledge
 
-> **Source Thread**: [T-019bfb5c-40e3-70b1-a2c5-5b6454a4605b](http://localhost:8317/threads/T-019bfb5c-40e3-70b1-a2c5-5b6454a4605b)  
+> **Source Threads**:
+> - [T-019bfb5c-40e3-70b1-a2c5-5b6454a4605b](https://ampcode.com/threads/T-019bfb5c-40e3-70b1-a2c5-5b6454a4605b) - Initial caching implementation
+> - [T-019bfea3-186d-752d-b75c-b460f2342c75](https://ampcode.com/threads/T-019bfea3-186d-752d-b75c-b460f2342c75) - Cache invalidation
+>
 > **Date**: January 2026
 
 ## Overview
 
-Implementation of Redis caching middleware for both HTTP (Hono) and oRPC endpoints in the cyberk-flow monorepo.
+Implementation of Redis caching middleware for both HTTP (Hono) and oRPC endpoints in the cyberk-flow monorepo, including cache invalidation for mutations.
 
 ## Architecture
 
@@ -37,9 +40,10 @@ Implementation of Redis caching middleware for both HTTP (Hono) and oRPC endpoin
 
 | File | Purpose |
 |------|---------|
-| [`packages/cache/src/http.ts`](packages/cache/src/http.ts) | Hono HTTP cache middleware |
-| [`packages/cache/src/orpc.ts`](packages/cache/src/orpc.ts) | oRPC cache middleware |
-| [`packages/cache/src/types.ts`](packages/cache/src/types.ts) | Shared TypeScript types |
+| [`packages/cache/src/http.ts`](packages/cache/src/http.ts) | Hono HTTP cache + invalidation middleware |
+| [`packages/cache/src/orpc.ts`](packages/cache/src/orpc.ts) | oRPC cache + invalidation middleware |
+| [`packages/cache/src/utils.ts`](packages/cache/src/utils.ts) | Shared utilities (resolveKeys, invalidateKeys) |
+| [`packages/cache/src/types.ts`](packages/cache/src/types.ts) | TypeScript types |
 | [`packages/db/src/redis.ts`](packages/db/src/redis.ts) | Redis client singleton |
 | [`packages/db/docker-compose.yml`](packages/db/docker-compose.yml) | Redis + PostgreSQL infrastructure |
 
@@ -48,8 +52,9 @@ Implementation of Redis caching middleware for both HTTP (Hono) and oRPC endpoin
 ```
 packages/cache/          # Caching logic
 ├── src/
-│   ├── http.ts         # Hono middleware
-│   ├── orpc.ts         # oRPC middleware
+│   ├── http.ts         # httpCache, httpInvalidate
+│   ├── orpc.ts         # orpcCache, orpcInvalidate
+│   ├── utils.ts        # Shared utilities
 │   ├── types.ts        # Types
 │   └── index.ts        # Exports
 └── package.json
@@ -73,8 +78,8 @@ packages/db/             # Infrastructure
 
 | Middleware | Default Key | Example |
 |------------|-------------|---------|
-| HTTP (`cache()`) | `c.req.url` | `http://localhost:3000/users?page=1` |
-| oRPC (`cacheMiddleware()`) | `path.join('/') + JSON.stringify(input)` | `users/getById{"id":123}` |
+| HTTP (`httpCache()`) | `c.req.url` | `http://localhost:3000/users?page=1` |
+| oRPC (`orpcCache()`) | `path.join('/') + JSON.stringify(input)` | `users/getById{"id":123}` |
 
 **Rationale**: Follows NestJS CacheInterceptor pattern where default key is derived from request.
 
@@ -82,19 +87,41 @@ packages/db/             # Infrastructure
 
 Short default TTL prevents stale data issues during development. Override with `ttl` option for production caching.
 
+### Cache Invalidation Strategy
+
+**Problem**: Users experienced stale data when performing mutations (add/delete/toggle). List endpoints cached data but mutations didn't invalidate the cache.
+
+**Solution**: Separate invalidation middlewares (`httpInvalidate`, `orpcInvalidate`) that delete cache keys on successful operations.
+
+**Design Decisions**:
+
+1. **Separate middlewares** - Cache and invalidation are separate middlewares (single responsibility principle)
+2. **Post-execution invalidation** - Only invalidate after handler succeeds (not on errors)
+3. **Explicit keys** - Must specify exact keys to invalidate (no pattern/wildcard support for simplicity)
+4. **Shared utilities** - `utils.ts` contains `resolveKeys()` and `invalidateKeys()` used by both HTTP and oRPC
+
+**Naming Convention**: Prefix-based naming (`http*`, `orpc*`) to distinguish middleware types clearly.
+
+| Middleware | Purpose |
+|------------|---------|
+| `httpCache` | Cache GET responses (HTTP) |
+| `httpInvalidate` | Delete cache on mutation (HTTP) |
+| `orpcCache` | Cache procedure output (oRPC) |
+| `orpcInvalidate` | Delete cache on mutation (oRPC) |
+
 ## Usage Patterns
 
 ### HTTP (Hono)
 
 ```typescript
-import { cache } from "@cyberk-flow/cache";
+import { httpCache, httpInvalidate } from "@cyberk-flow/cache";
 
 // Default: key = c.req.url, ttl = 2s
-app.get("/users", cache(), handler);
+app.get("/users", httpCache(), handler);
 
 // Custom key and TTL
 app.get("/users/:id", 
-  cache({ 
+  httpCache({ 
     key: (c) => `users:${c.req.param("id")}`,
     ttl: 300 
   }), 
@@ -103,22 +130,32 @@ app.get("/users/:id",
 
 // Conditional caching (skip for authenticated requests)
 app.get("/public",
-  cache({
+  httpCache({
     condition: (c) => !c.req.header("Authorization"),
   }),
   handler
 );
+
+// Invalidate cache on mutation
+app.post("/users", httpInvalidate({ keys: "users:list" }), handler);
 ```
 
 ### oRPC
 
 ```typescript
-import { cacheMiddleware } from "@cyberk-flow/cache";
+import { orpcCache, orpcInvalidate } from "@cyberk-flow/cache";
+
+const CACHE_KEYS = { todoList: "todo/getAll{}" };
 
 const todoRouter = {
   getAll: publicProcedure
-    .use(cacheMiddleware({ ttl: 60 }))
+    .use(orpcCache({ key: CACHE_KEYS.todoList, ttl: 60 }))
     .handler(async () => db.select().from(todo)),
+
+  create: publicProcedure
+    .use(orpcInvalidate({ keys: CACHE_KEYS.todoList }))
+    .input(z.object({ text: z.string() }))
+    .handler(async ({ input }) => db.insert(todo).values(input)),
 };
 ```
 
@@ -181,17 +218,18 @@ vi.mock("@cyberk-flow/db/redis", () => ({
   getRedis: () => ({
     get: mockGet,
     setex: mockSetex,
+    del: mockDel,
   }),
 }));
 
-const { cache } = await import("../http");
+const { httpCache, httpInvalidate } = await import("../http");
 ```
 
-## Limitations (v1)
+## Limitations
 
-- **No cache invalidation** - TTL-based expiration only
 - **JSON serialization** - Only supports JSON-serializable responses
-- **GET only** - HTTP middleware only caches GET requests
+- **GET only** - HTTP cache middleware only caches GET requests
+- **No pattern invalidation** - Must specify exact keys to invalidate
 
 ## Related
 

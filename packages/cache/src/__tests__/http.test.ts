@@ -3,17 +3,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockGet = vi.fn();
 const mockSetex = vi.fn();
+const mockDel = vi.fn();
 
 vi.mock("@cyberk-flow/db/redis", () => ({
   getRedis: () => ({
     get: mockGet,
     setex: mockSetex,
+    del: mockDel,
   }),
 }));
 
-const { cache } = await import("../http");
+const { httpCache, httpInvalidate } = await import("../http");
 
-describe("HTTP cache middleware", () => {
+describe("httpCache middleware", () => {
   let app: Hono;
   let handlerCalled: boolean;
 
@@ -27,7 +29,7 @@ describe("HTTP cache middleware", () => {
     mockGet.mockResolvedValue(null);
     mockSetex.mockResolvedValue("OK");
 
-    app.get("/test", cache(), (c) => {
+    app.get("/test", httpCache(), (c) => {
       handlerCalled = true;
       return c.json({ data: "fresh" });
     });
@@ -44,7 +46,7 @@ describe("HTTP cache middleware", () => {
   it("should return HIT on cache hit and skip handler", async () => {
     mockGet.mockResolvedValue(JSON.stringify({ data: "cached" }));
 
-    app.get("/test", cache(), (c) => {
+    app.get("/test", httpCache(), (c) => {
       handlerCalled = true;
       return c.json({ data: "fresh" });
     });
@@ -60,7 +62,7 @@ describe("HTTP cache middleware", () => {
   });
 
   it("should bypass cache for POST requests", async () => {
-    app.post("/test", cache(), (c) => {
+    app.post("/test", httpCache(), (c) => {
       handlerCalled = true;
       return c.json({ ok: true });
     });
@@ -77,7 +79,7 @@ describe("HTTP cache middleware", () => {
     mockGet.mockResolvedValue(null);
     mockSetex.mockResolvedValue("OK");
 
-    app.get("/users/:id", cache({ key: (c) => `users:${c.req.param("id")}` }), (c) =>
+    app.get("/users/:id", httpCache({ key: (c) => `users:${c.req.param("id")}` }), (c) =>
       c.json({ id: c.req.param("id") }),
     );
 
@@ -91,7 +93,7 @@ describe("HTTP cache middleware", () => {
     mockGet.mockResolvedValue(null);
     mockSetex.mockResolvedValue("OK");
 
-    app.get("/test", cache({ ttl: 300 }), (c) => c.json({ data: "test" }));
+    app.get("/test", httpCache({ ttl: 300 }), (c) => c.json({ data: "test" }));
 
     await app.request("/test");
 
@@ -99,7 +101,7 @@ describe("HTTP cache middleware", () => {
   });
 
   it("should skip cache when condition returns false", async () => {
-    app.get("/test", cache({ condition: (c) => !c.req.header("Authorization") }), (c) => {
+    app.get("/test", httpCache({ condition: (c) => !c.req.header("Authorization") }), (c) => {
       handlerCalled = true;
       return c.json({ data: "test" });
     });
@@ -112,5 +114,77 @@ describe("HTTP cache middleware", () => {
     expect(res.headers.get("X-Cache")).toBeNull();
     expect(handlerCalled).toBe(true);
     expect(mockGet).not.toHaveBeenCalled();
+  });
+});
+
+describe("httpInvalidate middleware", () => {
+  let app: Hono;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    app = new Hono();
+  });
+
+  it("should invalidate single key on successful POST", async () => {
+    mockDel.mockResolvedValue(1);
+
+    app.post("/users", httpInvalidate({ keys: "users:list" }), (c) => c.json({ created: true }));
+
+    const res = await app.request("/users", { method: "POST" });
+
+    expect(res.status).toBe(200);
+    expect(mockDel).toHaveBeenCalledWith("users:list");
+  });
+
+  it("should invalidate multiple keys on success", async () => {
+    mockDel.mockResolvedValue(1);
+
+    app.post("/users", httpInvalidate({ keys: ["users:list", "users:count"] }), (c) => c.json({ ok: true }));
+
+    await app.request("/users", { method: "POST" });
+
+    expect(mockDel).toHaveBeenCalledWith("users:list");
+    expect(mockDel).toHaveBeenCalledWith("users:count");
+  });
+
+  it("should support dynamic key from request context", async () => {
+    mockDel.mockResolvedValue(1);
+
+    app.delete("/users/:id", httpInvalidate({ keys: (c) => `users:${c.req.param("id")}` }), (c) =>
+      c.json({ deleted: true }),
+    );
+
+    await app.request("/users/456", { method: "DELETE" });
+
+    expect(mockDel).toHaveBeenCalledWith("users:456");
+  });
+
+  it("should not invalidate on error response", async () => {
+    app.post("/users", httpInvalidate({ keys: "users:list" }), (c) => c.json({ error: "Bad Request" }, 400));
+
+    const res = await app.request("/users", { method: "POST" });
+
+    expect(res.status).toBe(400);
+    expect(mockDel).not.toHaveBeenCalled();
+  });
+
+  it("should support async key function", async () => {
+    mockDel.mockResolvedValue(1);
+
+    app.post(
+      "/users",
+      httpInvalidate({
+        keys: async () => {
+          await Promise.resolve();
+          return ["users:list", "users:recent"];
+        },
+      }),
+      (c) => c.json({ ok: true }),
+    );
+
+    await app.request("/users", { method: "POST" });
+
+    expect(mockDel).toHaveBeenCalledWith("users:list");
+    expect(mockDel).toHaveBeenCalledWith("users:recent");
   });
 });

@@ -22,7 +22,7 @@ The system SHALL provide a Redis client that connects via TCP using the `REDIS_U
 
 ### Requirement: Cache Middleware
 
-The system SHALL provide a Hono middleware that caches GET request responses in Redis. Only GET requests are cacheable (like NestJS `allowedMethods = ['GET']`).
+The system SHALL provide Hono middleware (`httpCache`) and oRPC middleware (`orpcCache`) that cache responses in Redis.
 
 #### Scenario: Cache miss
 
@@ -101,4 +101,54 @@ The system SHALL support conditional caching based on request context.
 - **GIVEN** cache middleware with `condition: (c) => !c.req.header('Authorization')`
 - **WHEN** a request includes Authorization header
 - **THEN** caching is bypassed and handler executes directly
+
+### Requirement: oRPC Cache Invalidation
+
+The system SHALL provide an oRPC middleware (`orpcInvalidate`) that invalidates (deletes) cache entries when mutations succeed.
+
+#### Scenario: Invalidate single key on success
+
+- **GIVEN** a mutation endpoint with `orpcInvalidate({ keys: "todo:list" })`
+- **WHEN** the mutation executes successfully
+- **THEN** the cache entry for `todo:list` is deleted from Redis
+
+#### Scenario: Invalidate multiple keys on success
+
+- **GIVEN** a mutation endpoint with `orpcInvalidate({ keys: ["todo:list", "todo:count"] })`
+- **WHEN** the mutation executes successfully
+- **THEN** all specified cache entries are deleted from Redis
+
+#### Scenario: Dynamic key invalidation
+
+- **GIVEN** a mutation endpoint with `orpcInvalidate({ keys: (input) => \`todo:\${input.id}\` })`
+- **WHEN** the mutation executes with `{ id: 123 }`
+- **THEN** the cache entry for `todo:123` is deleted from Redis
+
+#### Scenario: No invalidation on failure
+
+- **GIVEN** a mutation endpoint with invalidation configured
+- **WHEN** the mutation throws an error
+- **THEN** cache entries are NOT invalidated
+
+### Requirement: HTTP Cache Invalidation
+
+The system SHALL provide a Hono middleware (`httpInvalidate`) that invalidates cache entries when non-GET requests succeed.
+
+#### Scenario: Invalidate on POST success
+
+- **GIVEN** a route with `httpInvalidate({ keys: "users:list" })`
+- **WHEN** a POST request completes successfully (2xx status)
+- **THEN** the cache entry for `users:list` is deleted from Redis
+
+#### Scenario: Dynamic key from request context
+
+- **GIVEN** a route with `httpInvalidate({ keys: (c) => \`users:\${c.req.param("id")}\` })`
+- **WHEN** a DELETE request to `/users/456` completes successfully
+- **THEN** the cache entry for `users:456` is deleted from Redis
+
+#### Scenario: No invalidation on error response
+
+- **GIVEN** a route with HTTP invalidation configured
+- **WHEN** the handler returns an error status (4xx, 5xx)
+- **THEN** cache entries are NOT invalidated
 

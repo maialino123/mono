@@ -1,19 +1,22 @@
 import { os } from "@orpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import z from "zod";
 
 const mockGet = vi.fn();
 const mockSetex = vi.fn();
+const mockDel = vi.fn();
 
 vi.mock("@cyberk-flow/db/redis", () => ({
   getRedis: () => ({
     get: mockGet,
     setex: mockSetex,
+    del: mockDel,
   }),
 }));
 
-const { cacheMiddleware } = await import("../orpc");
+const { orpcCache, orpcInvalidate } = await import("../orpc");
 
-describe("oRPC cache middleware", () => {
+describe("orpcCache middleware", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -23,7 +26,7 @@ describe("oRPC cache middleware", () => {
 
     let handlerCalled = false;
     const procedure = os
-      .use(cacheMiddleware())
+      .use(orpcCache())
       .handler(async () => {
         handlerCalled = true;
         return { data: "fresh" };
@@ -43,7 +46,7 @@ describe("oRPC cache middleware", () => {
 
     let handlerCalled = false;
     const procedure = os
-      .use(cacheMiddleware())
+      .use(orpcCache())
       .handler(async () => {
         handlerCalled = true;
         return { data: "fresh" };
@@ -62,14 +65,12 @@ describe("oRPC cache middleware", () => {
     mockSetex.mockResolvedValue("OK");
 
     const procedure = os
-      .use(cacheMiddleware())
+      .use(orpcCache())
       .handler(async () => ({ data: "test" }))
       .callable({ context: {} });
 
     await procedure();
 
-    // Default key is path.join('/') + JSON.stringify(input)
-    // For callable procedure without router, path is empty
     expect(mockGet).toHaveBeenCalledWith("undefined");
   });
 
@@ -78,7 +79,7 @@ describe("oRPC cache middleware", () => {
     mockSetex.mockResolvedValue("OK");
 
     const procedure = os
-      .use(cacheMiddleware({ key: () => "custom:123" }))
+      .use(orpcCache({ key: () => "custom:123" }))
       .handler(async () => ({ id: 456 }))
       .callable({ context: {} });
 
@@ -93,7 +94,7 @@ describe("oRPC cache middleware", () => {
     mockSetex.mockResolvedValue("OK");
 
     const procedure = os
-      .use(cacheMiddleware({ ttl: 300 }))
+      .use(orpcCache({ ttl: 300 }))
       .handler(async () => "data")
       .callable({ context: {} });
 
@@ -107,7 +108,7 @@ describe("oRPC cache middleware", () => {
     mockSetex.mockResolvedValue("OK");
 
     const procedure = os
-      .use(cacheMiddleware({ key: "static-key" }))
+      .use(orpcCache({ key: "static-key" }))
       .handler(async () => "data")
       .callable({ context: {} });
 
@@ -115,5 +116,75 @@ describe("oRPC cache middleware", () => {
 
     expect(mockGet).toHaveBeenCalledWith("static-key");
     expect(mockSetex).toHaveBeenCalledWith("static-key", 2, expect.any(String));
+  });
+});
+
+describe("orpcInvalidate middleware", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should invalidate single key on success", async () => {
+    mockDel.mockResolvedValue(1);
+
+    const procedure = os
+      .use(orpcInvalidate({ keys: "todo:list" }))
+      .handler(async () => ({ success: true }))
+      .callable({ context: {} });
+
+    await procedure();
+
+    expect(mockDel).toHaveBeenCalledWith("todo:list");
+  });
+
+  it("should invalidate multiple keys on success", async () => {
+    mockDel.mockResolvedValue(1);
+
+    const procedure = os
+      .use(orpcInvalidate({ keys: ["todo:list", "todo:count"] }))
+      .handler(async () => ({ success: true }))
+      .callable({ context: {} });
+
+    await procedure();
+
+    expect(mockDel).toHaveBeenCalledWith("todo:list");
+    expect(mockDel).toHaveBeenCalledWith("todo:count");
+  });
+
+  it("should support dynamic key function", async () => {
+    mockDel.mockResolvedValue(1);
+
+    const procedure = os
+      .input(z.object({ id: z.number() }))
+      .use(orpcInvalidate({ keys: (input) => `todo:${input.id}` }))
+      .handler(async () => ({ deleted: true }))
+      .callable({ context: {} });
+
+    await procedure({ id: 123 });
+
+    expect(mockDel).toHaveBeenCalledWith("todo:123");
+  });
+
+  it("should not invalidate when handler returns no output", async () => {
+    const procedure = os
+      .use(orpcInvalidate({ keys: "todo:list" }))
+      .handler(async () => undefined)
+      .callable({ context: {} });
+
+    await procedure();
+
+    expect(mockDel).not.toHaveBeenCalled();
+  });
+
+  it("should not invalidate when handler throws", async () => {
+    const procedure = os
+      .use(orpcInvalidate({ keys: "todo:list" }))
+      .handler(async () => {
+        throw new Error("Handler failed");
+      })
+      .callable({ context: {} });
+
+    await expect(procedure()).rejects.toThrow("Handler failed");
+    expect(mockDel).not.toHaveBeenCalled();
   });
 });

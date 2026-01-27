@@ -1,11 +1,12 @@
 import { getRedis } from "@cyberk-flow/db/redis";
 import type { Env } from "hono";
 import { createMiddleware } from "hono/factory";
-import type { HTTPCacheOptions } from "./types";
+import type { HTTPCacheOptions, HTTPInvalidateOptions } from "./types";
+import { invalidateKeys } from "./utils";
 
 const DEFAULT_TTL = 2;
 
-export function cache<E extends Env = Env>(options: HTTPCacheOptions<E> = {}) {
+export function httpCache<E extends Env = Env>(options: HTTPCacheOptions<E> = {}) {
   return createMiddleware<E>(async (c, next) => {
     if (c.req.method !== "GET") {
       return next();
@@ -34,5 +35,17 @@ export function cache<E extends Env = Env>(options: HTTPCacheOptions<E> = {}) {
       }
     }
     c.header("X-Cache", "MISS");
+  });
+}
+
+export function httpInvalidate<E extends Env = Env>(options: HTTPInvalidateOptions<E>) {
+  return createMiddleware<E>(async (c, next) => {
+    await next();
+
+    if (c.res.ok) {
+      const resolved = typeof options.keys === "function" ? await options.keys(c) : options.keys;
+      const keys = Array.isArray(resolved) ? resolved : [resolved];
+      await invalidateKeys(keys);
+    }
   });
 }

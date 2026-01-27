@@ -1,10 +1,11 @@
 import { getRedis } from "@cyberk-flow/db/redis";
 import { os } from "@orpc/server";
-import type { ORPCCacheOptions } from "./types";
+import type { ORPCCacheOptions, ORPCInvalidateOptions } from "./types";
+import { invalidateKeys, resolveKeys } from "./utils";
 
 const DEFAULT_TTL = 2;
 
-export function cacheMiddleware<TInput = unknown>(options: ORPCCacheOptions<TInput> = {}) {
+export function orpcCache<TInput = unknown>(options: ORPCCacheOptions<TInput> = {}) {
   return os.middleware(async ({ next, path }, input: TInput, output) => {
     const key = options.key
       ? typeof options.key === "function"
@@ -22,6 +23,19 @@ export function cacheMiddleware<TInput = unknown>(options: ORPCCacheOptions<TInp
     if (result.output) {
       await redis.setex(key, options.ttl ?? DEFAULT_TTL, JSON.stringify(result.output));
     }
+    return result;
+  });
+}
+
+export function orpcInvalidate<TInput = unknown>(options: ORPCInvalidateOptions<TInput>) {
+  return os.middleware(async ({ next }, input: TInput) => {
+    const result = await next({});
+
+    if (result.output) {
+      const keys = resolveKeys(options.keys, input);
+      await invalidateKeys(keys);
+    }
+
     return result;
   });
 }
