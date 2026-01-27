@@ -6,7 +6,7 @@ export function useDeleteTodo() {
   return useMutation(
     orpc.todo.delete.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: todoQueries.all() });
+        queryClient.invalidateQueries(todoQueries.list());
       },
     }),
   );

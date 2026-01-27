@@ -31,8 +31,23 @@ For tech stack, architecture, and code conventions, see `openspec/project.md`.
 - `bun run dev:server` - Start server only (Hono on port 3000)
 - `bun run dev:web` - Start web only (Next.js on port 3001)
 - `bun run check-types` - Typecheck all packages
+- `bun run check` - Lint/format with Biome (`biome check --write .`)
 - `bun run db:start` - Start PostgreSQL via Docker
 - `bun run db:push` - Push schema changes to database
+- `bun test <file>` - Run single test file (e.g., `bun test packages/api/src/foo.test.ts`)
+
+## Architecture
+
+- **Monorepo**: Turborepo + Bun workspaces
+- **Apps**: `apps/server` (Hono API :3000), `apps/web` (Next.js :3001), `apps/native` (Expo)
+- **Packages**: `api` (oRPC routers), `auth` (better-auth), `db` (Drizzle/PostgreSQL), `env` (Zod validation)
+
+## Code Style
+
+- TypeScript strict mode, ESM modules, Zod for validation
+- Biome: 2-space indent, 120 line width, double quotes, auto-organize imports
+- Use `catalog:` versions for shared deps in workspace
+- Conventional commits: `feat:`, `fix:`, `chore:`, etc.
 
 ## Language Requirements
 

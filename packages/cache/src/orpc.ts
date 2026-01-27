@@ -14,7 +14,6 @@ export function cacheMiddleware<TInput = unknown>(options: ORPCCacheOptions<TInp
 
     const redis = getRedis();
     const cachedValue = await redis.get(key);
-    console.log("cachedValue", key, cachedValue);
     if (cachedValue) {
       return output(JSON.parse(cachedValue));
     }

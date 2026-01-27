@@ -6,7 +6,7 @@ export function useToggleTodo() {
   return useMutation(
     orpc.todo.toggle.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: todoQueries.all() });
+        queryClient.invalidateQueries(todoQueries.list());
       },
     }),
   );

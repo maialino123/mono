@@ -6,7 +6,7 @@ export function useCreateTodo() {
   return useMutation(
     orpc.todo.create.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: todoQueries.all() });
+        queryClient.invalidateQueries(todoQueries.list());
       },
     }),
   );
