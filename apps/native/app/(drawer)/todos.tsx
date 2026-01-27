@@ -4,10 +4,12 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -17,17 +19,26 @@ import { NAV_THEME } from "@/lib/constants";
 import { useColorScheme } from "@/lib/use-color-scheme";
 import { orpc } from "@/utils/orpc";
 
+function showToast(message: string) {
+  if (Platform.OS === "android") {
+    ToastAndroid.show(message, ToastAndroid.SHORT);
+  } else {
+    Alert.alert("", message);
+  }
+}
+
 export default function TodosScreen() {
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "dark" ? NAV_THEME.dark : NAV_THEME.light;
   const [newTodoText, setNewTodoText] = useState("");
 
-  const todos = useQuery(orpc.todo.getAll.queryOptions());
+  const todos = useQuery(orpc.todo.list.queryOptions({ input: { page: 1, limit: 100 } }));
   const createMutation = useMutation(
     orpc.todo.create.mutationOptions({
       onSuccess: () => {
         todos.refetch();
         setNewTodoText("");
+        showToast("Todo created");
       },
     }),
   );
@@ -35,6 +46,7 @@ export default function TodosScreen() {
     orpc.todo.toggle.mutationOptions({
       onSuccess: () => {
         todos.refetch();
+        showToast("Todo updated");
       },
     }),
   );
@@ -42,6 +54,7 @@ export default function TodosScreen() {
     orpc.todo.delete.mutationOptions({
       onSuccess: () => {
         todos.refetch();
+        showToast("Todo deleted");
       },
     }),
   );
@@ -68,8 +81,9 @@ export default function TodosScreen() {
   }
 
   const isLoading = todos?.isLoading;
-  const completedCount = todos?.data?.filter((t) => t.completed).length || 0;
-  const totalCount = todos?.data?.length || 0;
+  const items = todos?.data?.items;
+  const completedCount = items?.filter((t) => t.completed).length || 0;
+  const totalCount = items?.length || 0;
 
   return (
     <Container>
@@ -134,7 +148,7 @@ export default function TodosScreen() {
           </View>
         )}
 
-        {todos?.data && todos.data.length === 0 && !isLoading && (
+        {items && items.length === 0 && !isLoading && (
           <View style={[styles.emptyCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <Ionicons name="checkbox-outline" size={64} color={theme.text} style={{ opacity: 0.5, marginBottom: 16 }} />
             <Text style={[styles.emptyTitle, { color: theme.text }]}>No todos yet</Text>
@@ -144,9 +158,9 @@ export default function TodosScreen() {
           </View>
         )}
 
-        {todos?.data && todos.data.length > 0 && (
+        {items && items.length > 0 && (
           <View style={styles.todosList}>
-            {todos.data.map((todo) => (
+            {items.map((todo) => (
               <View key={todo.id} style={[styles.todoCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
                 <View style={styles.todoRow}>
                   <TouchableOpacity
