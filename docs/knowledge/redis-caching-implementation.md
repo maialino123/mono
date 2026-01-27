@@ -3,6 +3,7 @@
 > **Source Threads**:
 > - [T-019bfb5c-40e3-70b1-a2c5-5b6454a4605b](https://ampcode.com/threads/T-019bfb5c-40e3-70b1-a2c5-5b6454a4605b) - Initial caching implementation
 > - [T-019bfea3-186d-752d-b75c-b460f2342c75](https://ampcode.com/threads/T-019bfea3-186d-752d-b75c-b460f2342c75) - Cache invalidation
+> - [T-019bffcb-0208-764f-a2a8-824df2462e93](https://ampcode.com/threads/T-019bffcb-0208-764f-a2a8-824df2462e93) - Tag-based caching
 >
 > **Date**: January 2026
 
@@ -42,7 +43,7 @@ Implementation of Redis caching middleware for both HTTP (Hono) and oRPC endpoin
 |------|---------|
 | [`packages/cache/src/http.ts`](packages/cache/src/http.ts) | Hono HTTP cache + invalidation middleware |
 | [`packages/cache/src/orpc.ts`](packages/cache/src/orpc.ts) | oRPC cache + invalidation middleware |
-| [`packages/cache/src/utils.ts`](packages/cache/src/utils.ts) | Shared utilities (resolveKeys, invalidateKeys) |
+| [`packages/cache/src/utils.ts`](packages/cache/src/utils.ts) | Shared utilities (resolveKeys, invalidateKeys, cacheWithTag, invalidateByTag) |
 | [`packages/cache/src/types.ts`](packages/cache/src/types.ts) | TypeScript types |
 | [`packages/db/src/redis.ts`](packages/db/src/redis.ts) | Redis client singleton |
 | [`packages/db/docker-compose.yml`](packages/db/docker-compose.yml) | Redis + PostgreSQL infrastructure |
@@ -83,9 +84,9 @@ packages/db/             # Infrastructure
 
 **Rationale**: Follows NestJS CacheInterceptor pattern where default key is derived from request.
 
-### Default TTL = 2 seconds
+### Default TTL = 60 seconds
 
-Short default TTL prevents stale data issues during development. Override with `ttl` option for production caching.
+Default TTL is 60 seconds. Override with `ttl` option for different caching needs.
 
 ### Cache Invalidation Strategy
 
@@ -101,6 +102,39 @@ Short default TTL prevents stale data issues during development. Override with `
 4. **Shared utilities** - `utils.ts` contains `resolveKeys()` and `invalidateKeys()` used by both HTTP and oRPC
 
 **Naming Convention**: Prefix-based naming (`http*`, `orpc*`) to distinguish middleware types clearly.
+
+### Tag-based Cache Invalidation
+
+**Problem**: List endpoints with pagination/filtering create many cache variants (e.g., `todos:{"page":1}`, `todos:{"page":2}`). On mutation, all variants need invalidation but exact keys are unknown.
+
+**Solution**: Tag-based caching using Redis Sets.
+
+```
+# When caching list response:
+SET todos:{"page":1} "data"
+SADD tag:todos "todos:{"page":1}"   # Register key in tag set
+
+# When invalidating (on mutation):
+SMEMBERS tag:todos                  # Get all keys: ["todos:{"page":1}", ...]
+DEL key1 key2 ...                   # Delete all cached keys
+DEL tag:todos                       # Delete tag set
+```
+
+**Design Decisions**:
+
+1. **Redis Sets** - O(1) tag lookup via SMEMBERS, vs O(n) SCAN for pattern matching
+2. **Tag prefix** - All tags stored with `tag:` prefix (e.g., `tag:todos`)
+3. **TTL sync** - Tag set TTL matches cache TTL to avoid orphaned tags
+4. **Atomic invalidation** - All keys in tag deleted in single operation
+
+**Utility Functions**:
+
+```typescript
+// packages/cache/src/utils.ts
+cacheWithTag(key, tag, value, ttl)  // Store + register in tag set
+invalidateByTag(tag)                 // Delete all keys in tag + tag itself
+invalidateTags(tags: string[])       // Invalidate multiple tags
+```
 
 | Middleware | Purpose |
 |------------|---------|
@@ -145,17 +179,36 @@ app.post("/users", httpInvalidate({ keys: "users:list" }), handler);
 ```typescript
 import { orpcCache, orpcInvalidate } from "@cyberk-flow/cache";
 
-const CACHE_KEYS = { todoList: "todo/getAll{}" };
+const CACHE_KEYS = {
+  tag: "todos",
+  list: (input) => `todos:${JSON.stringify(input)}`,
+  byId: (id: number) => `todo:${id}`,
+};
 
 const todoRouter = {
-  getAll: publicProcedure
-    .use(orpcCache({ key: CACHE_KEYS.todoList, ttl: 60 }))
-    .handler(async () => db.select().from(todo)),
+  // List with tag-based caching (all variants tracked)
+  list: publicProcedure
+    .input(listInputSchema)
+    .use(orpcCache({ key: (input) => CACHE_KEYS.list(input), tag: CACHE_KEYS.tag, ttl: 60 }))
+    .handler(async ({ input }) => db.select().from(todo).limit(input.limit)),
 
+  // Single item cache (no tag needed)
+  findById: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .use(orpcCache({ key: (input) => CACHE_KEYS.byId(input.id), ttl: 60 }))
+    .handler(async ({ input }) => db.select().from(todo).where(eq(todo.id, input.id))),
+
+  // Create: invalidate all list variants via tag
   create: publicProcedure
-    .use(orpcInvalidate({ keys: CACHE_KEYS.todoList }))
     .input(z.object({ text: z.string() }))
+    .use(orpcInvalidate({ tags: CACHE_KEYS.tag }))
     .handler(async ({ input }) => db.insert(todo).values(input)),
+
+  // Update/Delete: invalidate tag + specific item
+  toggle: publicProcedure
+    .input(z.object({ id: z.number(), completed: z.boolean() }))
+    .use(orpcInvalidate({ tags: CACHE_KEYS.tag, keys: (input) => CACHE_KEYS.byId(input.id) }))
+    .handler(async ({ input }) => db.update(todo).set({ completed: input.completed })),
 };
 ```
 
@@ -229,7 +282,7 @@ const { httpCache, httpInvalidate } = await import("../http");
 
 - **JSON serialization** - Only supports JSON-serializable responses
 - **GET only** - HTTP cache middleware only caches GET requests
-- **No pattern invalidation** - Must specify exact keys to invalidate
+- **Tag-based only for oRPC** - HTTP middleware doesn't support tags (use explicit keys)
 
 ## Related
 

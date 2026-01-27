@@ -9,5 +9,7 @@ export type {
   ORPCCacheKeyGenerator,
   ORPCCacheOptions,
   ORPCInvalidateOptions,
+  ORPCTagGenerator,
 } from "./types";
 export type { InvalidateKeyGenerator } from "./utils";
+export { cacheWithTag, invalidateByTag, invalidateTags } from "./utils";

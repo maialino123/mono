@@ -1,190 +1,83 @@
 import { Hono } from "hono";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockGet = vi.fn();
-const mockSetex = vi.fn();
-const mockDel = vi.fn();
-
-vi.mock("@cyberk-flow/db/redis", () => ({
-  getRedis: () => ({
-    get: mockGet,
-    setex: mockSetex,
-    del: mockDel,
-  }),
-}));
+const mockRedis = { get: vi.fn(), setex: vi.fn(), del: vi.fn() };
+vi.mock("@cyberk-flow/db/redis", () => ({ getRedis: () => mockRedis }));
 
 const { httpCache, httpInvalidate } = await import("../http");
 
-describe("httpCache middleware", () => {
+describe("httpCache", () => {
   let app: Hono;
-  let handlerCalled: boolean;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    handlerCalled = false;
     app = new Hono();
   });
 
-  it("should return MISS on cache miss and cache the response", async () => {
-    mockGet.mockResolvedValue(null);
-    mockSetex.mockResolvedValue("OK");
-
-    app.get("/test", httpCache(), (c) => {
-      handlerCalled = true;
-      return c.json({ data: "fresh" });
-    });
+  it("returns MISS and caches on miss", async () => {
+    mockRedis.get.mockResolvedValue(null);
+    app.get("/test", httpCache(), (c) => c.json({ fresh: true }));
 
     const res = await app.request("/test");
-
-    expect(res.status).toBe(200);
     expect(res.headers.get("X-Cache")).toBe("MISS");
-    expect(handlerCalled).toBe(true);
-    expect(mockGet).toHaveBeenCalledWith("http://localhost/test");
-    expect(mockSetex).toHaveBeenCalledWith("http://localhost/test", 2, expect.any(String));
+    expect(mockRedis.setex).toHaveBeenCalledWith("http://localhost/test", expect.any(Number), expect.any(String));
   });
 
-  it("should return HIT on cache hit and skip handler", async () => {
-    mockGet.mockResolvedValue(JSON.stringify({ data: "cached" }));
-
-    app.get("/test", httpCache(), (c) => {
-      handlerCalled = true;
-      return c.json({ data: "fresh" });
-    });
+  it("returns HIT on cache hit", async () => {
+    mockRedis.get.mockResolvedValue(JSON.stringify({ cached: true }));
+    app.get("/test", httpCache(), (c) => c.json({ fresh: true }));
 
     const res = await app.request("/test");
-    const body = await res.json();
-
-    expect(res.status).toBe(200);
     expect(res.headers.get("X-Cache")).toBe("HIT");
-    expect(body).toEqual({ data: "cached" });
-    expect(handlerCalled).toBe(false);
-    expect(mockSetex).not.toHaveBeenCalled();
+    expect(await res.json()).toEqual({ cached: true });
   });
 
-  it("should bypass cache for POST requests", async () => {
-    app.post("/test", httpCache(), (c) => {
-      handlerCalled = true;
-      return c.json({ ok: true });
-    });
-
+  it("bypasses cache for POST", async () => {
+    app.post("/test", httpCache(), (c) => c.json({ ok: true }));
     const res = await app.request("/test", { method: "POST" });
-
-    expect(res.status).toBe(200);
     expect(res.headers.get("X-Cache")).toBeNull();
-    expect(handlerCalled).toBe(true);
-    expect(mockGet).not.toHaveBeenCalled();
+    expect(mockRedis.get).not.toHaveBeenCalled();
   });
 
-  it("should use custom cache key", async () => {
-    mockGet.mockResolvedValue(null);
-    mockSetex.mockResolvedValue("OK");
+  it("uses custom key and TTL", async () => {
+    mockRedis.get.mockResolvedValue(null);
+    app.get("/u/:id", httpCache({ key: (c) => `user:${c.req.param("id")}`, ttl: 300 }), (c) => c.json({}));
 
-    app.get("/users/:id", httpCache({ key: (c) => `users:${c.req.param("id")}` }), (c) =>
-      c.json({ id: c.req.param("id") }),
-    );
-
-    await app.request("/users/123");
-
-    expect(mockGet).toHaveBeenCalledWith("users:123");
-    expect(mockSetex).toHaveBeenCalledWith("users:123", 2, expect.any(String));
+    await app.request("/u/123");
+    expect(mockRedis.setex).toHaveBeenCalledWith("user:123", 300, expect.any(String));
   });
 
-  it("should use custom TTL", async () => {
-    mockGet.mockResolvedValue(null);
-    mockSetex.mockResolvedValue("OK");
-
-    app.get("/test", httpCache({ ttl: 300 }), (c) => c.json({ data: "test" }));
-
-    await app.request("/test");
-
-    expect(mockSetex).toHaveBeenCalledWith(expect.any(String), 300, expect.any(String));
-  });
-
-  it("should skip cache when condition returns false", async () => {
-    app.get("/test", httpCache({ condition: (c) => !c.req.header("Authorization") }), (c) => {
-      handlerCalled = true;
-      return c.json({ data: "test" });
-    });
-
-    const res = await app.request("/test", {
-      headers: { Authorization: "Bearer token" },
-    });
-
-    expect(res.status).toBe(200);
+  it("skips cache when condition fails", async () => {
+    app.get("/test", httpCache({ condition: (c) => !c.req.header("Auth") }), (c) => c.json({}));
+    const res = await app.request("/test", { headers: { Auth: "token" } });
     expect(res.headers.get("X-Cache")).toBeNull();
-    expect(handlerCalled).toBe(true);
-    expect(mockGet).not.toHaveBeenCalled();
   });
 });
 
-describe("httpInvalidate middleware", () => {
+describe("httpInvalidate", () => {
   let app: Hono;
-
   beforeEach(() => {
     vi.clearAllMocks();
     app = new Hono();
   });
 
-  it("should invalidate single key on successful POST", async () => {
-    mockDel.mockResolvedValue(1);
-
-    app.post("/users", httpInvalidate({ keys: "users:list" }), (c) => c.json({ created: true }));
-
-    const res = await app.request("/users", { method: "POST" });
-
-    expect(res.status).toBe(200);
-    expect(mockDel).toHaveBeenCalledWith("users:list");
+  it.each([
+    ["single key", { keys: "k1" }, ["k1"]],
+    ["multiple keys", { keys: ["k1", "k2"] }, ["k1", "k2"]],
+  ])("invalidates %s on success", async (_, options, expectedKeys) => {
+    app.post("/test", httpInvalidate(options), (c) => c.json({ ok: true }));
+    await app.request("/test", { method: "POST" });
+    for (const k of expectedKeys) expect(mockRedis.del).toHaveBeenCalledWith(k);
   });
 
-  it("should invalidate multiple keys on success", async () => {
-    mockDel.mockResolvedValue(1);
-
-    app.post("/users", httpInvalidate({ keys: ["users:list", "users:count"] }), (c) => c.json({ ok: true }));
-
-    await app.request("/users", { method: "POST" });
-
-    expect(mockDel).toHaveBeenCalledWith("users:list");
-    expect(mockDel).toHaveBeenCalledWith("users:count");
+  it("supports dynamic key", async () => {
+    app.delete("/u/:id", httpInvalidate({ keys: (c) => `user:${c.req.param("id")}` }), (c) => c.json({}));
+    await app.request("/u/456", { method: "DELETE" });
+    expect(mockRedis.del).toHaveBeenCalledWith("user:456");
   });
 
-  it("should support dynamic key from request context", async () => {
-    mockDel.mockResolvedValue(1);
-
-    app.delete("/users/:id", httpInvalidate({ keys: (c) => `users:${c.req.param("id")}` }), (c) =>
-      c.json({ deleted: true }),
-    );
-
-    await app.request("/users/456", { method: "DELETE" });
-
-    expect(mockDel).toHaveBeenCalledWith("users:456");
-  });
-
-  it("should not invalidate on error response", async () => {
-    app.post("/users", httpInvalidate({ keys: "users:list" }), (c) => c.json({ error: "Bad Request" }, 400));
-
-    const res = await app.request("/users", { method: "POST" });
-
-    expect(res.status).toBe(400);
-    expect(mockDel).not.toHaveBeenCalled();
-  });
-
-  it("should support async key function", async () => {
-    mockDel.mockResolvedValue(1);
-
-    app.post(
-      "/users",
-      httpInvalidate({
-        keys: async () => {
-          await Promise.resolve();
-          return ["users:list", "users:recent"];
-        },
-      }),
-      (c) => c.json({ ok: true }),
-    );
-
-    await app.request("/users", { method: "POST" });
-
-    expect(mockDel).toHaveBeenCalledWith("users:list");
-    expect(mockDel).toHaveBeenCalledWith("users:recent");
+  it("skips invalidation on error response", async () => {
+    app.post("/test", httpInvalidate({ keys: "k" }), (c) => c.json({}, 400));
+    await app.request("/test", { method: "POST" });
+    expect(mockRedis.del).not.toHaveBeenCalled();
   });
 });

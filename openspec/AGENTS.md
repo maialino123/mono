@@ -96,7 +96,9 @@ For **ALL** changes (including "Happy Path"), you **MUST** perform discovery to 
 - **Codebase Mapping**: Use `mcp__gkg__repo_map` (preferred) or `Read` (list directory).
 - **Codebase Search**: Use `mcp__gkg__search_codebase_definitions` (preferred) or `finder` / `Grep`.
 - **References**: Use `mcp__gkg__get_references` to find usages.
-- **External Search**: Use `librarian` or `web_search` for library docs or best practices.
+- **External Research** (choose based on need):
+  - `librarian`: For understanding **how established projects implement similar features** (e.g., "How does authentication work in Kubernetes?", "Explain the plugin system in VSCode", "How does Next.js handle routing?")
+  - `web_search`: For **API docs, library usage, recent releases, troubleshooting**
 
 **`discovery.md` Template**:
 
@@ -596,8 +598,8 @@ Only add complexity with:
 | Codebase structure | `mcp__gkg__repo_map`, `Read`                              |
 | Find definitions   | `mcp__gkg__search_codebase_definitions`, `finder`, `Grep` |
 | Find usages        | `mcp__gkg__get_references`, `Grep`                        |
-| External patterns  | `librarian`                                               |
-| Web research       | `web_search`                                              |
+| How OSS projects solve it | `librarian` (architecture, patterns from GitHub repos)    |
+| API docs, releases | `web_search`                                              |
 | Gap analysis       | `oracle`                                                  |
 | Create specs       | `create_file` / `edit_file`                               |
 

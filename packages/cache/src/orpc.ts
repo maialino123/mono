@@ -1,9 +1,9 @@
 import { getRedis } from "@cyberk-flow/db/redis";
 import { os } from "@orpc/server";
 import type { ORPCCacheOptions, ORPCInvalidateOptions } from "./types";
-import { invalidateKeys, resolveKeys } from "./utils";
+import { cacheWithTag, invalidateKeys, invalidateTags, resolveKeys, resolveTags } from "./utils";
 
-const DEFAULT_TTL = 2;
+const DEFAULT_TTL = 60;
 
 export function orpcCache<TInput = unknown>(options: ORPCCacheOptions<TInput> = {}) {
   return os.middleware(async ({ next, path }, input: TInput, output) => {
@@ -13,6 +13,8 @@ export function orpcCache<TInput = unknown>(options: ORPCCacheOptions<TInput> = 
         : options.key
       : path.join("/") + JSON.stringify(input);
 
+    const tag = options.tag ? (typeof options.tag === "function" ? options.tag(input) : options.tag) : undefined;
+
     const redis = getRedis();
     const cachedValue = await redis.get(key);
     if (cachedValue) {
@@ -21,7 +23,12 @@ export function orpcCache<TInput = unknown>(options: ORPCCacheOptions<TInput> = 
 
     const result = await next({});
     if (result.output) {
-      await redis.setex(key, options.ttl ?? DEFAULT_TTL, JSON.stringify(result.output));
+      const ttl = options.ttl ?? DEFAULT_TTL;
+      if (tag) {
+        await cacheWithTag(key, tag, JSON.stringify(result.output), ttl);
+      } else {
+        await redis.setex(key, ttl, JSON.stringify(result.output));
+      }
     }
     return result;
   });
@@ -33,7 +40,8 @@ export function orpcInvalidate<TInput = unknown>(options: ORPCInvalidateOptions<
 
     if (result.output) {
       const keys = resolveKeys(options.keys, input);
-      await invalidateKeys(keys);
+      const tags = resolveTags(options.tags, input);
+      await Promise.all([invalidateKeys(keys), invalidateTags(tags)]);
     }
 
     return result;

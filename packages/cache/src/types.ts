@@ -24,11 +24,14 @@ export interface HTTPInvalidateOptions<E extends Env = Env> {
 
 // oRPC Types
 export type ORPCCacheKeyGenerator<TInput> = string | ((input: TInput, path: readonly string[]) => string);
+export type ORPCTagGenerator<TInput> = string | ((input: TInput) => string);
 
 export interface ORPCCacheOptions<TInput = unknown> extends BaseCacheOptions {
   key?: ORPCCacheKeyGenerator<TInput>;
+  tag?: ORPCTagGenerator<TInput>;
 }
 
 export interface ORPCInvalidateOptions<TInput = unknown> {
-  keys: InvalidateKeyGenerator<TInput>;
+  keys?: InvalidateKeyGenerator<TInput>;
+  tags?: InvalidateKeyGenerator<TInput>;
 }

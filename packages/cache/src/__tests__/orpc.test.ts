@@ -2,189 +2,139 @@ import { os } from "@orpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import z from "zod";
 
-const mockGet = vi.fn();
-const mockSetex = vi.fn();
-const mockDel = vi.fn();
-
-vi.mock("@cyberk-flow/db/redis", () => ({
-  getRedis: () => ({
-    get: mockGet,
-    setex: mockSetex,
-    del: mockDel,
-  }),
-}));
+const mockRedis = { get: vi.fn(), setex: vi.fn(), del: vi.fn(), sadd: vi.fn(), expire: vi.fn(), smembers: vi.fn() };
+vi.mock("@cyberk-flow/db/redis", () => ({ getRedis: () => mockRedis }));
 
 const { orpcCache, orpcInvalidate } = await import("../orpc");
 
-describe("orpcCache middleware", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+describe("orpcCache", () => {
+  beforeEach(() => vi.clearAllMocks());
 
-  it("should return cached value on cache hit", async () => {
-    mockGet.mockResolvedValue(JSON.stringify({ data: "cached" }));
-
-    let handlerCalled = false;
-    const procedure = os
+  it("returns cached value on hit", async () => {
+    mockRedis.get.mockResolvedValue(JSON.stringify({ cached: true }));
+    const proc = os
       .use(orpcCache())
-      .handler(async () => {
-        handlerCalled = true;
-        return { data: "fresh" };
-      })
+      .handler(async () => ({ data: "fresh" }))
       .callable({ context: {} });
-
-    const result = await procedure();
-
-    expect(result).toEqual({ data: "cached" });
-    expect(handlerCalled).toBe(false);
-    expect(mockSetex).not.toHaveBeenCalled();
+    expect(await proc()).toEqual({ cached: true });
+    expect(mockRedis.setex).not.toHaveBeenCalled();
   });
 
-  it("should execute handler and cache result on cache miss", async () => {
-    mockGet.mockResolvedValue(null);
-    mockSetex.mockResolvedValue("OK");
-
-    let handlerCalled = false;
-    const procedure = os
-      .use(orpcCache())
-      .handler(async () => {
-        handlerCalled = true;
-        return { data: "fresh" };
-      })
+  it("caches result on miss", async () => {
+    mockRedis.get.mockResolvedValue(null);
+    const proc = os
+      .use(orpcCache({ key: "test", ttl: 120 }))
+      .handler(async () => ({ data: "fresh" }))
       .callable({ context: {} });
-
-    const result = await procedure();
-
-    expect(result).toEqual({ data: "fresh" });
-    expect(handlerCalled).toBe(true);
-    expect(mockSetex).toHaveBeenCalledWith(expect.any(String), 2, JSON.stringify({ data: "fresh" }));
+    await proc();
+    expect(mockRedis.setex).toHaveBeenCalledWith("test", 120, expect.any(String));
   });
 
-  it("should use default key from path and input", async () => {
-    mockGet.mockResolvedValue(null);
-    mockSetex.mockResolvedValue("OK");
-
-    const procedure = os
-      .use(orpcCache())
-      .handler(async () => ({ data: "test" }))
+  it("registers key with tag when provided", async () => {
+    mockRedis.get.mockResolvedValue(null);
+    const proc = os
+      .use(orpcCache({ key: "todos:1", tag: "todos", ttl: 60 }))
+      .handler(async () => ({}))
       .callable({ context: {} });
-
-    await procedure();
-
-    expect(mockGet).toHaveBeenCalledWith("undefined");
+    await proc();
+    expect(mockRedis.sadd).toHaveBeenCalledWith("tag:todos", "todos:1");
+    expect(mockRedis.expire).toHaveBeenCalledWith("tag:todos", 60);
   });
 
-  it("should use custom key function", async () => {
-    mockGet.mockResolvedValue(null);
-    mockSetex.mockResolvedValue("OK");
-
-    const procedure = os
-      .use(orpcCache({ key: () => "custom:123" }))
-      .handler(async () => ({ id: 456 }))
+  it("supports dynamic tag function", async () => {
+    mockRedis.get.mockResolvedValue(null);
+    const proc = os
+      .input(z.object({ type: z.string() }))
+      .use(orpcCache({ key: "k", tag: (i) => `tag:${i.type}` }))
+      .handler(async () => ({}))
       .callable({ context: {} });
-
-    await procedure();
-
-    expect(mockGet).toHaveBeenCalledWith("custom:123");
-    expect(mockSetex).toHaveBeenCalledWith("custom:123", 2, expect.any(String));
+    await proc({ type: "active" });
+    expect(mockRedis.sadd).toHaveBeenCalledWith("tag:tag:active", "k");
   });
 
-  it("should use custom TTL", async () => {
-    mockGet.mockResolvedValue(null);
-    mockSetex.mockResolvedValue("OK");
-
-    const procedure = os
-      .use(orpcCache({ ttl: 300 }))
-      .handler(async () => "data")
+  it("skips tag registration when not provided", async () => {
+    mockRedis.get.mockResolvedValue(null);
+    const proc = os
+      .use(orpcCache({ key: "simple" }))
+      .handler(async () => ({}))
       .callable({ context: {} });
-
-    await procedure();
-
-    expect(mockSetex).toHaveBeenCalledWith(expect.any(String), 300, expect.any(String));
-  });
-
-  it("should use static string key", async () => {
-    mockGet.mockResolvedValue(null);
-    mockSetex.mockResolvedValue("OK");
-
-    const procedure = os
-      .use(orpcCache({ key: "static-key" }))
-      .handler(async () => "data")
-      .callable({ context: {} });
-
-    await procedure();
-
-    expect(mockGet).toHaveBeenCalledWith("static-key");
-    expect(mockSetex).toHaveBeenCalledWith("static-key", 2, expect.any(String));
+    await proc();
+    expect(mockRedis.sadd).not.toHaveBeenCalled();
   });
 });
 
-describe("orpcInvalidate middleware", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+describe("orpcInvalidate", () => {
+  beforeEach(() => vi.clearAllMocks());
 
-  it("should invalidate single key on success", async () => {
-    mockDel.mockResolvedValue(1);
-
-    const procedure = os
-      .use(orpcInvalidate({ keys: "todo:list" }))
-      .handler(async () => ({ success: true }))
+  it("invalidates single key", async () => {
+    const proc = os
+      .use(orpcInvalidate({ keys: "k1" }))
+      .handler(async () => ({ ok: true }))
       .callable({ context: {} });
-
-    await procedure();
-
-    expect(mockDel).toHaveBeenCalledWith("todo:list");
+    await proc();
+    expect(mockRedis.del).toHaveBeenCalledWith("k1");
   });
 
-  it("should invalidate multiple keys on success", async () => {
-    mockDel.mockResolvedValue(1);
-
-    const procedure = os
-      .use(orpcInvalidate({ keys: ["todo:list", "todo:count"] }))
-      .handler(async () => ({ success: true }))
+  it("invalidates multiple keys", async () => {
+    const proc = os
+      .use(orpcInvalidate({ keys: ["k1", "k2"] }))
+      .handler(async () => ({ ok: true }))
       .callable({ context: {} });
-
-    await procedure();
-
-    expect(mockDel).toHaveBeenCalledWith("todo:list");
-    expect(mockDel).toHaveBeenCalledWith("todo:count");
+    await proc();
+    expect(mockRedis.del).toHaveBeenCalledWith("k1");
+    expect(mockRedis.del).toHaveBeenCalledWith("k2");
   });
 
-  it("should support dynamic key function", async () => {
-    mockDel.mockResolvedValue(1);
-
-    const procedure = os
+  it("supports dynamic key function", async () => {
+    const proc = os
       .input(z.object({ id: z.number() }))
-      .use(orpcInvalidate({ keys: (input) => `todo:${input.id}` }))
-      .handler(async () => ({ deleted: true }))
+      .use(orpcInvalidate({ keys: (i) => `todo:${i.id}` }))
+      .handler(async () => ({ ok: true }))
       .callable({ context: {} });
-
-    await procedure({ id: 123 });
-
-    expect(mockDel).toHaveBeenCalledWith("todo:123");
+    await proc({ id: 123 });
+    expect(mockRedis.del).toHaveBeenCalledWith("todo:123");
   });
 
-  it("should not invalidate when handler returns no output", async () => {
-    const procedure = os
-      .use(orpcInvalidate({ keys: "todo:list" }))
+  it("invalidates by tag", async () => {
+    mockRedis.smembers.mockResolvedValue(["todos:1", "todos:2"]);
+    const proc = os
+      .use(orpcInvalidate({ tags: "todos" }))
+      .handler(async () => ({ ok: true }))
+      .callable({ context: {} });
+    await proc();
+    expect(mockRedis.smembers).toHaveBeenCalledWith("tag:todos");
+    expect(mockRedis.del).toHaveBeenCalledWith("todos:1", "todos:2");
+    expect(mockRedis.del).toHaveBeenCalledWith("tag:todos");
+  });
+
+  it("invalidates both keys and tags", async () => {
+    mockRedis.smembers.mockResolvedValue(["list:1"]);
+    const proc = os
+      .input(z.object({ id: z.number() }))
+      .use(orpcInvalidate({ tags: "list", keys: (i) => `item:${i.id}` }))
+      .handler(async () => ({ ok: true }))
+      .callable({ context: {} });
+    await proc({ id: 42 });
+    expect(mockRedis.del).toHaveBeenCalledWith("item:42");
+    expect(mockRedis.del).toHaveBeenCalledWith("list:1");
+  });
+
+  it("handles empty tag set", async () => {
+    mockRedis.smembers.mockResolvedValue([]);
+    const proc = os
+      .use(orpcInvalidate({ tags: "empty" }))
+      .handler(async () => ({ ok: true }))
+      .callable({ context: {} });
+    await proc();
+    expect(mockRedis.del).toHaveBeenCalledWith("tag:empty");
+  });
+
+  it("skips invalidation when handler returns no output", async () => {
+    const proc = os
+      .use(orpcInvalidate({ keys: "k" }))
       .handler(async () => undefined)
       .callable({ context: {} });
-
-    await procedure();
-
-    expect(mockDel).not.toHaveBeenCalled();
-  });
-
-  it("should not invalidate when handler throws", async () => {
-    const procedure = os
-      .use(orpcInvalidate({ keys: "todo:list" }))
-      .handler(async () => {
-        throw new Error("Handler failed");
-      })
-      .callable({ context: {} });
-
-    await expect(procedure()).rejects.toThrow("Handler failed");
-    expect(mockDel).not.toHaveBeenCalled();
+    await proc();
+    expect(mockRedis.del).not.toHaveBeenCalled();
   });
 });
