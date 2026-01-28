@@ -18,8 +18,10 @@
   },
   "dependencies": {
     "@cyberk-flow/db": "workspace:*",
+    "@hono-rate-limiter/redis": "^0.1.4",
     "@orpc/server": "catalog:",
-    "hono": "catalog:"
+    "hono": "catalog:",
+    "hono-rate-limiter": "^0.5.3"
   },
   "devDependencies": {
     "@cyberk-flow/config": "workspace:*",

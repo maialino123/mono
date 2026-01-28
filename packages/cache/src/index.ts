@@ -1,5 +1,8 @@
+export { getClientIP } from "./client-ip";
 export { httpCache, httpInvalidate } from "./http";
 export { orpcCache, orpcInvalidate } from "./orpc";
+export type { RateLimitStoreOptions } from "./rate-limit";
+export { createRateLimitStore } from "./rate-limit";
 export type {
   BaseCacheOptions,
   HTTPCacheKeyGenerator,
