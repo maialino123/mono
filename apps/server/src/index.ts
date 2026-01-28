@@ -27,10 +27,10 @@ const app = new Hono<AppEnv>();
 
 type RateLimiterContext = Context<AppEnv>;
 
-// Auth limiter: 20 req/15min per IP (prevent brute-force)
+// Auth limiter: 100 req/15min per IP (prevent brute-force)
 const authLimiter = rateLimiter<AppEnv>({
   windowMs: 15 * 60 * 1000,
-  limit: 20,
+  limit: 100,
   standardHeaders: "draft-6",
   keyGenerator: (c: RateLimiterContext) => {
     return `ip:${getClientIP(c)}`;
