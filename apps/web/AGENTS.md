@@ -1,120 +1,27 @@
-# apps/web - Next.js Frontend with FSD Architecture
+# apps/web - Next.js FSD Application
 
-## Overview
+**Skill Required**: `cyberk-fsd-fe` (Read this first!)
 
-Frontend application using **Feature Sliced Design (FSD)** with **ORPC** for type-safe API communication.
-
-## Architecture
-
-```
-src/
-├── app/        # Next.js routing shell (minimal logic)
-├── screens/    # Page compositions (login, dashboard, todos, ai, home)
-├── widgets/    # Reusable large blocks (layout)
-├── features/   # Mutations only (auth, todo)
-├── entities/   # Queries only (user, todo)
-├── shared/     # Infrastructure (api, ui, lib, providers)
-└── index.css
-```
-
-## Import Rules (Critical)
-
-```
-app/      → screens, widgets, shared
-screens/  → widgets, features, entities, shared
-widgets/  → features, entities, shared
-features/ → entities, shared
-entities/ → shared
-shared/   → nothing external
-```
-
-**Always import via `index.ts`** - never import internal files directly.
-
-## Key Patterns
-
-### ORPC Query (entities)
-
-```tsx
-// entities/todo/api/todo.queries.ts
-export const todoQueries = {
-  all: () => ["todo"] as const,
-  list: () => orpc.todo.getAll.queryOptions(),
-};
-
-// Usage
-const { data } = useQuery(todoQueries.list());
-```
-
-### ORPC Mutation (features)
-
-```tsx
-// features/todo/create-todo/api/use-create-todo.ts
-export function useCreateTodo() {
-  return useMutation(
-    orpc.todo.create.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: todoQueries.all() });
-      },
-    })
-  );
-}
-```
-
-### Screen Composition
-
-```tsx
-// screens/todos/ui/todos-screen.tsx
-export function TodosScreen() {
-  const { data } = useQuery(todoQueries.list());
-  return (
-    <Card>
-      <CreateTodoForm />
-      <TodoList todos={data} />
-    </Card>
-  );
-}
-```
-
-## Where to Put Code
-
-| Type | Location | Example |
-|------|----------|---------|
-| API client, QueryClient | `shared/api/` | orpc.ts, auth-client.ts |
-| UI kit (shadcn) | `shared/ui/` | button.tsx, card.tsx |
-| Business data queries | `entities/{name}/api/` | todoQueries |
-| Entity UI components | `entities/{name}/ui/` | TodoItem, TodoList |
-| Mutations | `features/{entity}/{action}/` | useCreateTodo |
-| Page composition | `screens/{page}/` | TodosScreen |
-| Reusable layouts | `widgets/` | Header, UserMenu |
-| Route handlers | `app/` | page.tsx (minimal) |
-
-## Commands
-
-```bash
-bun run dev:web     # Start dev server (port 3001)
-bun run check-types # Type check
-```
-
-## Tech Stack
-
+## Architecture Overview
 - **Framework**: Next.js 16 (App Router)
-- **API Client**: ORPC with TanStack Query
+- **Design Pattern**: Feature Sliced Design (FSD)
+- **API Client**: ORPC with TanStack Query (`@/shared/api/orpc`)
 - **Auth**: better-auth
 - **UI**: shadcn/ui + Tailwind CSS
-- **State**: React Query (via ORPC)
 
-## AI Skill
+## Layer Responsibility Map
+| Layer | Path | Responsibility |
+|-------|------|----------------|
+| **App** | `app/` | Routing shell, layouts, global providers |
+| **Screens** | `screens/` | Page composition (Widgets + Features) |
+| **Widgets** | `widgets/` | Reusable large UI blocks (Header, Sidebar) |
+| **Features** | `features/` | **Mutations** (Create/Update/Delete) |
+| **Entities** | `entities/` | **Queries** (Read-only), Domain UI |
+| **Shared** | `shared/` | Infrastructure, generic UI, utilities |
 
-Use `cyberk-fsd-fe` skill for detailed FSD guidance:
-- Layer hierarchy and patterns
-- Entity/feature creation checklists
-- ORPC-specific examples
-
-## Layer Documentation
-
-Each layer has its own AGENTS.md:
-- `src/shared/AGENTS.md` - Infrastructure patterns
-- `src/entities/AGENTS.md` - Query factory patterns
-- `src/features/AGENTS.md` - Mutation patterns
-- `src/widgets/AGENTS.md` - Composition patterns
-- `src/screens/AGENTS.md` - Page composition patterns
+## Critical Rules
+1. **Strict Imports**: Only import from layers **below**. `shared` imports nothing. `app` imports everything.
+2. **Index Exports**: Always import via the layer's `index.ts` (e.g., `import { PostCard } from "@/entities/post"`).
+3. **API Pattern**:
+   - Reads → `entities/{name}/api/*.queries.ts`
+   - Mutations → `features/{name}/api/use-*.ts`

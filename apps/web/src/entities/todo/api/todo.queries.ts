@@ -1,17 +1,10 @@
 import { orpc } from "@/shared/api/orpc";
 
-export interface TodoListParams {
-  page?: number;
-  limit?: number;
-  completed?: boolean;
-  text?: string;
-  sortBy?: "createdAt" | "text";
-  sortOrder?: "asc" | "desc";
-}
+type ListInputType = Exclude<Parameters<typeof orpc.todo.list.queryOptions>["0"]["input"], symbol>;
 
 export const todoQueries = {
   all: () => ["todo"] as const,
-  list: (params: TodoListParams = {}) =>
+  list: (params: ListInputType = {}) =>
     orpc.todo.list.queryOptions({
       input: { page: 1, limit: 10, ...params },
       queryKey: [...todoQueries.all(), "list", params],
