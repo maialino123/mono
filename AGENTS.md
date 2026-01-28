@@ -1,24 +1,15 @@
-<!-- OPENSPEC:START -->
+# Skill Loader
 
-# OpenSpec Instructions
+Automatically use skills in the following contexts:
 
-These instructions are for AI assistants working in this project.
+| Skill | Usage Context |
+| :--- | :--- |
+| `openspec` | proposal, spec, change, plan |
+| `cyberk-fsd-fe` | Web-related development |
+| `next-best-practices` | Next.js framework patterns |
+| `next-cache-components` | Next.js cache UI components |
+| `vercel-react-best-practices` | React best practices and patterns |
 
-Load the `openspec` skill when the request:
-
-- Mentions planning or proposals (words like proposal, spec, change, plan)
-- Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
-- Sounds ambiguous and you need the authoritative spec before coding
-
-The skill provides:
-
-- How to create and apply change proposals
-- Spec format and conventions
-- Templates for discovery, proposal, tasks, design, and spec deltas
-
-Keep this managed block so 'openspec update' can refresh the instructions.
-
-<!-- OPENSPEC:END -->
 
 # AGENTS.md
 
