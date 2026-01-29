@@ -1,3 +1,5 @@
+import { StakeScreen } from "@/screens/stake";
+
 export default function StakePage() {
-  return <div>Stake</div>;
+  return <StakeScreen />;
 }
