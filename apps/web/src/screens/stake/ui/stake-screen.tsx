@@ -1,3 +1,4 @@
+import { StakeModule } from "@/widgets/stake-module";
 import { TVLChart } from "@/widgets/tvl-chart";
 
 const PILLS = ["1:1 Backed", "On Base", "Fully On-chain"] as const;
@@ -26,9 +27,7 @@ export function StakeScreen() {
           <TVLChart />
         </div>
         <div className="col-span-12 lg:col-span-4">
-          <div className="flex h-full min-h-[460px] items-center justify-center rounded-xl border bg-card p-6">
-            <p className="text-muted-foreground text-sm">Staking panel coming soon</p>
-          </div>
+          <StakeModule />
         </div>
       </div>
     </div>
