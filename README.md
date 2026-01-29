@@ -32,8 +32,18 @@ bun install
 
 This project uses PostgreSQL with Drizzle ORM.
 
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/server/.env` file with your PostgreSQL connection details.
+1. Start PostgreSQL and Redis via Docker:
+
+```bash
+bun run db:start
+```
+
+2. Create `.env` files from the examples:
+
+```bash
+cp apps/server/.env.example apps/server/.env
+cp apps/web/.env.example apps/web/.env
+```
 
 3. Apply the schema to your database:
 
