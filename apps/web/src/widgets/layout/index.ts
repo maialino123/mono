@@ -1,3 +1,4 @@
+export { Footer } from "./ui/footer";
 export { default as Header } from "./ui/header";
 export { HeaderNav } from "./ui/header-nav";
 export { MobileNav } from "./ui/mobile-nav";
