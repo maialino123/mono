@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { todoQueries } from "@/entities/todo";
-import { orpc, queryClient } from "@/shared";
+import { orpc, queryClient } from "@/shared/api";
 
 export function useCreateTodo() {
   return useMutation(

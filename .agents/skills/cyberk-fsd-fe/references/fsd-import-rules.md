@@ -12,7 +12,7 @@
 | `screens` | `widgets`, `features`, `entities`, `shared` |
 | `widgets` | `features`, `entities`, `shared` |
 | `features` | `entities`, `shared` |
-| `entities` | `shared` (only via `index.ts`) |
+| `entities` | `shared` (via segment barrels `@/shared/api`, or direct for `shadcn/`/`ui/`) |
 | `shared` | (No internal imports) |
 
 ## Cross-Slice Access

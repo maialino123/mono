@@ -1,4 +1,4 @@
-import { orpc } from "@/shared/api/orpc";
+import { orpc } from "@/shared/api";
 
 type ListInputType = Exclude<Parameters<typeof orpc.todo.list.queryOptions>["0"]["input"], symbol>;
 

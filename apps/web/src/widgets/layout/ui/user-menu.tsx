@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { authClient } from "@/shared/api";
+import { Button } from "@/shared/shadcn/button";
 import {
-  authClient,
-  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -13,8 +13,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  Skeleton,
-} from "@/shared";
+} from "@/shared/shadcn/dropdown-menu";
+import { Skeleton } from "@/shared/shadcn/skeleton";
 
 export default function UserMenu() {
   const router = useRouter();

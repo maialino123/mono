@@ -1,4 +1,4 @@
-import { orpc } from "@/shared/api/orpc";
+import { orpc } from "@/shared/api";
 
 export const userQueries = {
   all: () => ["user"] as const,

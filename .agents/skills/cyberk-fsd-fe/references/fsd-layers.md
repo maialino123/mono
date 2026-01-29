@@ -40,4 +40,6 @@
 ## shared/
 **Infrastructure**.
 - Role: Reusable code without business domain knowledge.
-- Contains: UI Kit (shadcn), API Clients, Utility functions.
+- Contains: `shadcn/` (CLI-managed components), `ui/` (custom components), `api/` (clients), `lib/` (utilities), `providers/`.
+- `api/`, `lib/`, `providers/` have `index.ts` barrels — import via `@/shared/api`, `@/shared/lib`, `@/shared/providers`.
+- `shadcn/` and `ui/` do NOT have barrels — import directly: `@/shared/shadcn/button`, `@/shared/ui/loader`.

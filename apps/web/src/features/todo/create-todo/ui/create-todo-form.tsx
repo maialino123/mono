@@ -3,7 +3,8 @@
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
-import { Button, Input } from "@/shared";
+import { Button } from "@/shared/shadcn/button";
+import { Input } from "@/shared/shadcn/input";
 
 import { useCreateTodo } from "../api/use-create-todo";
 

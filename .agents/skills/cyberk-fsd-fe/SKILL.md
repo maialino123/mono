@@ -13,7 +13,7 @@ description: Definitive guide for building Next.js apps with FSD architecture an
 2. **Adding a Reusable UI Block?** (Header, Sidebar) → Create `widgets/{name}`.
 3. **Adding a User Action?** (Create, Update, Delete) → Create `features/{action}-{entity}`.
 4. **Adding Business Data?** (Read-only, Search) → Create `entities/{name}`.
-5. **Adding Generic UI?** (Button, Input) → Use `shared/ui` (shadcn).
+5. **Adding Generic UI?** (Button, Input) → Use `shared/shadcn` (shadcn CLI-managed, direct import).
 
 ## Core References (Read These)
 - **[Layers Definition](references/fsd-layers.md)**: What goes where.

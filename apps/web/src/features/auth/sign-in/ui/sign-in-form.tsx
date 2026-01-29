@@ -4,8 +4,11 @@ import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
-import { Button, Input, Label, Loader } from "@/shared";
-import { authClient } from "@/shared/api/auth-client";
+import { authClient } from "@/shared/api";
+import { Button } from "@/shared/shadcn/button";
+import { Input } from "@/shared/shadcn/input";
+import { Label } from "@/shared/shadcn/label";
+import Loader from "@/shared/ui/loader";
 
 function GoogleIcon() {
   return (

@@ -21,7 +21,7 @@
 
 ## Critical Rules
 1. **Strict Imports**: Only import from layers **below**. `shared` imports nothing. `app` imports everything.
-2. **Index Exports**: Always import via the layer's `index.ts` (e.g., `import { PostCard } from "@/entities/post"`).
+2. **Index Exports**: Import via the layer's `index.ts` (e.g., `import { PostCard } from "@/entities/post"`). Exception: `shared/` has no barrel — import directly from segments (e.g., `@/shared/shadcn/button`).
 3. **API Pattern**:
    - Reads → `entities/{name}/api/*.queries.ts`
    - Mutations → `features/{name}/api/use-*.ts`

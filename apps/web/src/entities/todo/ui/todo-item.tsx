@@ -1,6 +1,7 @@
 import { Trash2 } from "lucide-react";
 
-import { Button, Checkbox } from "@/shared";
+import { Button } from "@/shared/shadcn/button";
+import { Checkbox } from "@/shared/shadcn/checkbox";
 
 export interface TodoItemProps {
   id: number;

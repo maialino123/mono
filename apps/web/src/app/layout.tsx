@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import "../index.css";
-import { Providers } from "@/shared";
+import { Providers } from "@/shared/providers";
 import { Header } from "@/widgets/layout";
 
 const geistSans = Geist({

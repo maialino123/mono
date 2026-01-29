@@ -7,7 +7,8 @@ import { Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
 
-import { Button, Input } from "@/shared";
+import { Button } from "@/shared/shadcn/button";
+import { Input } from "@/shared/shadcn/input";
 
 export function AIScreen() {
   const [input, setInput] = useState("");

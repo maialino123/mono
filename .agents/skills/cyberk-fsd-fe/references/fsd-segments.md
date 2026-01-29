@@ -4,7 +4,7 @@
 Location: `entities/{name}/api/{name}.queries.ts`
 
 ```typescript
-import { orpc } from "@/shared";
+import { orpc } from "@/shared/api";
 
 type ListInputType = Exclude<Parameters<typeof orpc.posts.list.queryOptions>["0"]["input"], symbol>;
 
@@ -31,7 +31,7 @@ Location: `features/{action}/api/use-{action}.ts`
 
 ```typescript
 import { useMutation } from "@tanstack/react-query";
-import { orpc, queryClient } from "@/shared";
+import { orpc, queryClient } from "@/shared/api";
 import { postQueries } from "@/entities/post"; 
 
 export function useCreatePost() {

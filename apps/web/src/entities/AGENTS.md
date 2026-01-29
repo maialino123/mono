@@ -1,7 +1,7 @@
 # Entities Layer
 
 **Role**: Business Domain Data (READ-ONLY)
-**Imports**: shared (via index only)
+**Imports**: shared (direct segment imports)
 
 ## Primary Contents
 - **API**: `api/{entity}.queries.ts` (ORPC Query Factory)

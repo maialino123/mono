@@ -5,7 +5,8 @@ import { useState } from "react";
 
 import { TodoList, todoQueries } from "@/entities/todo";
 import { CreateTodoForm, useDeleteTodo, useToggleTodo } from "@/features/todo";
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared";
+import { Button } from "@/shared/shadcn/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/shadcn/card";
 
 export function TodosScreen() {
   const [page, setPage] = useState(1);

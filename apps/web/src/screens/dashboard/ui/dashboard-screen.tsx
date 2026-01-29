@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { orpc } from "@/shared/api/orpc";
+import { orpc } from "@/shared/api";
 
 export interface DashboardScreenProps {
   userName: string;
