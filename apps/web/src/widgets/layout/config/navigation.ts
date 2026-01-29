@@ -8,6 +8,4 @@ export type NavItem = {
 export const navigationItems: NavItem[] = [
   { title: "Mint", href: "/mint", segment: "mint" },
   { title: "Stake", href: "/stake", segment: "stake" },
-  { title: "Dashboard", href: "/dashboard", segment: "dashboard" },
-  { title: "Profile", href: "/profile", segment: "profile" },
 ];
