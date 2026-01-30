@@ -18,6 +18,8 @@ export interface ThemeConfig {
   appearance: "light" | "dark" | "system";
   font: string;
   radius: number;
+  letterSpacing: number;
+  spacing: number;
   colors: {
     light: ColorPalette;
     dark: ColorPalette;
@@ -78,6 +80,8 @@ export const DEFAULT_THEME_CONFIG: ThemeConfig = {
   appearance: "system",
   font: "Inter",
   radius: 10,
+  letterSpacing: 0,
+  spacing: 0.25,
   colors: {
     light: DEFAULT_LIGHT_PALETTE,
     dark: DEFAULT_DARK_PALETTE,
