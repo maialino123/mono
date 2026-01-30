@@ -1,6 +1,9 @@
 "use client";
 
 import { useTheme } from "next-themes";
+import { useRef } from "react";
+import { useCustomTheme } from "@/shared/providers/custom-theme-provider";
+import type { ColorPalette } from "@/shared/providers/theme-config";
 import {
   Accordion,
   AccordionContent,
@@ -18,18 +21,27 @@ interface ColorInputProps {
 
 const ColorInput = ({ label, colorKey, value, onChange }: ColorInputProps) => {
   const inputId = `color-input-${colorKey}`;
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const nativePickerRef = useRef<HTMLInputElement>(null);
+
+  const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     if (/^#[0-9A-Fa-f]{0,6}$/.test(newValue) || newValue === "") {
       onChange(newValue);
     }
   };
 
+  const handleNativeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
+  };
+
   return (
     <div className="flex items-center gap-3 px-3 py-2.5">
-      <div
-        className="h-6 w-6 shrink-0 rounded border border-slate-300 dark:border-slate-600"
+      <button
+        type="button"
+        className="h-6 w-6 shrink-0 cursor-pointer rounded border border-slate-300 dark:border-slate-600"
         style={{ backgroundColor: value || "#000000" }}
+        onClick={() => nativePickerRef.current?.click()}
+        aria-label={`Pick color for ${label}`}
       />
       <label
         htmlFor={inputId}
@@ -41,10 +53,19 @@ const ColorInput = ({ label, colorKey, value, onChange }: ColorInputProps) => {
         id={inputId}
         type="text"
         value={value}
-        onChange={handleChange}
+        onChange={handleHexChange}
         placeholder="#000000"
         className="h-8 w-24 border-slate-300 bg-white font-mono text-xs dark:border-gray-600 dark:bg-gray-800"
         maxLength={7}
+      />
+      <input
+        ref={nativePickerRef}
+        type="color"
+        value={value || "#000000"}
+        onChange={handleNativeChange}
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
       />
     </div>
   );
@@ -52,15 +73,15 @@ const ColorInput = ({ label, colorKey, value, onChange }: ColorInputProps) => {
 
 interface ColorSectionProps {
   title: string;
-  colors: Array<{ key: string; label: string }>;
-  colorScheme: string;
-  onColorChange: (key: string, value: string) => void;
+  colors: Array<{ key: keyof ColorPalette; label: string }>;
+  palette: ColorPalette;
+  onColorChange: (key: keyof ColorPalette, value: string) => void;
 }
 
 const ColorSection = ({
   title,
   colors,
-  colorScheme,
+  palette,
   onColorChange,
 }: ColorSectionProps) => {
   return (
@@ -80,7 +101,7 @@ const ColorSection = ({
               key={key}
               label={label}
               colorKey={key}
-              value={colorScheme === "dark" ? "dark" : "light"}
+              value={palette[key]}
               onChange={(value) => onColorChange(key, value)}
             />
           ))}
@@ -90,86 +111,92 @@ const ColorSection = ({
   );
 };
 
+const PREVIEW_COLOR_KEYS: (keyof ColorPalette)[] = [
+  "primary",
+  "secondary",
+  "background",
+  "card",
+  "success",
+  "error",
+];
+
 export const ColorSwatches = () => {
-  const previewColors = [
-    "primary",
-    "secondary",
-    "appBackground",
-    "cardBackground",
-    "success",
-    "error",
-    "warning",
-    "info",
-  ].filter(Boolean) as string[];
+  const { config } = useCustomTheme();
+  const { resolvedTheme } = useTheme();
+  const currentMode: "light" | "dark" = resolvedTheme === "dark" ? "dark" : "light";
+  const palette = config.colors[currentMode];
 
   return (
     <div className="flex h-full items-center">
-      {previewColors.slice(0, 6).map((color) => (
+      {PREVIEW_COLOR_KEYS.map((key) => (
         <div
-          key={color}
+          key={key}
           className="h-4 w-4"
-          style={{ backgroundColor: color }}
+          style={{ backgroundColor: palette[key] }}
         />
       ))}
     </div>
   );
 };
 
+const COLOR_SECTIONS: Array<{
+  title: string;
+  colors: Array<{ key: keyof ColorPalette; label: string }>;
+}> = [
+  {
+    title: "Core Brand Colors",
+    colors: [
+      { key: "primary", label: "Primary" },
+      { key: "secondary", label: "Secondary" },
+    ],
+  },
+  {
+    title: "Neutral / Layout Colors",
+    colors: [
+      { key: "background", label: "App Background" },
+      { key: "card", label: "Card Background" },
+      { key: "secondaryCard", label: "Secondary Card" },
+    ],
+  },
+  {
+    title: "Text Colors",
+    colors: [
+      { key: "primaryText", label: "Primary Text" },
+      { key: "secondaryText", label: "Secondary Text" },
+      { key: "mutedText", label: "Muted / Hint" },
+      { key: "inverseText", label: "Inverse Text" },
+    ],
+  },
+  {
+    title: "Status Colors",
+    colors: [
+      { key: "success", label: "Success" },
+      { key: "warning", label: "Warning" },
+      { key: "error", label: "Error" },
+      { key: "info", label: "Info" },
+    ],
+  },
+];
+
 export const ColorConfig = () => {
+  const { config, updateColor } = useCustomTheme();
   const { resolvedTheme } = useTheme();
+  const currentMode: "light" | "dark" = resolvedTheme === "dark" ? "dark" : "light";
+  const palette = config.colors[currentMode];
 
-  const currentMode = resolvedTheme === "dark" ? "dark" : "light";
-
-  const handleColorChange = (_key: string, _value: string) => {
-    //
+  const handleColorChange = (key: keyof ColorPalette, value: string) => {
+    updateColor(currentMode, key, value);
   };
-
-  const colorSections = [
-    {
-      title: "Core Brand Colors",
-      colors: [
-        { key: "primary", label: "Primary" },
-        { key: "secondary", label: "Secondary" },
-      ],
-    },
-    {
-      title: "Neutral / Layout Colors",
-      colors: [
-        { key: "appBackground", label: "App Background" },
-        { key: "cardBackground", label: "Card Background" },
-        { key: "secondaryCard", label: "Secondary Card" },
-      ],
-    },
-    {
-      title: "Text Colors",
-      colors: [
-        { key: "primaryText", label: "Primary Text" },
-        { key: "secondaryText", label: "Secondary Text" },
-        { key: "mutedText", label: "Muted / Hint" },
-        { key: "inverseText", label: "Inverse Text" },
-      ],
-    },
-    {
-      title: "Status Colors",
-      colors: [
-        { key: "success", label: "Success" },
-        { key: "warning", label: "Warning" },
-        { key: "error", label: "Error" },
-        { key: "info", label: "Info" },
-      ],
-    },
-  ];
 
   return (
     <div className="space-y-3 px-3">
-      {/* Nested Accordion for Color Sections */}
       <Accordion className="w-full">
-        {colorSections.map((section) => (
+        {COLOR_SECTIONS.map((section) => (
           <ColorSection
             key={section.title}
             title={section.title}
             colors={section.colors}
-            colorScheme={currentMode}
+            palette={palette}
             onColorChange={handleColorChange}
           />
         ))}

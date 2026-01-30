@@ -1,10 +1,10 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import { cn } from "@/shared/lib";
+import { useCustomTheme } from "@/shared/providers/custom-theme-provider";
 
 export const AppearanceSelect = () => {
-  const { theme, setTheme } = useTheme();
+  const { config, updateAppearance } = useCustomTheme();
 
   const themes = [
     { value: "dark", label: "Dark" },
@@ -12,14 +12,10 @@ export const AppearanceSelect = () => {
     { value: "system", label: "System" },
   ] as const;
 
-  const handleThemeChange = (theme: string) => {
-    setTheme(theme);
-  };
-
   return (
     <div className="flex items-center justify-between gap-2 px-3">
       {themes.map((themeOption) => {
-        const isSelected = theme === themeOption.value;
+        const isSelected = config.appearance === themeOption.value;
         return (
           <label key={themeOption.value} className="flex cursor-pointer items-center gap-2">
             <input
@@ -27,7 +23,7 @@ export const AppearanceSelect = () => {
               name="appearance"
               value={themeOption.value}
               checked={isSelected}
-              onChange={() => handleThemeChange(themeOption.value)}
+              onChange={() => updateAppearance(themeOption.value)}
               className="sr-only"
             />
             <div

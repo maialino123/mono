@@ -1,10 +1,10 @@
 "use client";
 
 import { ChevronDown, X } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/shared/lib";
+import { useCustomTheme } from "@/shared/providers/custom-theme-provider";
 import { Button } from "@/shared/shadcn/button";
 import { Input } from "@/shared/shadcn/input";
 
@@ -28,8 +28,8 @@ const POPULAR_FONTS = [
 ] as const;
 
 export const FontSelect = () => {
-  const { theme } = useTheme();
-  const currentFont = theme === "dark" ? "Roboto" : "Inter";
+  const { config, updateFont } = useCustomTheme();
+  const currentFont = config.font;
   const [searchValue, setSearchValue] = useState<string>(currentFont);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [dropdownPosition, setDropdownPosition] = useState<{
@@ -43,10 +43,11 @@ export const FontSelect = () => {
   const filteredFonts = POPULAR_FONTS.filter((font) => font.toLowerCase().includes(searchValue.toLowerCase()));
 
   const handleFontChange = useCallback((font: string) => {
+    updateFont(font);
     setSearchValue(font);
     setIsOpen(false);
     inputRef.current?.blur();
-  }, []);
+  }, [updateFont]);
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);

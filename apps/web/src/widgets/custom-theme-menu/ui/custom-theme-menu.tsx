@@ -1,12 +1,17 @@
 "use client";
 
 import { Palette } from "lucide-react";
-import { useTheme } from "next-themes";
 import { cn } from "@/shared/lib";
 import { useCustomTheme } from "@/shared/providers/custom-theme-provider";
 import { Accordion } from "@/shared/shadcn/accordion";
 import { Button } from "@/shared/shadcn/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/shared/shadcn/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/shared/shadcn/sheet";
 import { AppearanceSelect } from "./appearance-select";
 import { ColorConfig, ColorSwatches } from "./color-config";
 import { CustomAccordionItem } from "./custom-accordion";
@@ -18,8 +23,7 @@ interface CustomThemeMenuProps {
 }
 
 export const CustomThemeMenu = ({ className }: CustomThemeMenuProps) => {
-  const { theme } = useTheme();
-  const { isOpen, toggle } = useCustomTheme();
+  const { config, isOpen, toggle } = useCustomTheme();
 
   return (
     <div className={cn("absolute right-6 bottom-6 z-50", className)}>
@@ -43,13 +47,19 @@ export const CustomThemeMenu = ({ className }: CustomThemeMenuProps) => {
             </SheetTitle>
           </SheetHeader>
           <Accordion className="space-y-4 overflow-visible px-6 pb-6">
-            <CustomAccordionItem value="appearance" themeValue={theme}>
+            <CustomAccordionItem
+              value="appearance"
+              themeValue={config.appearance}
+            >
               <AppearanceSelect />
             </CustomAccordionItem>
-            <CustomAccordionItem value="font" themeValue={theme === "dark" ? "Inter" : "Inter"}>
+            <CustomAccordionItem value="font" themeValue={config.font}>
               <FontSelect />
             </CustomAccordionItem>
-            <CustomAccordionItem value="layout radius" themeValue={theme === "dark" ? "16px" : "16px"}>
+            <CustomAccordionItem
+              value="layout radius"
+              themeValue={`${config.radius}px`}
+            >
               <LayoutRadiusSelect />
             </CustomAccordionItem>
             <CustomAccordionItem value="color" triggerSlot={<ColorSwatches />}>
