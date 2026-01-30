@@ -5,8 +5,6 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "@/shared/api/orpc";
 import { Toaster } from "../shadcn/sonner";
 import { CustomThemeProvider } from "./custom-theme-provider";
-import { EvmProvider } from "./evm-provider";
-import { SolanaProvider } from "./solana-provider";
 import { ThemeProvider } from "./theme-provider";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -18,11 +16,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <QueryClientProvider client={queryClient}>
-        <EvmProvider>
-          <SolanaProvider>
-            <CustomThemeProvider>{children}</CustomThemeProvider>
-          </SolanaProvider>
-        </EvmProvider>
+        <CustomThemeProvider>{children}</CustomThemeProvider>
         <ReactQueryDevtools />
       </QueryClientProvider>
       <Toaster richColors />
