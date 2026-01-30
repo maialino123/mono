@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 
@@ -16,7 +17,7 @@ export function HeaderNav() {
       {navigationItems.map((item: NavItem) => (
         <Link
           key={item.href}
-          href={item.href}
+          href={item.href as Route}
           className={cn(
             "flex h-9 items-center px-4 font-medium text-sm leading-5 transition-colors",
             segment === item.segment ? "text-primary" : "text-muted-foreground hover:text-primary",

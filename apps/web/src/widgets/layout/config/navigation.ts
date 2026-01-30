@@ -1,6 +1,8 @@
+import type { Route } from "next";
+
 export type NavItem = {
   title: string;
-  href: string;
+  href: Route;
   segment: string | null;
   disabled?: boolean;
 };

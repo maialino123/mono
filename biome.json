@@ -28,6 +28,14 @@
       "!**/convex/_generated"
     ]
   },
+  "overrides": [
+    {
+      "includes": ["**/*.tsx"],
+      "formatter": {
+        "enabled": false
+      }
+    }
+  ],
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
