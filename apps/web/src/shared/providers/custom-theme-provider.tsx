@@ -15,6 +15,8 @@ interface CustomThemeContextValue {
   updateAppearance: (appearance: ThemeConfig["appearance"]) => void;
   updateFont: (font: string) => void;
   updateRadius: (radius: number) => void;
+  updateLetterSpacing: (letterSpacing: number) => void;
+  updateSpacing: (spacing: number) => void;
   updateColor: (mode: "light" | "dark", key: keyof ColorPalette, value: string) => void;
   resetToDefaults: () => void;
   isOpen: boolean;
@@ -30,9 +32,9 @@ function loadConfigFromStorage(): ThemeConfig {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      const parsed = JSON.parse(stored) as ThemeConfig;
+      const parsed = JSON.parse(stored) as Partial<ThemeConfig>;
       if (parsed?.font && parsed.colors) {
-        return parsed;
+        return { ...DEFAULT_THEME_CONFIG, ...parsed };
       }
     }
   } catch {
@@ -80,6 +82,8 @@ function applyThemeToDOM(config: ThemeConfig, resolvedMode: "light" | "dark") {
   }
 
   root.style.setProperty("--radius", `${config.radius / 16}rem`);
+  root.style.setProperty("--letter-spacing", `${config.letterSpacing}em`);
+  root.style.setProperty("--spacing", `${config.spacing}rem`);
   root.style.setProperty("--font-sans", `"${config.font}", sans-serif`);
 
   if (config.font !== "Inter") {
@@ -93,6 +97,8 @@ function removeThemeFromDOM() {
     root.style.removeProperty(cssVar);
   }
   root.style.removeProperty("--radius");
+  root.style.removeProperty("--letter-spacing");
+  root.style.removeProperty("--spacing");
   root.style.removeProperty("--font-sans");
 
   const link = document.getElementById("custom-theme-google-font");
@@ -155,6 +161,20 @@ export const CustomThemeProvider = ({ children }: CustomThemeProviderProps) => {
     [updateConfig],
   );
 
+  const updateLetterSpacing = useCallback(
+    (letterSpacing: number) => {
+      updateConfig((prev) => ({ ...prev, letterSpacing }));
+    },
+    [updateConfig],
+  );
+
+  const updateSpacing = useCallback(
+    (spacing: number) => {
+      updateConfig((prev) => ({ ...prev, spacing }));
+    },
+    [updateConfig],
+  );
+
   const updateColor = useCallback(
     (mode: "light" | "dark", key: keyof ColorPalette, value: string) => {
       updateConfig((prev) => ({
@@ -191,6 +211,8 @@ export const CustomThemeProvider = ({ children }: CustomThemeProviderProps) => {
     updateAppearance,
     updateFont,
     updateRadius,
+    updateLetterSpacing,
+    updateSpacing,
     updateColor,
     resetToDefaults,
     isOpen,

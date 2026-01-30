@@ -1,6 +1,6 @@
-# Specification: Custom Theme
+# Specification: Custom Theme (Delta)
 
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Theme Config Model
 
@@ -17,26 +17,6 @@ The system SHALL define a typed `ThemeConfig` model containing appearance mode, 
 - **WHEN** existing localStorage contains a config without `letterSpacing` or `spacing`
 - **THEN** the provider merges with defaults (`letterSpacing: 0`, `spacing: 0.25`)
 - **AND** existing settings are preserved
-
-### Requirement: Theme Persistence
-
-The system SHALL persist the full `ThemeConfig` to localStorage under the key `"custom-theme"` whenever any theme property changes.
-
-#### Scenario: Save on change
-
-- **WHEN** user changes any theme property (appearance, font, radius, letterSpacing, spacing, or color)
-- **THEN** the full config is serialized to `localStorage.setItem("custom-theme", ...)`
-
-#### Scenario: Load on app start
-
-- **WHEN** the app starts and `localStorage.getItem("custom-theme")` returns a valid JSON config
-- **THEN** the provider initializes state from that config
-- **AND** applies all CSS variable overrides before the first paint
-
-#### Scenario: Fallback to defaults
-
-- **WHEN** localStorage has no stored theme or contains invalid data
-- **THEN** the provider uses `DEFAULT_THEME_CONFIG`
 
 ### Requirement: Theme Menu Display
 
@@ -123,32 +103,15 @@ The system SHALL provide a reusable `SliderWithInput` component combining a labe
 - **AND** dragging the slider updates the input value and vice versa
 - **AND** values are clamped to the configured min/max range
 
-### Requirement: Font Customization
-
-The system SHALL allow users to select a Google Font family via the FontSelect component.
-
-#### Scenario: Change font
-
-- **WHEN** user selects a font from the dropdown
-- **THEN** the provider updates `config.font`
-- **AND** injects a Google Fonts `<link>` element into `<head>` for the selected font
-- **AND** sets `--font-sans` CSS variable to the selected font family
-- **AND** the change persists across page refreshes
-
-#### Scenario: Custom font name
-
-- **WHEN** user types a font name not in the preset list and presses Enter
-- **THEN** the system treats it as a valid Google Font name and attempts to load it
-
 ### Requirement: Save Theme Button
 
-The system SHALL provide a Save Theme button that persists the current configuration and closes the menu.
+The system SHALL provide a Save Theme button that persists the current configuration.
 
 #### Scenario: Save theme
 
 - **WHEN** user clicks the Save Theme button
 - **THEN** the current `ThemeConfig` is persisted to localStorage
-- **AND** the theme menu closes
+- **AND** visual feedback confirms the save action
 
 ### Requirement: Reset to Defaults
 
