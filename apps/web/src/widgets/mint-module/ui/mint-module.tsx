@@ -2,7 +2,9 @@
 
 import { cn } from "@/shared/lib/utils";
 import { Card, CardContent } from "@/shared/shadcn/card";
-import { Tabs, TabsList, TabsTrigger } from "@/shared/shadcn/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/shadcn/tabs";
+import { MintTab } from "./mint-tab";
+import { RedeemTab } from "./redeem-tab";
 
 interface MintModuleProps {
   className?: string;
@@ -32,6 +34,12 @@ export function MintModule({ className }: MintModuleProps) {
               Redeem
             </TabsTrigger>
           </TabsList>
+          <TabsContent value="mint">
+            <MintTab />
+          </TabsContent>
+          <TabsContent value="redeem">
+            <RedeemTab />
+          </TabsContent>
         </Tabs>
       </CardContent>
     </Card>

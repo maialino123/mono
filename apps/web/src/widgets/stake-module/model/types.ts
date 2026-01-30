@@ -1,9 +1,4 @@
-export interface Token {
-  symbol: string;
-  decimals?: number;
-  name?: string;
-  logoURI?: string;
-}
+export type { Token } from "@/shared/types/token";
 
 export type WithdrawStatus = "pending" | "ready" | "completed" | "failed";
 
@@ -21,5 +16,5 @@ export interface Withdraw {
   requestedAt?: string;
   claimableAt: string;
   amount: number;
-  token: Token;
+  token: import("@/shared/types/token").Token;
 }
