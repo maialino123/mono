@@ -28,14 +28,16 @@ export const CustomThemeMenu = ({ className }: CustomThemeMenuProps) => {
   return (
     <div className={cn("absolute right-6 bottom-6 z-50", className)}>
       <Sheet open={isOpen} onOpenChange={toggle}>
-        <SheetTrigger>
-          <Button
-            className="h-12 w-12 cursor-pointer rounded-full border-2 border-slate-400 bg-slate-200 hover:bg-slate-300 dark:border-slate-500 dark:bg-slate-700 dark:hover:bg-slate-600"
-            size="icon"
-            aria-label="Open custom theme menu"
-          >
-            <Palette className="h-6 w-6 text-black dark:text-white" />
-          </Button>
+        <SheetTrigger
+          render={
+            <Button
+              className="h-12 w-12 cursor-pointer rounded-full border-2 border-slate-400 bg-slate-200 hover:bg-slate-300 dark:border-slate-500 dark:bg-slate-700 dark:hover:bg-slate-600"
+              size="icon"
+              aria-label="Open custom theme menu"
+            />
+          }
+        >
+          <Palette className="h-6 w-6 text-black dark:text-white" />
         </SheetTrigger>
         <SheetContent
           className="w-full gap-0 overflow-visible bg-white sm:max-w-[364px] dark:bg-[#171717]"
