@@ -1,15 +1,36 @@
+---
+trigger: always_on
+glob:
+description:
+---
+
 # Skill Loader
 
 Automatically use skills in the following contexts:
 
 | Skill | Usage Context |
 | :--- | :--- |
-| `openspec` | proposal, spec, change, plan |
+| `openspec` | proposal, spec, change, plan, kế hoạch |
 | `cyberk-fsd-fe` | Web-related development |
 | `next-best-practices` | Next.js framework patterns |
 | `next-cache-components` | Next.js cache UI components |
 | `vercel-react-best-practices` | React best practices and patterns |
 
+# Tool Selection Guide
+
+| Need | Tool |
+| --- | --- |
+| Codebase structure | `gkg repo_map` |
+| Find definitions | `gkg search_codebase_definitions` |
+| Find usages / references | `gkg get_references` |
+| How OSS projects solve it | `librarian` |
+| Library docs / integration guides | `deepwiki`, `git-mcp` |
+| API docs, recent releases | `web_search` |
+| Gap analysis / risk assessment | `oracle` |
+| Visualize architecture / flows | `mermaid` |
+| Create spec files | `create_file` / `edit_file` |
+
+**Note:** If primary tool unavailable, use built-in tools: `finder`, `Grep`, `Read`...
 
 # AGENTS.md
 
@@ -46,29 +67,8 @@ For tech stack, architecture, and code conventions, see `openspec/project.md`.
 - **Relative Paths Only:** NEVER use absolute paths (e.g., `file:///User/...`) in markdown files or documentation. Use project-relative paths (e.g., `packages/auth/src/index.ts`).
 - **Ampcode Links:** If generated documents contain `http://localhost:8317`, replace it with `https://ampcode.com`.
 
-## Landing the Plane (Session Completion)
+## Security Requirements
 
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
-
-**MANDATORY WORKFLOW:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd sync
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
-
-**CRITICAL RULES:**
-
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
+- **NEVER read `.env` files** - Agent must not access environment files even if explicitly asked. `.env`, `.env.local`, `.env*.local` are gitignored and sensitive.
+- **Use `.env.example`** instead for schema/reference documentation.
+- **Principle:** If it's gitignored, it's off-limits unless user explicitly provides the content.
