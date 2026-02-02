@@ -101,7 +101,17 @@ cyberk-flow/
 
 This project leverages AI tools to optimize the development workflow. Follow the steps below to set up the AI tooling.
 
-### 1. MCP Config (Antigravity only)
+### 1. OpenSpec CLI
+
+Install OpenSpec CLI for spec-driven development workflow:
+
+```bash
+npm install -g @openspec/cli
+```
+
+See [OpenSpec documentation](https://github.com/Fission-AI/OpenSpec?tab=readme-ov-file#updating-openspec) for more details.
+
+### 2. MCP Config (Antigravity only)
 
 Add the following MCP servers to `~/.gemini/antigravity/mcp_config.json`:
 
@@ -121,13 +131,14 @@ Add the following MCP servers to `~/.gemini/antigravity/mcp_config.json`:
 }
 ```
 
-### 2. Ampcode Setup
+### 3. Ampcode Setup
 
 1. Register an account at [ampcode.com](https://ampcode.com/)
-2. Install Amp CLI: [Getting Started Guide](https://ampcode.com/manual#get-started)
-3. Install the **Sourcegraph Amp** extension in VS Code (`sourcegraph.amp`)
+2. Go to [ampcode.com/settings](https://ampcode.com/settings) and connect with the company's GitHub organization
+3. Install Amp CLI: [Getting Started Guide](https://ampcode.com/manual#get-started)
+4. Install the **Sourcegraph Amp** extension in VS Code (`sourcegraph.amp`)
 
-### 3. GitLab Knowledge Graph (GKG)
+### 4. GitLab Knowledge Graph (GKG)
 
 GKG provides local code intelligence via MCP for AI agents.
 
@@ -235,3 +246,101 @@ mkdir -p .claude && ln -s ../.agents/skills .claude/skills
 ```
 
 This way, all AI tools (Ampcode, Claude Code, Antigravity) share the same rules and skills from a single location.
+
+## Setup CLIProxyAPIPlus
+
+[CLIProxyAPIPlus](https://github.com/router-for-me/CLIProxyAPIPlus) is a local proxy that routes AI requests through a unified endpoint with model mapping support.
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/router-for-me/CLIProxyAPIPlus.git
+cd CLIProxyAPIPlus
+```
+
+### 2. Configure
+
+```bash
+cp config.example.yaml config.yaml
+```
+
+Edit `config.yaml` and set the following to enable the Web UI:
+
+```yaml
+remote-management:
+  allow-remote: true
+  secret-key: "any_thing_you_want"
+api-keys:
+  - "WHATEVER_YOU_WANT"
+```
+
+### 3. Start the service
+
+```bash
+docker compose up -d
+```
+
+### 4. Open Management Web UI
+
+Navigate to [http://localhost:8317/management.html](http://localhost:8317/management.html).
+
+### 5. Configure Custom Provider
+
+You need two keys:
+
+- **ai-provider.cyberk.io** — request the API key from the company
+- **ampcode** — copy your access token from [https://ampcode.com/settings](https://ampcode.com/settings)
+
+Go to the **Config Management** tab and add the following config:
+
+```yaml
+ampcode:
+  upstream-url: "https://ampcode.com/"
+  upstream-api-key: "sgamp_user_PASTE_YOUR_ACCESS_KEY_FROM_AMPCODE.COM"
+  restrict-management-to-localhost: false
+  model-mappings:
+    - from: claude-sonnet-4-5-20250929
+      to: claude-sonnet-4-5-20250929
+    - from: gemini-2.5-flash-lite
+      to: gemini-3-flash-preview
+    - from: gpt-5.1
+      to: gemini-3-pro-preview
+    - from: gemini-3-flash-preview
+      to: gemini-3-flash-preview
+    - from: gemini-3-pro-preview
+      to: gemini-3-pro-preview
+    - from: claude-haiku-4-5-20251001
+      to: claude-haiku-4-5-20251001
+    - from: gpt-5.2
+      to: claude-opus-4-5-20251101
+    - from: claude-opus-4-5-20251101
+      to: claude-opus-4-5-20251101
+    - from: gemini-2.5-flash
+      to: gemini-3-flash-preview
+    - from: gemini-2.5-flash-lite-preview-09-2025
+      to: gemini-3-flash-preview
+    - from: claude-opus-4.5
+      to: claude-opus-4-5-20251101
+    - from: claude-opus-4-5
+      to: claude-opus-4-5-20251101
+    - from: claude-haiku-4.5
+      to: claude-haiku-4-5-20251001
+    - from: claude-haiku-4-5
+      to: claude-haiku-4-5-20251001
+    - from: claude-sonnet-4.5
+      to: claude-sonnet-4-5-20241022
+    - from: claude-sonnet-4-5
+      to: claude-sonnet-4-5-20241022
+  force-model-mappings: true
+claude-api-key:
+  - api-key: YOUR_CYBERK_API_KEY
+    base-url: https://ai-provider.cyberk.io/
+    proxy-url: ""
+    models: []
+```
+
+### 6. Integrate with Ampcode Extension
+
+1. Open Ampcode extension settings in VS Code (or Antigravity)
+2. Scroll to the bottom, change **Amp: Url** to `http://localhost:8317`
+3. Open the Ampcode tab, fill in the **Amp Access Token** with the API key you set in step 2
