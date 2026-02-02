@@ -31,11 +31,11 @@ Populate `discovery.md` by selecting tracks appropriate to the change's complexi
 
 | Track | When to use | Tools |
 | --- | --- | --- |
-| **Architecture Snapshot** | Always (at minimum read affected files) | `gkg repo_map`, `gkg search_codebase_definitions`, `Read` |
-| **Internal Patterns** | When similar features exist in codebase | `gkg get_references`, `Grep`, `finder` |
-| **External Patterns** | Novel architecture or unfamiliar domain | `librarian` ("how do similar projects do this?") |
-| **Constraint Check** | New dependencies or build changes | Read `package.json`, `tsconfig.json` |
-| **Documentation** | New external library or API integration | `deepwiki` / `git-mcp` / `web_search` |
+| **Task(Architecture Snapshot)** | Always (at minimum read affected files) | `gkg repo_map`, `gkg search_codebase_definitions`, `Read` |
+| **Task(Internal Patterns)** | When similar features exist in codebase | `gkg get_references`, `Grep`, `finder` |
+| **Task(External Patterns)** | Novel architecture or unfamiliar domain | `librarian` ("how do similar projects do this?") |
+| **Task(Constraint Check)** | New dependencies or build changes | Read `package.json`, `tsconfig.json` |
+| **Task(Documentation)** | New external library or API integration | `deepwiki` / `git-mcp` / `web_search` |
 
 **Guidelines**:
 - **Small/well-documented changes** (e.g., adding a well-documented plugin): Architecture Snapshot + Constraint Check + Documentation may suffice.

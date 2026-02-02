@@ -32,6 +32,11 @@ Automatically use skills in the following contexts:
 
 **Note:** If primary tool unavailable, use built-in tools: `finder`, `Grep`, `Read`...
 
+## Sub-agent Best Practices
+
+- **Before delegating**: Use `gkg search_codebase_definitions` or `gkg get_references` to confirm exact API names, method signatures, and existing patterns. Pass confirmed facts to the sub-agent prompt — never pass uncertain guesses.
+- **Prompt quality**: Include concrete code references (file paths, function names, import paths) rather than vague descriptions like "check if X exists".
+
 # AGENTS.md
 
 For tech stack, architecture, and code conventions, see `openspec/project.md`.
