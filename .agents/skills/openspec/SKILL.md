@@ -131,6 +131,22 @@ oracle(
 
 ## Appendix
 
+### Tool Selection Guide
+
+| Need | Tool |
+| --- | --- |
+| Codebase structure | `gkg repo_map` |
+| Find definitions | `gkg search_codebase_definitions` |
+| Find usages / references | `gkg get_references` |
+| How OSS projects solve it | `librarian` |
+| Library docs / integration guides | `deepwiki`, `git-mcp` |
+| API docs, recent releases | `web_search` |
+| Gap analysis / risk assessment | `oracle` |
+| Visualize architecture / flows | `mermaid` |
+| Create spec files | `create_file` / `edit_file` |
+
+**Note:** If primary tool unavailable, use built-in tools: `finder`, `Grep`, `Read`...
+
 ### CLI Quick Reference
 
 ```bash
