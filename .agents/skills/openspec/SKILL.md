@@ -11,264 +11,150 @@ description: |
   Skip for: bug fixes, typos, dependency updates, config changes, tests for existing behavior.
 ---
 
-# OpenSpec Skill
+# OpenSpec Workflow
 
-Spec-driven development workflow for managing change proposals.
+3 stages: **Plan -> Implement -> Archive**.
 
-## Quick Checklist
+## Stage 1: Plan
 
-- Search existing: `openspec spec list --long`, `openspec list`
-- Decide scope: new vs modify existing capability
-- Pick unique `change-id`: kebab-case, verb-led (`add-`, `update-`, `remove-`, `refactor-`)
-- Scaffold: `discovery.md`, `proposal.md`, `tasks.md`, `design.md`, delta specs
-- Write deltas: `## ADDED|MODIFIED|REMOVED|RENAMED Requirements` with `#### Scenario:` per requirement
-- Validate: `openspec validate [change-id] --strict --no-interactive`
-- Request approval before implementation
+Flow: `context review` -> `discovery` -> `proposal` -> `specs` -> `design` -> `tasks` -> `validation`
 
-## Three-Stage Workflow
+### 1. ContextReview
+- Review `openspec/project.md`, `openspec list`, and `openspec list --specs`.
+- Choose a unique verb-led `change-id`, scaffold: `openspec new change "<change-id>"`
 
-### Stage 1: Creating Changes
+### 2. Discovery (Adaptive Exploration)
+Template: `openspec/templates/discovery.md`
+Populate `discovery.md` by selecting tracks appropriate to the change's complexity. Run selected tracks in parallel when possible.
 
-**Workflow:**
+**Available tracks** (pick what's relevant — not all are needed for every change):
 
-1. **Context Review**: Read `openspec/project.md`, run `openspec list`, `openspec list --specs`
-2. **Scaffold**: Create `openspec/changes/<id>/` folder
-3. **Deep Planning**:
-   - **Discovery**: Create `discovery.md` with architecture findings
-   - **Analysis**: Identify risks; if HIGH RISK, create `spikes/`
-   - **Design**: Create `design.md` with risk map
-4. **Specification**: Write `proposal.md`, `tasks.md`, spec deltas in `specs/<capability>/spec.md`
-5. **Validation**: Run `openspec validate <id> --strict --no-interactive`
-6. **Wait for Approval**: Stop and request user review
+| Track | When to use | Tools |
+| --- | --- | --- |
+| **Task(Architecture Snapshot)** | Always (at minimum read affected files) | `gkg repo_map`, `gkg search_codebase_definitions`, `Read` |
+| **Task(Internal Patterns)** | When similar features exist in codebase | `gkg get_references`, `Grep`, `finder` |
+| **Task(External Patterns)** | Novel architecture or unfamiliar domain | `librarian` ("how do similar projects do this?") |
+| **Task(Constraint Check)** | New dependencies or build changes | Read `package.json`, `tsconfig.json` |
+| **Task(Documentation)** | New external library or API integration | `deepwiki` / `git-mcp` / `web_search` |
 
-### Stage 2: Implementing Changes
+**Guidelines**:
+- **Small/well-documented changes** (e.g., adding a well-documented plugin): Architecture Snapshot + Constraint Check + Documentation may suffice.
+- **Large/novel changes** (e.g., new architecture pattern, unfamiliar domain): Use all tracks. Consider spawning subagents for parallel exploration.
+- **Always justify** in discovery.md which tracks were used and why others were skipped.
 
-1. Read `proposal.md`, `design.md`, `tasks.md`
-2. Implement tasks sequentially
-3. Mark all tasks `- [x]` when complete
-4. Do not start until proposal approved
+### 3. Proposal
+Template: `openspec/templates/proposal.md`
+- **Why**: Problem/Opportunity (1-2 sentences).
+- **What Changes**: Bullet list of new/mod/removed capabilities.
+- **Capabilities**: List new (`specs/new-cap/spec.md`) and mod (`specs/existing-cap/spec.md` delta).
+- **Impact**: Affected areas.
 
-### Stage 3: Archiving Changes
+### 4. Specs (Delta Format)
+Create ONE spec file per capability. **Path**: `openspec/changes/<change-id>/specs/<capability-name>/spec.md`.
+Follow format in `openspec/templates/spec.md`.
 
-After deployment:
-- Move `changes/[name]/` → `changes/archive/YYYY-MM-DD-[name]/`
-- Update `specs/` if capabilities changed
-- Run `openspec archive <change-id> --yes`
+**Format rules**:
+- Sections: `ADDED`, `MODIFIED`, `REMOVED`, `RENAMED`
+- `#### Scenario:` — exactly 4 hashtags, ≥1 per requirement
+- MODIFIED: copy FULL original requirement block, then edit. Partial = data loss at archive.
+- Use SHALL/MUST for normative requirements.
 
-## CLI Commands
+**Quality rules** (keep specs dense, not verbose):
+- **One scenario per distinct behavior**, not per input variant. If bold/italic/links all just "render markdown" → one scenario.
+- **Scenarios MUST add info beyond the requirement**. If deleting the scenario loses nothing, delete it.
+- **Don't scenario infrastructure wiring** ("plugin is configured", "provider wraps app"). State in requirement sentence.
+- **Omit obvious defaults** ("plain text stays plain", "missing input shows error") unless AI is likely to miss them.
+- **Inline constraints** (sanitization, open-in-new-tab) as bullets under one scenario, not separate scenarios.
+- **≤ 3 scenarios per requirement**. If more, consolidate.
+
+### 5. Design
+Template: `openspec/templates/design.md`
+Defines **HOW** to implement. Create only if: cross-cutting, new external dep, high risk/ambiguity.
+
+**Process**: Feed discovery, specs, proposal, and the design template to Oracle. Use Oracle output as the basis for `design.md`.
+
+```
+oracle(
+  task: "Analyze gap and produce design document",
+  context: "Discovery (what exists), specs (what's needed), proposal (why + impact) attached. Produce design document following the template in design.md.",
+  files: [
+    "openspec/changes/<change-id>/discovery.md",
+    "openspec/changes/<change-id>/specs/<cap>/spec.md",
+    "openspec/changes/<change-id>/proposal.md",
+    "openspec/templates/design.md"
+  ]
+)
+```
+
+**Risk scale** for Risk Map:
+
+| Level  | Criteria                      | Verification                 |
+| ------ | ----------------------------- | ---------------------------- |
+| LOW    | Pattern exists in codebase    | Proceed                      |
+| MEDIUM | Variation of existing pattern | Interface sketch, type-check |
+| HIGH   | Novel or external integration | Spike required               |
+
+### 6. Tasks
+Template: `openspec/templates/tasks.md`
+Verifiable implementation checklist. Reference Specs (what) and Design (how).
+
+### 7. Validation
+- Oracle Final Review
+```
+oracle(
+  task: "Review plan completeness and clarity",
+  context: "Plan ready. Check for gaps, unclear beads, missing deps.",
+  files: ["openspec/changes/<change-id>/tasks.md"]
+)
+```
+- Run: `openspec validate <change-id> --strict --no-interactive`
+- If errors, debug with: `openspec show <change-id> --json --deltas-only`
+- **STOP** and ask for user approval before moving to Implementation.
+
+## Stage 2: Implement
+
+1. **Read**: `proposal.md`, `design.md` (if existing), and `tasks.md` and refer `discovery.md` (if needed).
+2. **Execute**: Implement tasks sequentially. Can start before all artifacts done if tasks exist.
+3. **Update**: Mark tasks `- [x]` as you go.
+4. **Adapt**: If implementation reveals design issues, update artifacts — workflow is fluid.
+5. **Verify**: Ensure code matches specs.
+
+## Stage 3: Archive
+
+**After deployment/merge:**
+
+1. Move folder: `changes/<change-id>/` → `changes/archive/YYYY-MM-DD-<change-id>/`
+2. Update Specs: Update `specs/` to reflect the new "current truth" if capabilities changed.
+3. Archive: `openspec archive <change-id> --yes`
+
+---
+
+## Appendix
+
+### Tool Selection Guide
+
+| Need | Tool |
+| --- | --- |
+| Codebase structure | `gkg repo_map` |
+| Find definitions | `gkg search_codebase_definitions` |
+| Find usages / references | `gkg get_references` |
+| How OSS projects solve it | `librarian` |
+| Library docs / integration guides | `deepwiki`, `git-mcp` |
+| API docs, recent releases | `web_search` |
+| Gap analysis / risk assessment | `oracle` |
+| Visualize architecture / flows | `mermaid` |
+| Create spec files | `create_file` / `edit_file` |
+
+**Note:** If primary tool unavailable, use built-in tools: `finder`, `Grep`, `Read`...
+
+### CLI Quick Reference
 
 ```bash
-openspec list                  # List active changes
-openspec list --specs          # List specifications
-openspec show [item]           # Display change or spec
-openspec validate [item]       # Validate changes
-openspec archive <id> --yes    # Archive after deployment
+openspec new change "<name>"                                # Scaffold change
+openspec status --change "<name>" --json                    # Artifact status
+openspec instructions <artifact> --change "<name>" --json   # Get template + rules
+openspec spec list --long                                   # List all specs
+openspec show <id> --json --deltas-only                     # Debug delta parsing
+openspec validate <id> --strict --no-interactive            # Validate
+openspec archive <id> --yes                                 # Archive after merge
 ```
-
-**Flags:** `--json`, `--strict`, `--no-interactive`, `--skip-specs`, `--yes`
-
-## Directory Structure
-
-```
-openspec/
-├── project.md              # Project conventions
-├── specs/                  # Current truth - what IS built
-│   └── [capability]/
-│       └── spec.md
-├── changes/                # Proposals - what SHOULD change
-│   ├── [change-name]/
-│   │   ├── discovery.md
-│   │   ├── proposal.md
-│   │   ├── tasks.md
-│   │   ├── design.md
-│   │   ├── spikes/
-│   │   └── specs/[capability]/spec.md
-│   └── archive/
-```
-
-## Spec Format
-
-### Delta Operations
-
-- `## ADDED Requirements` - New capabilities
-- `## MODIFIED Requirements` - Changed behavior
-- `## REMOVED Requirements` - Deprecated features
-- `## RENAMED Requirements` - Name changes
-
-### Requirement Format (CORRECT)
-
-```markdown
-### Requirement: Feature Name
-
-The system SHALL provide...
-
-#### Scenario: Success case
-
-- **WHEN** user performs action
-- **THEN** expected result
-```
-
-**Every requirement MUST have at least one `#### Scenario:`**
-
-### Common Mistakes
-
-```markdown
-- **Scenario: Name** ❌  # Don't use bullets
-**Scenario**: Name ❌    # Don't use bold
-### Scenario: Name ❌    # Use #### not ###
-```
-
-## Discovery Template
-
-```markdown
-# Discovery: <Feature Name>
-
-## 1. Feature Summary
-<1-2 sentence description>
-
-## 2. Architecture Snapshot
-
-### Relevant Packages
-| Package        | Purpose | Key Files |
-| -------------- | ------- | --------- |
-| `packages/...` | ...     | ...       |
-
-### Entry Points
-- API: ...
-- UI: ...
-
-## 3. Existing Patterns
-
-### Similar Implementations
-| Feature | Location | Pattern Used |
-| ------- | -------- | ------------ |
-| ...     | ...      | ...          |
-
-### Reusable Utilities
-- Validation: ...
-- Error handling: ...
-
-## 4. Technical Constraints
-- Dependencies: ...
-- Build Requirements: ...
-- Database: ...
-
-## 5. External References
-- Library Docs: ...
-- Similar Projects: ...
-
-## 6. Gap Analysis (Synthesized)
-| Component | Have        | Need          | Gap Size |
-| --------- | ----------- | ------------- | -------- |
-| API       | None        | POST /v1/auth | New      |
-| DB        | User Schema | 2FA Columns   | Small    |
-
-## 7. Open Questions
-- [ ] ...
-```
-
-## Risk Assessment
-
-- **LOW**: Pattern exists AND impact < 5 files → Proceed
-- **MEDIUM**: Variation of pattern OR medium impact → Sketch in `design.md`
-- **HIGH**: New technique, external integration, OR impact > 5 files → **REQUIRE SPIKE**
-
-> New external dependency = HIGH RISK
-
-## Proposal Template
-
-```markdown
-# Change: [Brief description]
-
-## Why
-[1-2 sentences on problem/opportunity]
-
-## What Changes
-- [Bullet list]
-- [Mark **BREAKING** changes]
-
-## Impact
-- Affected specs: [list]
-- Affected code: [key files]
-```
-
-## Tasks Template
-
-```markdown
-## 1. Implementation
-
-- [ ] 1.1 Create database schema
-- [ ] 1.2 Implement API endpoint
-- [ ] 1.3 Add frontend component
-- [ ] 1.4 Write tests
-```
-
-## Spec Delta Template
-
-```markdown
-## ADDED Requirements
-
-### Requirement: New Feature
-
-The system SHALL provide...
-
-#### Scenario: Success case
-
-- **WHEN** user performs action
-- **THEN** expected result
-
-## MODIFIED Requirements
-
-### Requirement: Existing Feature
-
-[Complete modified requirement - copy full original, then edit]
-
-## REMOVED Requirements
-
-### Requirement: Old Feature
-
-**Reason**: [Why removing]
-**Migration**: [How to handle]
-```
-
-> If multiple capabilities affected, create `changes/[id]/specs/<capability>/spec.md` per capability.
-
-## Design Template
-
-Create `design.md` when: cross-cutting change, new external dependency, security/performance complexity, or ambiguity needing decisions.
-
-```markdown
-## Context
-[Background, constraints, stakeholders]
-
-## Goals / Non-Goals
-- Goals: [...]
-- Non-Goals: [...]
-
-## Risk Map (REQUIRED)
-| Component | Risk | Rationale | Verification (Spike) |
-| --------- | ---- | --------- | -------------------- |
-| Auth API  | HIGH | New lib   | Spike `test-auth.ts` |
-| DB Schema | LOW  | Standard  | N/A                  |
-
-## Decisions
-- Decision: [What and why]
-- Alternatives considered: [Options + rationale]
-
-## Migration Plan
-[Steps, rollback]
-
-## Open Questions
-- [...]
-```
-
-## Tool Selection
-
-| Need               | Tool                                         |
-| ------------------ | -------------------------------------------- |
-| Codebase structure | `mcp__gkg__repo_map`, `Read`                 |
-| Find definitions   | `mcp__gkg__search_codebase_definitions`      |
-| Find usages        | `mcp__gkg__get_references`, `Grep`           |
-| OSS patterns       | `librarian`                                  |
-| API docs           | `web_search`                                 |
-| Gap analysis       | `oracle`                                     |

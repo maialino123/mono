@@ -40,6 +40,12 @@
         "read_definitions",
         "repo_map"
       ]
+    },
+    "deepwiki": {
+      "url": "https://mcp.deepwiki.com/mcp"
+    },
+    "git-mcp": {
+      "url": "https://gitmcp.io/docs"
     }
   }
 }

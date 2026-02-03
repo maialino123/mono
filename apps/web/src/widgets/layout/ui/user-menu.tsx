@@ -26,7 +26,7 @@ export default function UserMenu() {
 
   if (!session) {
     return (
-      <Link href="/">
+      <Link href="/sign-in">
         <Button variant="outline" size="sm" className="rounded-md">
           Sign In
         </Button>
@@ -48,7 +48,11 @@ export default function UserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>{session.user.email}</DropdownMenuItem>
+          <DropdownMenuItem>
+            <Link href="/profile" className="w-full">
+              Profile
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
             onClick={() => {
