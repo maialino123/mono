@@ -2,7 +2,11 @@
 
 Monorepo project of CyberK built on modern standards, continuously updated with the latest technologies.
 
+> **Tại sao CyberK tạo dự án này?** Đọc thêm tại [docs/why-cyberk-flow.md](docs/why-cyberk-flow.md)
+
 ## Features
+
+For detailed tech stack and architecture, see [openspec/project.md](openspec/project.md).
 
 - **TypeScript** - Strict mode for type safety and improved developer experience
 - **Next.js 16** - Full-stack React 19 framework
