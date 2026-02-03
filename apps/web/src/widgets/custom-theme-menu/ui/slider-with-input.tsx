@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Input } from "@/shared/shadcn/input";
 import { Label } from "@/shared/shadcn/label";
 import { Slider } from "@/shared/shadcn/slider";
@@ -32,15 +31,10 @@ export const SliderWithInput = ({
       return;
     }
     const newValue = Number(inputValue);
-    if (!isNaN(newValue)) {
+    if (!Number.isNaN(newValue)) {
       const clampedValue = Math.max(min, Math.min(max, newValue));
       onChange(clampedValue);
     }
-  };
-
-  const handleSliderChange = (values: number) => {
-    const newValue = values;
-    onChange(newValue);
   };
 
   return (
