@@ -338,9 +338,25 @@ ampcode:
   force-model-mappings: true
 claude-api-key:
   - api-key: YOUR_CYBERK_API_KEY
-    base-url: https://ai-provider.cyberk.io/
+    base-url: "https://ai-provider.cyberk.io"
     proxy-url: ""
-    models: []
+    models:
+    - name: "claude-3-5-haiku-20241022"
+      alias: "claude-3-5-haiku-20241022"
+    - name: "claude-haiku-4-5-20251001"
+      alias: "claude-haiku-4-5-20251001"
+    - name: "claude-sonnet-4-5-20250929"
+      alias: "claude-sonnet-4-5-20250929"
+    - name: "claude-opus-4-5-20251101"
+      alias: "claude-opus-4-5-20251101"
+    - name: "claude-opus-4-1-20250805"
+      alias: "claude-opus-4-1-20250805"
+    - name: "claude-opus-4-20250514"
+      alias: "claude-opus-4-20250514"
+    - name: "claude-sonnet-4-20250514"
+      alias: "claude-sonnet-4-20250514"
+    - name: "claude-3-7-sonnet-20250219"
+      alias: "claude-3-7-sonnet-20250219"
 ```
 
 ### 6. Integrate with Ampcode Extension
