@@ -10,9 +10,9 @@ export const LetterSpacingSelect = () => {
     <SliderWithInput
       value={config.letterSpacing}
       onChange={updateLetterSpacing}
-      min={-0.25}
-      max={0.25}
-      step={0.025}
+      min={0.15}
+      max={0.35}
+      step={0.01}
       unit="em"
       label="Letter Spacing"
     />
