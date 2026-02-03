@@ -40,14 +40,19 @@ export const FontSelect = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const filteredFonts = POPULAR_FONTS.filter((font) => font.toLowerCase().includes(searchValue.toLowerCase()));
+  const filteredFonts = POPULAR_FONTS.filter((font) =>
+    font.toLowerCase().includes(searchValue.toLowerCase()),
+  );
 
-  const handleFontChange = useCallback((font: string) => {
-    updateFont(font);
-    setSearchValue(font);
-    setIsOpen(false);
-    inputRef.current?.blur();
-  }, [updateFont]);
+  const handleFontChange = useCallback(
+    (font: string) => {
+      updateFont(font);
+      setSearchValue(font);
+      setIsOpen(false);
+      inputRef.current?.blur();
+    },
+    [updateFont],
+  );
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
@@ -137,7 +142,7 @@ export const FontSelect = () => {
   }, [searchValue, currentFont, handleFontChange]);
 
   return (
-    <div className="space-y-3 overflow-visible px-3">
+    <div className="space-y-3 overflow-visible">
       {/* Combobox Input Field */}
       <div className="relative overflow-visible">
         <Input
@@ -177,7 +182,10 @@ export const FontSelect = () => {
             aria-label="Toggle dropdown"
           >
             <ChevronDown
-              className={cn("h-4 w-4 text-slate-500 transition-transform dark:text-slate-400", isOpen && "rotate-180")}
+              className={cn(
+                "h-4 w-4 text-slate-500 transition-transform dark:text-slate-400",
+                isOpen && "rotate-180",
+              )}
             />
           </Button>
         </div>
@@ -204,14 +212,17 @@ export const FontSelect = () => {
                     onClick={() => handleFontChange(font)}
                     className={cn(
                       "w-full cursor-pointer px-3 py-2 text-left text-slate-700 text-sm transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-gray-700",
-                      font === currentFont && "bg-slate-100 font-medium dark:bg-gray-700",
+                      font === currentFont &&
+                        "bg-slate-100 font-medium dark:bg-gray-700",
                     )}
                   >
                     {font}
                   </button>
                 ))
               ) : (
-                <div className="px-3 py-2 text-slate-500 text-sm dark:text-slate-400">No fonts found</div>
+                <div className="px-3 py-2 text-slate-500 text-sm dark:text-slate-400">
+                  No fonts found
+                </div>
               )}
             </div>,
             document.body,
@@ -219,7 +230,9 @@ export const FontSelect = () => {
       </div>
 
       {/* Descriptive Text */}
-      <p className="text-slate-500 text-xs dark:text-slate-400">Support all font in Google fonts</p>
+      <p className="text-slate-500 text-xs dark:text-slate-400">
+        Support all font in Google fonts
+      </p>
     </div>
   );
 };

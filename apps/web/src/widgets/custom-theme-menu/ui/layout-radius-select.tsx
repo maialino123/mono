@@ -7,16 +7,14 @@ export const LayoutRadiusSelect = () => {
   const { config, updateRadius } = useCustomTheme();
 
   return (
-    <div className="px-3">
-      <SliderWithInput
-        value={config.radius}
-        onChange={updateRadius}
-        min={0}
-        max={32}
-        step={1}
-        unit="px"
-        label="Radius"
-      />
-    </div>
+    <SliderWithInput
+      value={config.radius}
+      onChange={updateRadius}
+      min={0}
+      max={32}
+      step={1}
+      unit="px"
+      label="Radius"
+    />
   );
 };

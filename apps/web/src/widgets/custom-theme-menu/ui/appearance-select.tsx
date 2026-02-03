@@ -1,11 +1,14 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 import { cn } from "@/shared/lib";
 import { useCustomTheme } from "@/shared/providers/custom-theme-provider";
+import { Button } from "@/shared/shadcn/button";
 
 export const AppearanceSelect = () => {
   const { config, updateAppearance } = useCustomTheme();
+  const { resolvedTheme } = useTheme();
 
   const modes = [
     { value: "light" as const, label: "Light", icon: Sun },
@@ -15,14 +18,19 @@ export const AppearanceSelect = () => {
   return (
     <div className="flex gap-2">
       {modes.map((mode) => {
-        const isSelected = config.appearance === mode.value;
+        // When appearance is "system", check resolvedTheme. Otherwise, check config.appearance
+        const isSelected =
+          config.appearance === "system"
+            ? resolvedTheme === mode.value
+            : config.appearance === mode.value;
         return (
-          <button
+          <Button
             key={mode.value}
-            type="button"
+            variant={isSelected ? "default" : "outline"}
+            size="default"
             onClick={() => updateAppearance(mode.value)}
             className={cn(
-              "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 py-2 font-medium text-sm transition-colors",
+              "flex flex-1 rounded-lg px-3 py-2",
               isSelected
                 ? "border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-900"
                 : "border-slate-200 bg-transparent text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800",
@@ -30,7 +38,7 @@ export const AppearanceSelect = () => {
           >
             <mode.icon className="h-4 w-4" />
             {mode.label}
-          </button>
+          </Button>
         );
       })}
     </div>

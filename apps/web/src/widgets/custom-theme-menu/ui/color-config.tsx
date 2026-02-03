@@ -38,7 +38,7 @@ const ColorInput = ({ label, colorKey, value, onChange }: ColorInputProps) => {
     <div className="flex items-center gap-3 px-3 py-2.5">
       <button
         type="button"
-        className="h-6 w-6 shrink-0 cursor-pointer rounded border border-slate-300 dark:border-slate-600"
+        className="h-6 w-6 shrink-0 cursor-pointer rounded-lg border border-slate-300 dark:border-slate-600"
         style={{ backgroundColor: value || "#000000" }}
         onClick={() => nativePickerRef.current?.click()}
         aria-label={`Pick color for ${label}`}
@@ -55,7 +55,7 @@ const ColorInput = ({ label, colorKey, value, onChange }: ColorInputProps) => {
         value={value}
         onChange={handleHexChange}
         placeholder="#000000"
-        className="h-8 w-24 border-slate-300 bg-white font-mono text-xs dark:border-gray-600 dark:bg-gray-800"
+        className="h-8 w-24 rounded-lg border-slate-300 bg-white font-mono text-xs dark:border-gray-600 dark:bg-gray-800"
         maxLength={7}
       />
       <input
@@ -123,7 +123,8 @@ const PREVIEW_COLOR_KEYS: (keyof ColorPalette)[] = [
 export const ColorSwatches = () => {
   const { config } = useCustomTheme();
   const { resolvedTheme } = useTheme();
-  const currentMode: "light" | "dark" = resolvedTheme === "dark" ? "dark" : "light";
+  const currentMode: "light" | "dark" =
+    resolvedTheme === "dark" ? "dark" : "light";
   const palette = config.colors[currentMode];
 
   return (
@@ -181,7 +182,8 @@ const COLOR_SECTIONS: Array<{
 export const ColorConfig = () => {
   const { config, updateColor } = useCustomTheme();
   const { resolvedTheme } = useTheme();
-  const currentMode: "light" | "dark" = resolvedTheme === "dark" ? "dark" : "light";
+  const currentMode: "light" | "dark" =
+    resolvedTheme === "dark" ? "dark" : "light";
   const palette = config.colors[currentMode];
 
   const handleColorChange = (key: keyof ColorPalette, value: string) => {
@@ -189,7 +191,7 @@ export const ColorConfig = () => {
   };
 
   return (
-    <div className="space-y-3 px-3">
+    <div className="rounded-lg border border-slate-200 dark:border-slate-700">
       <Accordion className="w-full">
         {COLOR_SECTIONS.map((section) => (
           <ColorSection
