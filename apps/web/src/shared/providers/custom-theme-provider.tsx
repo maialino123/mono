@@ -1,7 +1,15 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { createContext, type ReactNode, useCallback, useContext, useLayoutEffect, useRef, useState } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   COLOR_KEY_TO_CSS_VAR,
   type ColorPalette,
@@ -17,7 +25,11 @@ interface CustomThemeContextValue {
   updateRadius: (radius: number) => void;
   updateLetterSpacing: (letterSpacing: number) => void;
   updateSpacing: (spacing: number) => void;
-  updateColor: (mode: "light" | "dark", key: keyof ColorPalette, value: string) => void;
+  updateColor: (
+    mode: "light" | "dark",
+    key: keyof ColorPalette,
+    value: string,
+  ) => void;
   resetToDefaults: () => void;
   isOpen: boolean;
   open: () => void;
@@ -25,7 +37,9 @@ interface CustomThemeContextValue {
   toggle: () => void;
 }
 
-const CustomThemeContext = createContext<CustomThemeContextValue | undefined>(undefined);
+const CustomThemeContext = createContext<CustomThemeContextValue | undefined>(
+  undefined,
+);
 
 function loadConfigFromStorage(): ThemeConfig {
   if (typeof window === "undefined") return DEFAULT_THEME_CONFIG;
@@ -115,7 +129,8 @@ export const CustomThemeProvider = ({ children }: CustomThemeProviderProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const isInitialMount = useRef(true);
 
-  const resolvedMode: "light" | "dark" = resolvedTheme === "dark" ? "dark" : "light";
+  const resolvedMode: "light" | "dark" =
+    resolvedTheme === "dark" ? "dark" : "light";
 
   useLayoutEffect(() => {
     applyThemeToDOM(config, resolvedMode);
@@ -129,15 +144,18 @@ export const CustomThemeProvider = ({ children }: CustomThemeProviderProps) => {
       }
       return;
     }
-  }, []);
+  }, [setTheme, config.appearance]);
 
-  const updateConfig = useCallback((updater: (prev: ThemeConfig) => ThemeConfig) => {
-    setConfig((prev) => {
-      const next = updater(prev);
-      persistConfig(next);
-      return next;
-    });
-  }, []);
+  const updateConfig = useCallback(
+    (updater: (prev: ThemeConfig) => ThemeConfig) => {
+      setConfig((prev) => {
+        const next = updater(prev);
+        persistConfig(next);
+        return next;
+      });
+    },
+    [],
+  );
 
   const updateAppearance = useCallback(
     (appearance: ThemeConfig["appearance"]) => {
@@ -221,7 +239,11 @@ export const CustomThemeProvider = ({ children }: CustomThemeProviderProps) => {
     toggle,
   };
 
-  return <CustomThemeContext.Provider value={value}>{children}</CustomThemeContext.Provider>;
+  return (
+    <CustomThemeContext.Provider value={value}>
+      {children}
+    </CustomThemeContext.Provider>
+  );
 };
 
 export const useCustomTheme = (): CustomThemeContextValue => {

@@ -251,44 +251,38 @@ mkdir -p .claude && ln -s ../.agents/skills .claude/skills
 
 This way, all AI tools (Ampcode, Claude Code, Antigravity) share the same rules and skills from a single location.
 
-## Setup CLIProxyAPIPlus
+## Setup EasyCLI
 
-[CLIProxyAPIPlus](https://github.com/router-for-me/CLIProxyAPIPlus) is a local proxy that routes AI requests through a unified endpoint with model mapping support.
+[EasyCLI](https://github.com/router-for-me/EasyCLI) is a user-friendly application to run the proxy.
 
-### 1. Clone the repository
+### 1. Installation
 
-```bash
-git clone https://github.com/router-for-me/CLIProxyAPIPlus.git
-cd CLIProxyAPIPlus
-```
+Download the latest version for your operating system from [GitHub Releases](https://github.com/router-for-me/EasyCLI/releases).
 
-### 2. Configure
+Install and open the application.
 
-```bash
-cp config.example.yaml config.yaml
-```
+### 2. Configuration
 
-Edit `config.yaml` and set the following to enable the Web UI:
+**Basic Setting Tab:**
 
-```yaml
-remote-management:
-  allow-remote: true
-  secret-key: "any_thing_you_want"
-api-keys:
-  - "WHATEVER_YOU_WANT"
-```
+- Change Port to `8317` (General Port).
+- Enable `Allow Remote Management`.
+- Set a **Remote Management Secret Key** (this will be your password).
+- Click **Apply**.
 
-### 3. Start the service
+**Access Token Tab:**
 
-```bash
-docker compose up -d
-```
+- Delete all existing API keys.
+- Create a new API key (you can choose any value).
+- Click **Apply**.
 
-### 4. Open Management Web UI
+### 3. Open Management Web UI
 
-Navigate to [http://localhost:8317/management.html](http://localhost:8317/management.html).
+Navigate to [http://localhost:8317/management.html#](http://localhost:8317/management.html#).
 
-### 5. Configure Custom Provider
+Enter your **Remote Management Secret Key** when prompted.
+
+### 4. Configure Custom Provider
 
 You need two keys:
 
@@ -307,6 +301,8 @@ ampcode:
       to: claude-sonnet-4-5-20250929
     - from: gemini-2.5-flash-lite
       to: gemini-3-flash-preview
+    - from: gpt-5
+      to: gemini-3-pro-preview
     - from: gpt-5.1
       to: gemini-3-pro-preview
     - from: gemini-3-flash-preview
@@ -317,34 +313,43 @@ ampcode:
       to: claude-haiku-4-5-20251001
     - from: gpt-5.2
       to: claude-opus-4-5-20251101
+    - from: gpt-5.2-codex
+      to: claude-opus-4-5-20251101
     - from: claude-opus-4-5-20251101
       to: claude-opus-4-5-20251101
     - from: gemini-2.5-flash
       to: gemini-3-flash-preview
     - from: gemini-2.5-flash-lite-preview-09-2025
       to: gemini-3-flash-preview
-    - from: claude-opus-4.5
-      to: claude-opus-4-5-20251101
-    - from: claude-opus-4-5
-      to: claude-opus-4-5-20251101
-    - from: claude-haiku-4.5
-      to: claude-haiku-4-5-20251001
-    - from: claude-haiku-4-5
-      to: claude-haiku-4-5-20251001
-    - from: claude-sonnet-4.5
-      to: claude-sonnet-4-5-20241022
-    - from: claude-sonnet-4-5
-      to: claude-sonnet-4-5-20241022
   force-model-mappings: true
 claude-api-key:
   - api-key: YOUR_CYBERK_API_KEY
-    base-url: https://ai-provider.cyberk.io/
+    base-url: "https://ai-provider.cyberk.io"
     proxy-url: ""
-    models: []
+    models:
+    - name: "claude-3-5-haiku-20241022"
+      alias: "claude-3-5-haiku-20241022"
+    - name: "claude-haiku-4-5-20251001"
+      alias: "claude-haiku-4-5-20251001"
+    - name: "claude-sonnet-4-5-20250929"
+      alias: "claude-sonnet-4-5-20250929"
+    - name: "claude-opus-4-5-20251101"
+      alias: "claude-opus-4-5-20251101"
+    - name: "claude-opus-4-1-20250805"
+      alias: "claude-opus-4-1-20250805"
+    - name: "claude-opus-4-20250514"
+      alias: "claude-opus-4-20250514"
+    - name: "claude-sonnet-4-20250514"
+      alias: "claude-sonnet-4-20250514"
+    - name: "claude-3-7-sonnet-20250219"
+      alias: "claude-3-7-sonnet-20250219"
 ```
 
-### 6. Integrate with Ampcode Extension
+### 5. Integrate with Ampcode Extension
 
-1. Open Ampcode extension settings in VS Code (or Antigravity)
-2. Scroll to the bottom, change **Amp: Url** to `http://localhost:8317`
-3. Open the Ampcode tab, fill in the **Amp Access Token** with the API key you set in step 2
+1. Open your IDE and ensure the Amp extension is installed.
+2. Open the extension settings.
+3. Scroll to the bottom and enter `http://localhost:8317` in the **Amp: Url** field.
+4. Open the Amp Extension via the sidebar.
+5. Select **Advance**.
+6. Enter the API key you created earlier (in the Access Token tab) into the **Amp Access Token** field.
