@@ -23,6 +23,7 @@ Automatically use skills in the following contexts:
 | Codebase structure | `gkg repo_map` |
 | Find definitions | `gkg search_codebase_definitions` |
 | Find usages / references | `gkg get_references` |
+| Re-index project | `gkg index_project` |
 | How OSS projects solve it | `librarian` |
 | Library docs / integration guides | `deepwiki`, `git-mcp` |
 | API docs, recent releases | `web_search` |

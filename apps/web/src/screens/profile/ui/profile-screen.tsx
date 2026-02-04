@@ -10,6 +10,7 @@ import { authClient } from "@/shared/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/shadcn/card";
 import { Separator } from "@/shared/shadcn/separator";
 import { Skeleton } from "@/shared/shadcn/skeleton";
+import Loader from "@/shared/ui/loader";
 
 const PROVIDER_LABELS: Record<string, string> = {
   credential: "Email & Password",
@@ -58,8 +59,12 @@ export function ProfileScreen() {
     }
   }, [sessionPending, session, router]);
 
-  if (sessionPending || !session) {
-    return null;
+  if (sessionPending) {
+    return <Loader />;
+  }
+
+  if (!session) {
+    return <Loader />;
   }
 
   const user = session.user;

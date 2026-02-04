@@ -7,7 +7,11 @@ import { Button } from "@/shared/shadcn/button";
 import { Input } from "@/shared/shadcn/input";
 import { Label } from "@/shared/shadcn/label";
 
-export function SignInForm() {
+interface SignInFormProps {
+  redirectTo?: string;
+}
+
+export function SignInForm({ redirectTo = "/" }: SignInFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +26,7 @@ export function SignInForm() {
       email,
       password,
       fetchOptions: {
-        onSuccess: () => router.push("/"),
+        onSuccess: () => router.push(redirectTo),
         onError: (ctx) => setError(ctx.error.message),
       },
     });

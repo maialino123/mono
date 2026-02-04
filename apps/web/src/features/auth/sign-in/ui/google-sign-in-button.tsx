@@ -3,9 +3,13 @@
 import { authClient } from "@/shared/api";
 import { Button } from "@/shared/shadcn/button";
 
-export function GoogleSignInButton() {
+interface GoogleSignInButtonProps {
+  redirectTo?: string;
+}
+
+export function GoogleSignInButton({ redirectTo = "/" }: GoogleSignInButtonProps) {
   const handleClick = () => {
-    authClient.signIn.social({ provider: "google", callbackURL: `${window.location.origin}/` });
+    authClient.signIn.social({ provider: "google", callbackURL: `${window.location.origin}${redirectTo}` });
   };
 
   return (
