@@ -307,6 +307,8 @@ ampcode:
       to: claude-sonnet-4-5-20250929
     - from: gemini-2.5-flash-lite
       to: gemini-3-flash-preview
+    - from: gpt-5
+      to: gemini-3-pro-preview
     - from: gpt-5.1
       to: gemini-3-pro-preview
     - from: gemini-3-flash-preview
@@ -323,18 +325,6 @@ ampcode:
       to: gemini-3-flash-preview
     - from: gemini-2.5-flash-lite-preview-09-2025
       to: gemini-3-flash-preview
-    - from: claude-opus-4.5
-      to: claude-opus-4-5-20251101
-    - from: claude-opus-4-5
-      to: claude-opus-4-5-20251101
-    - from: claude-haiku-4.5
-      to: claude-haiku-4-5-20251001
-    - from: claude-haiku-4-5
-      to: claude-haiku-4-5-20251001
-    - from: claude-sonnet-4.5
-      to: claude-sonnet-4-5-20241022
-    - from: claude-sonnet-4-5
-      to: claude-sonnet-4-5-20241022
   force-model-mappings: true
 claude-api-key:
   - api-key: YOUR_CYBERK_API_KEY
