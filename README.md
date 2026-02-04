@@ -319,6 +319,8 @@ ampcode:
       to: claude-haiku-4-5-20251001
     - from: gpt-5.2
       to: claude-opus-4-5-20251101
+    - from: gpt-5.2-codex
+      to: claude-opus-4-5-20251101
     - from: claude-opus-4-5-20251101
       to: claude-opus-4-5-20251101
     - from: gemini-2.5-flash
