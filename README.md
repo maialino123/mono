@@ -317,6 +317,8 @@ ampcode:
       to: claude-opus-4-5-20251101
     - from: claude-opus-4-5-20251101
       to: claude-opus-4-5-20251101
+    - from: claude-opus-4-6
+      to: claude-opus-4-6
     - from: gemini-2.5-flash
       to: gemini-3-flash-preview
     - from: gemini-2.5-flash-lite-preview-09-2025
@@ -343,6 +345,32 @@ claude-api-key:
       alias: "claude-sonnet-4-20250514"
     - name: "claude-3-7-sonnet-20250219"
       alias: "claude-3-7-sonnet-20250219"
+```
+
+If there is no claude, let oath with antigravtiy and config as below
+```
+oauth-model-alias:
+  antigravity:
+    - name: rev19-uic3-1p
+      alias: gemini-2.5-computer-use-preview-10-2025
+    - name: gemini-3-pro-image
+      alias: gemini-3-pro-image-preview
+    - name: gemini-3-pro-high
+      alias: gemini-3-pro-preview
+    - name: gemini-3-flash
+      alias: gemini-3-flash-preview
+    - name: claude-sonnet-4-5
+      alias: gemini-claude-sonnet-4-5
+    - name: claude-sonnet-4-5-thinking
+      alias: gemini-claude-sonnet-4-5-thinking
+    - name: claude-opus-4-5-thinking
+      alias: gemini-claude-opus-4-5-thinking
+    - name: claude-sonnet-4-5
+      alias: claude-haiku-4-5-20251001
+    - name: claude-opus-4-5-thinking
+      alias: claude-opus-4-5-20251101
+    - name: claude-opus-4-5-thinking
+      alias: claude-opus-4-6 
 ```
 
 ### 5. Integrate with Ampcode Extension
