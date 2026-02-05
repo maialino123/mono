@@ -1,14 +1,20 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { sepolia } from "wagmi/chains";
 import { cn } from "@/shared/lib/utils";
+import type { WalletOptions } from "@/shared/lib/wallet/types";
+import { useWalletConnection } from "@/shared/lib/wallet/use-wallet-connection";
 import { Button } from "@/shared/shadcn/button";
+import { ConnectWallet } from "@/shared/ui/connect-wallet";
 import { TokenAmountInput } from "@/shared/ui/token-amount-input";
 import type { Token } from "../model/types";
 import { CusdIcon } from "./cusd-icon";
 
 export function StakeTab() {
-  const isConnected = false;
+  const walletOptions: WalletOptions = { type: "evm", chainId: sepolia.id };
+  const { isConnected, isCorrectChain } = useWalletConnection(walletOptions);
+  const walletReady = isConnected && isCorrectChain;
 
   const sendToken: Token = { symbol: "CUSD" };
   const receiveToken: Token = { symbol: "stCUSD" };
@@ -46,7 +52,7 @@ export function StakeTab() {
                 placeholder="0.0"
                 value={amount}
                 onChange={setAmount}
-                disabled={!isConnected}
+                disabled={!walletReady}
                 error={!isSufficientBalance}
               />
               <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
@@ -68,13 +74,15 @@ export function StakeTab() {
         </span>
       </div>
 
-      <Button
-        className="mt-4 h-10 w-full cursor-pointer rounded-md"
-        disabled={!isConnected || !isValidAmount || !isSufficientBalance}
-        size="lg"
-      >
-        {isConnected ? (isSufficientBalance ? "Stake" : "Insufficient balance") : "Connect Wallet"}
-      </Button>
+      <ConnectWallet options={walletOptions} className="mt-4 h-10 w-full cursor-pointer rounded-md">
+        <Button
+          className="mt-4 h-10 w-full cursor-pointer rounded-md"
+          disabled={!isValidAmount || !isSufficientBalance}
+          size="lg"
+        >
+          {isSufficientBalance ? "Stake" : "Insufficient balance"}
+        </Button>
+      </ConnectWallet>
 
       <div className="mt-6 flex items-center justify-between gap-3">
         <span className="font-normal text-[14px] text-muted-foreground">Exchange rate</span>
