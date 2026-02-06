@@ -43,14 +43,16 @@ CyberK Flow is a full-stack monorepo project including both backend and frontend
 - ESM modules (`"type": "module"`)
 - Use workspace catalog versions for shared deps (`catalog:`)
 - Zod for runtime validation
+- Biome: 2-space indent, 120 line width, double quotes, auto-organize imports
 
 ### Architecture Patterns
 
 - **Monorepo structure**:
-  - `apps/server` - Hono API server with oRPC endpoints
-  - `apps/web` - Next.js frontend application
+  - `apps/server` - Hono API server with oRPC endpoints (port 3000)
+  - `apps/web` - Next.js frontend application (port 3001)
+  - `apps/native` - Expo mobile application
   - `packages/api` - Shared API routers and context (business logic)
-  - `packages/auth` - Authentication configuration
+  - `packages/auth` - Authentication configuration (better-auth)
   - `packages/db` - Drizzle ORM schema and queries
   - `packages/env` - Zod-validated environment variables
   - `packages/config` - Shared TypeScript configuration

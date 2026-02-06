@@ -4,6 +4,11 @@ glob:
 description:
 ---
 
+# AGENTS.md
+
+For tech stack, architecture, and code conventions, see `openspec/project.md`.
+
+
 # Skill Loader
 
 Automatically use skills in the following contexts:
@@ -38,10 +43,6 @@ Automatically use skills in the following contexts:
 - **Before delegating**: Use `gkg search_codebase_definitions` or `gkg get_references` to confirm exact API names, method signatures, and existing patterns. Pass confirmed facts to the sub-agent prompt — never pass uncertain guesses.
 - **Prompt quality**: Include concrete code references (file paths, function names, import paths) rather than vague descriptions like "check if X exists".
 
-# AGENTS.md
-
-For tech stack, architecture, and code conventions, see `openspec/project.md`.
-
 ## Commands
 
 - `bun install` - Install dependencies
@@ -53,19 +54,6 @@ For tech stack, architecture, and code conventions, see `openspec/project.md`.
 - `bun run db:start` - Start PostgreSQL via Docker
 - `bun run db:push` - Push schema changes to database
 - `bun test <file>` - Run single test file (e.g., `bun test packages/api/src/foo.test.ts`)
-
-## Architecture
-
-- **Monorepo**: Turborepo + Bun workspaces
-- **Apps**: `apps/server` (Hono API :3000), `apps/web` (Next.js :3001), `apps/native` (Expo)
-- **Packages**: `api` (oRPC routers), `auth` (better-auth), `db` (Drizzle/PostgreSQL), `env` (Zod validation)
-
-## Code Style
-
-- TypeScript strict mode, ESM modules, Zod for validation
-- Biome: 2-space indent, 120 line width, double quotes, auto-organize imports
-- Use `catalog:` versions for shared deps in workspace
-- Conventional commits: `feat:`, `fix:`, `chore:`, etc.
 
 ## Language Requirements
 
