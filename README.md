@@ -369,8 +369,10 @@ oauth-model-alias:
       alias: claude-haiku-4-5-20251001
     - name: claude-opus-4-5-thinking
       alias: claude-opus-4-5-20251101
-    - name: claude-opus-4-5-thinking
-      alias: claude-opus-4-6 
+    - name: claude-opus-4-6-thinking
+      alias: claude-opus-4-6
+    - name: claude-opus-4-6-thinking
+      alias: gemini-claude-opus-4-6-thinking
 ```
 
 ### 5. Integrate with Ampcode Extension
