@@ -312,9 +312,9 @@ ampcode:
     - from: claude-haiku-4-5-20251001
       to: claude-haiku-4-5-20251001
     - from: gpt-5.2
-      to: claude-opus-4-5-20251101
+      to: claude-opus-4-6
     - from: gpt-5.2-codex
-      to: claude-opus-4-5-20251101
+      to: claude-opus-4-6
     - from: claude-opus-4-5-20251101
       to: claude-opus-4-5-20251101
     - from: claude-opus-4-6
