@@ -4,9 +4,19 @@
 
 ## Steps
 
-1. **Move folder**: `changes/<change-id>/` → `changes/archive/YYYY-MM-DD-<change-id>/`
-2. **Update Specs**: Update `specs/` to reflect the new "current truth" if capabilities changed.
-3. **Archive**: `openspec archive <change-id> --yes`
+1. **Review Code** (run first):
+   - Run `oracle` and `code_review` tool **in parallel** on the change's diff
+   - Consolidate findings and propose fixes to the user
+   - Wait for user approval before proceeding
+
+2. **Extract Knowledge**:
+   - Use `find_thread` to search for threads related to this change
+   - Look for: new patterns, bug fixes, gotchas, architectural decisions, lessons learned
+   - If valuable knowledge is found, invoke the `knowledge` skill to persist it
+
+3. **Move folder**: `changes/<change-id>/` → `changes/archive/YYYY-MM-DD-<change-id>/`
+4. **Update Specs**: Update `specs/` to reflect the new "current truth" if capabilities changed.
+5. **Archive**: `openspec archive <change-id> --yes`
 
 ## When to Archive
 

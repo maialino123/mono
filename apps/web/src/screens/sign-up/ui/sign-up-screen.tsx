@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { GoogleSignInButton, SignInForm } from "@/features/auth/sign-in";
+import { GoogleSignInButton } from "@/features/auth/sign-in";
+import { SignUpForm } from "@/features/auth/sign-up";
 import { useAuthRedirect } from "@/shared/lib";
 import {
   Card,
@@ -13,7 +14,7 @@ import {
 import { Separator } from "@/shared/shadcn/separator";
 import Loader from "@/shared/ui/loader";
 
-export function SignInScreen() {
+export function SignUpScreen() {
   const { session, isPending, redirectTo } = useAuthRedirect();
 
   if (isPending) {
@@ -28,11 +29,11 @@ export function SignInScreen() {
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Sign In</CardTitle>
-          <CardDescription>Enter your credentials to continue</CardDescription>
+          <CardTitle>Sign Up</CardTitle>
+          <CardDescription>Create your account to get started</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <SignInForm />
+          <SignUpForm />
           <div className="relative flex items-center">
             <Separator className="flex-1" />
             <span className="px-3 text-muted-foreground text-sm">or</span>
@@ -41,9 +42,9 @@ export function SignInScreen() {
           <GoogleSignInButton redirectTo={redirectTo} />
         </CardContent>
         <p className="pb-6 text-center text-muted-foreground text-sm">
-          Don&apos;t have an account?{" "}
-          <Link href="/sign-up" className="text-primary underline-offset-4 hover:underline">
-            Sign up
+          Already have an account?{" "}
+          <Link href="/sign-in" className="text-primary underline-offset-4 hover:underline">
+            Sign in
           </Link>
         </p>
       </Card>
