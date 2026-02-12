@@ -293,8 +293,8 @@ Go to the **Config Management** tab and add the following config:
 
 ```yaml
 ampcode:
-  upstream-url: "https://ampcode.com/"
-  upstream-api-key: "sgamp_user_PASTE_YOUR_ACCESS_KEY_FROM_AMPCODE.COM"
+  upstream-url: https://ampcode.com/
+  upstream-api-key: YOUR_AMPCODE_ACCESS_TOKEN
   restrict-management-to-localhost: false
   model-mappings:
     - from: claude-sonnet-4-5-20250929
@@ -312,9 +312,9 @@ ampcode:
     - from: claude-haiku-4-5-20251001
       to: claude-haiku-4-5-20251001
     - from: gpt-5.2
-      to: claude-opus-4-6
+      to: gpt-5.2
     - from: gpt-5.2-codex
-      to: claude-opus-4-6
+      to: gpt-5.2-codex
     - from: claude-opus-4-5-20251101
       to: claude-opus-4-5-20251101
     - from: claude-opus-4-6
@@ -325,26 +325,38 @@ ampcode:
       to: gemini-3-flash-preview
   force-model-mappings: true
 claude-api-key:
-  - api-key: YOUR_CYBERK_API_KEY
-    base-url: "https://ai-provider.cyberk.io"
-    proxy-url: ""
-    models:
-    - name: "claude-3-5-haiku-20241022"
-      alias: "claude-3-5-haiku-20241022"
-    - name: "claude-haiku-4-5-20251001"
-      alias: "claude-haiku-4-5-20251001"
-    - name: "claude-sonnet-4-5-20250929"
-      alias: "claude-sonnet-4-5-20250929"
-    - name: "claude-opus-4-5-20251101"
-      alias: "claude-opus-4-5-20251101"
-    - name: "claude-opus-4-1-20250805"
-      alias: "claude-opus-4-1-20250805"
-    - name: "claude-opus-4-20250514"
-      alias: "claude-opus-4-20250514"
-    - name: "claude-sonnet-4-20250514"
-      alias: "claude-sonnet-4-20250514"
-    - name: "claude-3-7-sonnet-20250219"
-      alias: "claude-3-7-sonnet-20250219"
+  - api-key: theanh
+    base-url: https://ai-proxy.cyberk.io
+oauth-model-alias:
+  antigravity:
+    - name: rev19-uic3-1p
+      alias: gemini-2.5-computer-use-preview-10-2025
+    - name: gemini-3-pro-image
+      alias: gemini-3-pro-image-preview
+    - name: gemini-3-pro-high
+      alias: gemini-3-pro-preview
+    - name: gemini-3-flash
+      alias: gemini-3-flash-preview
+    - name: claude-sonnet-4-5
+      alias: gemini-claude-sonnet-4-5
+    - name: claude-sonnet-4-5-thinking
+      alias: gemini-claude-sonnet-4-5-thinking
+    - name: claude-opus-4-5-thinking
+      alias: gemini-claude-opus-4-5-thinking
+    - name: claude-sonnet-4-5
+      alias: claude-haiku-4-5-20251001
+    - name: claude-opus-4-5-thinking
+      alias: claude-opus-4-5-20251101
+    - name: claude-opus-4-6-thinking
+      alias: claude-opus-4-6
+    - name: claude-opus-4-6-thinking
+      alias: gemini-claude-opus-4-6-thinking
+gemini-api-key:
+  - api-key: theanh
+    base-url: https://ai-proxy.cyberk.io
+codex-api-key:
+  - api-key: theanh
+    base-url: https://ai-proxy.cyberk.io
 ```
 
 If there is no claude, let oath with antigravtiy and config as below
