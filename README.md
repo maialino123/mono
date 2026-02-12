@@ -314,7 +314,7 @@ ampcode:
     - from: gpt-5.2
       to: gpt-5.2
     - from: gpt-5.2-codex
-      to: gpt-5.2-codex
+      to: gpt-5.3-codex
     - from: claude-opus-4-5-20251101
       to: claude-opus-4-5-20251101
     - from: claude-opus-4-6
