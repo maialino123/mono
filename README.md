@@ -356,7 +356,7 @@ gemini-api-key:
     base-url: https://ai-proxy.cyberk.io
 codex-api-key:
   - api-key: YOUR_COMPANY_API_KEY
-    base-url: https://ai-proxy.cyberk.io
+    base-url: https://ai-proxy.cyberk.io/v1
 ```
 
 If there is no claude, let oath with antigravtiy and config as below
