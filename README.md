@@ -325,7 +325,7 @@ ampcode:
       to: gemini-3-flash-preview
   force-model-mappings: true
 claude-api-key:
-  - api-key: theanh
+  - api-key: YOUR_COMPANY_API_KEY
     base-url: https://ai-proxy.cyberk.io
 oauth-model-alias:
   antigravity:
@@ -352,10 +352,10 @@ oauth-model-alias:
     - name: claude-opus-4-6-thinking
       alias: gemini-claude-opus-4-6-thinking
 gemini-api-key:
-  - api-key: theanh
+  - api-key: YOUR_COMPANY_API_KEY
     base-url: https://ai-proxy.cyberk.io
 codex-api-key:
-  - api-key: theanh
+  - api-key: YOUR_COMPANY_API_KEY
     base-url: https://ai-proxy.cyberk.io
 ```
 
