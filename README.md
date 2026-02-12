@@ -341,6 +341,8 @@ oauth-model-alias:
       alias: gemini-claude-sonnet-4-5
     - name: claude-sonnet-4-5-thinking
       alias: gemini-claude-sonnet-4-5-thinking
+    - name: claude-sonnet-4-5-thinking
+      alias: claude-sonnet-4-5-20250929
     - name: claude-opus-4-5-thinking
       alias: gemini-claude-opus-4-5-thinking
     - name: claude-sonnet-4-5
