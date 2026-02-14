@@ -4,10 +4,17 @@
 
 ## Steps
 
-1. **Review Code** (run first):
-   - Run `oracle` (and `code_review` skill if available) on the change's diff
-   - Consolidate findings and propose fixes to the user
-   - **Gate: user approved code review findings** — present findings using Gate Output Format and wait for approval
+1. **Post-merge Sanity Check** (lightweight — not a full code review):
+   - Confirm the change references the final merged commit/PR.
+   - Confirm no unaccounted files changed vs what specs/tasks expected (guard against drive-by edits).
+   - Confirm deploy succeeded, smoke tests passed, migrations ran (if applicable).
+   - **Escalation triggers** — only run full Oracle + Code Review again if:
+     - There was a hotfix after merge
+     - A rollback or incident occurred
+     - The merged diff materially differs from what was verified in Implement
+     - Production behavior deviates from spec
+
+   > **Note**: Full code review (Oracle + code_review) is done in **Implement → "Review — Oracle" and "Review — Code Review"**. Archive does NOT repeat it unless escalation triggers fire.
 
 2. **Extract Knowledge**:
    - Use `find_thread` to search for threads related to this change
@@ -23,6 +30,7 @@
 4. **Apply Delta Specs**: `bun run cf apply <change-id>`
 
 5. **Archive**: `bun run cf archive <change-id>`
+   - Automatically ticks the "Archive change" checkbox in `workflow.md` before moving
    - Moves change to `archive/YYYY-MM-DD-HHmm-<change-id>/` (UTC timestamp)
 
 ## When to Archive

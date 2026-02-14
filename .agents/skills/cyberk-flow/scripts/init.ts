@@ -1,30 +1,12 @@
-import { cpSync, existsSync, mkdirSync, readdirSync } from "fs";
+import { cpSync, existsSync, mkdirSync } from "fs";
 import { join, resolve } from "path";
+import { findSkillTemplatesDir } from "./lib/find-templates.ts";
 
 const CYBERK_FLOW_DIR = "cyberk-flow";
 const OPENSPEC_DIR = "openspec";
 const MARKER_FILE = join(CYBERK_FLOW_DIR, "project.md");
 
-const DIRS = [
-  join(CYBERK_FLOW_DIR, "changes", "archive"),
-  join(CYBERK_FLOW_DIR, "specs"),
-  join(CYBERK_FLOW_DIR, "templates"),
-];
-
-function findSkillTemplatesDir(): string {
-  // Look for templates in known skill install locations
-  const candidates = [
-    join(".agents", "skills", "cyberk-flow", "templates"),
-    join("skills", "cyberk-flow", "templates"),
-  ];
-  for (const dir of candidates) {
-    if (existsSync(dir)) return dir;
-  }
-  // Fallback: resolve relative to this script's location
-  const scriptDir = resolve(import.meta.dir, "..", "templates");
-  if (existsSync(scriptDir)) return scriptDir;
-  return "";
-}
+const DIRS = [join(CYBERK_FLOW_DIR, "changes", "archive"), join(CYBERK_FLOW_DIR, "specs")];
 
 function isInitialized(): boolean {
   return existsSync(MARKER_FILE);
@@ -56,36 +38,19 @@ async function init(force = false, options: InitOptions = {}): Promise<void> {
     }
   }
 
-  // 2. Copy templates from skill to project-local cyberk-flow/templates/
+  // 2. Copy project.md from skill templates (the main marker)
   const skillTemplatesDir = findSkillTemplatesDir();
   if (skillTemplatesDir) {
-    const projectTemplatesDir = join(CYBERK_FLOW_DIR, "templates");
-    let copied = 0;
-    const SKIP_FILES = ["ROOT_AGENTS.md"];
-    for (const file of readdirSync(skillTemplatesDir)) {
-      if (!file.endsWith(".md") || SKIP_FILES.includes(file)) continue;
-      const dest = join(projectTemplatesDir, file);
-      if (!existsSync(dest)) {
-        cpSync(join(skillTemplatesDir, file), dest);
-        copied++;
-        console.log(`  📄 Copied template: ${file}`);
-      }
-    }
-    if (copied === 0) {
-      console.log("  ✓  All templates already present.");
+    const projectMdSrc = join(skillTemplatesDir, "project.md");
+    if (!existsSync(MARKER_FILE) && existsSync(projectMdSrc)) {
+      cpSync(projectMdSrc, MARKER_FILE);
+      console.log(`  📄 Created ${MARKER_FILE}`);
     }
   } else {
-    console.warn("  ⚠  Could not find skill templates directory. Skipping template copy.");
+    console.warn("  ⚠  Could not find skill templates directory. Skipping project.md copy.");
   }
 
-  // 3. Copy project.md to root (the main marker)
-  const projectMdSrc = join(CYBERK_FLOW_DIR, "templates", "project.md");
-  if (!existsSync(MARKER_FILE) && existsSync(projectMdSrc)) {
-    cpSync(projectMdSrc, MARKER_FILE);
-    console.log(`  📄 Created ${MARKER_FILE}`);
-  }
-
-  // 4. Auto-migrate from openspec if detected
+  // 3. Auto-migrate from openspec if detected
   if (autoMigrate && existsSync(OPENSPEC_DIR)) {
     console.log(`\n  🔄 Detected ${OPENSPEC_DIR}/, auto-migrating...`);
     const { migrate } = await import("./migrate.ts");
@@ -100,7 +65,6 @@ Directory structure:
   ├── changes/          # Active change proposals
   │   └── archive/      # Completed changes
   ├── specs/            # Consolidated specifications
-  ├── templates/        # Templates for new changes
   └── project.md        # Project context (fill this out!)
 
 Next steps:

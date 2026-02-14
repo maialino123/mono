@@ -32,6 +32,7 @@ The system SHALL [updated text with changes]
 
 ## RENAMED Requirements
 
-### Old Name → New Name
+FROM: ### Requirement: Old Name
+TO: ### Requirement: New Name
 
 **Reason**: [Why renaming]

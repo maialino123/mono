@@ -14,7 +14,7 @@
 - [ ] 6. Verification _(spikes — skip if no HIGH risk items)_
 - [ ] 7. Tasks
 - [ ] 8. Validation _(see references/plan.md § 8 for full checklist)_
-  - [ ] Oracle reviewed plan completeness, task deps, and gaps
+  - [ ] **MANDATORY** Oracle reviewed: plan completeness, task deps, gaps, parallelization _(never skip)_
   - [ ] `bun run cf validate <change-id>` passes (or errors justified)
 - [ ] **Gate: user approved plan**
 
@@ -23,15 +23,17 @@
 <!-- RULE: After completing each task, immediately mark it [x] in tasks.md AND log in Revision Log below. -->
 - [ ] Read references/implement.md before starting
 - [ ] All tasks in tasks.md are complete (update tasks.md after EACH task)
-- [ ] Verify: check-types, check, tests
+- [ ] Verify: run **Verify** commands from tasks.md (all must pass)
+- [ ] Review — Oracle (correctness / architecture / security)
+- [ ] Review — Code Review (style / conventions / consistency)
 - [ ] **Gate: all tasks done + verification passed**
 
 ## Archive
 
-- [ ] Code review
-- [ ] **Gate: user approved code review findings**
+- [ ] Post-merge sanity check
 - [ ] Extract knowledge + retrospective
-- [ ] Apply deltas + archive change
+- [ ] Apply deltas: `bun run cf apply <change-id>`
+- [ ] Archive change: `bun run cf archive <change-id>`
 
 ## Notes
 

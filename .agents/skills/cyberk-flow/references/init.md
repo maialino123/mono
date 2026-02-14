@@ -61,7 +61,20 @@ Spawn a sub-agent to generate or update the root `AGENTS.md` with agent-only dir
 Task("Generate/update root AGENTS.md: Read the template at .agents/skills/cyberk-flow/templates/ROOT_AGENTS.md and create or update ./AGENTS.md following its structure (including YAML front matter). The file must contain only agent instructions: skill loader, tool selection guide, sub-agent best practices, commands, language/security requirements. Do NOT include project-specific info — only reference cyberk-flow/project.md for that. If AGENTS.md already exists, merge missing sections while preserving manually-added content. Output: updated AGENTS.md + brief summary of changes.")
 ```
 
-## 5. Set up MCP servers
+## 5. Set up security permissions
+
+Add `amp.permissions` to `.vscode/settings.json` to enforce secret file protection at the tool level:
+
+```jsonc
+"amp.permissions": [
+  { "tool": "Read", "matches": { "path": ["*.env", "*.env.*", "**/.env", "**/.env.*", "**/secrets/**", "**/*.pem", "**/*.key"] }, "action": "reject" },
+  { "tool": "Bash", "matches": { "cmd": ["*cat*.env*", "*less*.env*", "*head*.env*", "*tail*.env*", "*echo*ENV*", "*cat*secrets*", "*cat*.pem*", "*cat*.key*"] }, "action": "reject" }
+]
+```
+
+This enforces at the Amp tool level — unlike AGENTS.md instructions which agents can bypass.
+
+## 6. Set up MCP servers
 
 Add the following to `.vscode/settings.json` under the `"amp.mcpServers"` field:
 
@@ -111,7 +124,7 @@ Add the following to `.vscode/settings.json` under the `"amp.mcpServers"` field:
   curl -s -o /dev/null -w "%{http_code}" http://localhost:27495/mcp
   ```
 
-## 6. Verify
+## 7. Verify
 
 ```bash
 bun run cf changes

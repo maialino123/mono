@@ -11,7 +11,9 @@ const COMMANDS: Record<string, { script: string; args?: string[]; desc: string }
   validate: { script: "validate-change.ts", desc: "Validate delta specs" },
   apply: { script: "apply-deltas.ts", desc: "Apply delta specs to main specs" },
   archive: { script: "archive-change.ts", desc: "Move change to archive/" },
+  release: { script: "release.ts", desc: "Create a release (bump version + changelog)" },
   migrate: { script: "migrate.ts", desc: "Migrate openspec/ to cyberk-flow/" },
+  update: { script: "update.ts", desc: "Update skills from cyberk-dev/cyberk-skills" },
 };
 
 const HELP_FLAGS = new Set(["help", "-h", "--help"]);

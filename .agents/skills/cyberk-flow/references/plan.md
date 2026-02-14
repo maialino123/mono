@@ -19,7 +19,7 @@ Flow: `context review` → `discovery` → `proposal` → `specs` → `design` �
 
 - **Open questions**: Surface unresolved questions to the user after each artifact — don't bury uncertainties.
 
-**Templates**: Each stage follows its template in `cyberk-flow/templates/`. Artifacts go in `cyberk-flow/changes/<change-id>/`. Only stage-specific rules are listed below.
+**Templates**: Each stage follows its template in the skill's `templates/` directory (resolved automatically by scripts). Artifacts go in `cyberk-flow/changes/<change-id>/`. Only stage-specific rules are listed below.
 
 **Tool fallback**: If primary tools (`gkg`, `librarian`, `deepwiki`, `git-mcp`) are unavailable, use `glob` + `Grep` + `Read` + `web_search` to replicate the intent.
 
@@ -50,13 +50,23 @@ Template: `proposal.md` — fill why, appetite (`S ≤1d` / `M ≤3d` / `L ≤2w
 
 ## 4. Specs (Delta Format)
 
-Template: `spec.md` — one file per capability at `cyberk-flow/changes/<change-id>/specs/<capability-name>/spec.md`.
+Create ONE spec file per capability. **Path**: `cyberk-flow/changes/<change-id>/specs/<capability-name>/spec.md`.
+Follow format in `templates/spec.md`.
 
-**Rules**:
-- Sections: `ADDED` / `MODIFIED` / `REMOVED` / `RENAMED`. Use SHALL/MUST for normative requirements.
-- MODIFIED: quote original in blockquote (`>`), show changed version below, reference original spec path.
-- `#### Scenario:` — ≥1 per requirement. Scenarios MUST add info beyond the requirement; delete if redundant.
+**Heading format** (must match exactly for the delta parser):
+- H2 section headers: `## ADDED Requirements`, `## MODIFIED Requirements`, `## REMOVED Requirements`, `## RENAMED Requirements`
+- Requirements under ADDED/MODIFIED: `### Requirement: <name>` (H3 heading)
+- Requirements under REMOVED: `### Requirement: <name>` (one per line)
+- Requirements under RENAMED: `FROM: ### Requirement: <old>` / `TO: ### Requirement: <new>` (line pairs)
+- Use SHALL/MUST for normative requirements.
+
+**Format rules**:
+- MODIFIED: quote original requirement in blockquote (`>`), then show changed version below. Reference original spec path.
+- `#### Scenario:` — consistent heading level, ≥1 per requirement.
+
+**Quality rules** (keep specs dense, not verbose):
 - One scenario per distinct behavior, not per input variant. Inline constraints as bullets under one scenario.
+- Scenarios MUST add info beyond the requirement; delete if redundant.
 - Don't scenario infrastructure wiring. Omit obvious defaults unless AI is likely to miss them.
 
 ## 5. Design
@@ -92,7 +102,7 @@ Template: `tasks.md` — execution-ordered checklist referencing specs (what) an
 
 ## 8. Validation
 
-- Ask Oracle to review plan completeness, task deps, and gaps.
+- **MUST** ask Oracle to review plan completeness, task deps, gaps, and parallelization opportunities — even for LOW risk changes. This step is never skippable.
 - Run: `bun run cf validate <change-id>` — fix any reported errors.
 - **Checklist** (present status at approval gate):
   - [ ] Every spec requirement has ≥1 testable scenario

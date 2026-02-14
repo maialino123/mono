@@ -1,6 +1,7 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "fs";
 import { dirname, join, resolve } from "path";
 import { init } from "./init.ts";
+import { findSkillTemplatesDir } from "./lib/find-templates.ts";
 
 const CYBERK_FLOW_DIR = "cyberk-flow";
 const OPENSPEC_SKILL_DIRS = [join(".agents", "skills", "openspec")];
@@ -43,7 +44,9 @@ function copyDirRecursive(
 
 function injectWorkflows(counts: MigrateCounts): void {
   const changesDir = join(CYBERK_FLOW_DIR, "changes");
-  const templatePath = join(CYBERK_FLOW_DIR, "templates", "workflow.md");
+  const skillTemplates = findSkillTemplatesDir();
+  if (!skillTemplates) return;
+  const templatePath = join(skillTemplates, "workflow.md");
   if (!existsSync(changesDir) || !existsSync(templatePath)) return;
 
   const template = readFileSync(templatePath, "utf-8");
@@ -110,7 +113,6 @@ async function migrate(source = "openspec", options: MigrateOptions = {}): Promi
   // Ensure cyberk-flow directories exist even with skipInit
   mkdirSync(join(CYBERK_FLOW_DIR, "specs"), { recursive: true });
   mkdirSync(join(CYBERK_FLOW_DIR, "changes", "archive"), { recursive: true });
-  mkdirSync(join(CYBERK_FLOW_DIR, "templates"), { recursive: true });
 
   const counts: MigrateCounts = { specs: 0, changes: 0, archived: 0, workflows: 0, skipped: 0 };
 

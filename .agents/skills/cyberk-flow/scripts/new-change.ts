@@ -1,5 +1,6 @@
-import { cpSync, existsSync, mkdirSync, readdirSync } from "fs";
+import { cpSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
+import { findSkillTemplatesDir } from "./lib/find-templates.ts";
 
 const name = process.argv[2];
 if (!name) {
@@ -20,28 +21,20 @@ if (existsSync(changeDir)) {
 
 mkdirSync(join(changeDir, "specs"), { recursive: true });
 
-const templatesDir = join("cyberk-flow", "templates");
-if (!existsSync(templatesDir)) {
-  console.error(`Error: Templates dir not found at ${templatesDir} (run from project root?)`);
+const templatesDir = findSkillTemplatesDir();
+if (!templatesDir) {
+  console.error("Error: Could not find skill templates directory");
   process.exit(1);
 }
 
 const REQUIRED_TEMPLATES = ["tasks.md", "workflow.md"];
-const OPTIONAL_TEMPLATES = ["design.md", "discovery.md", "proposal.md"];
-const available = new Set(readdirSync(templatesDir));
 for (const file of REQUIRED_TEMPLATES) {
-  if (!available.has(file)) {
+  const src = join(templatesDir, file);
+  if (!existsSync(src)) {
     console.error(`Error: required template ${file} missing in ${templatesDir}`);
     process.exit(1);
   }
-  cpSync(join(templatesDir, file), join(changeDir, file));
-}
-for (const file of OPTIONAL_TEMPLATES) {
-  if (!available.has(file)) {
-    console.warn(`Warning: optional template ${file} missing in ${templatesDir}`);
-    continue;
-  }
-  cpSync(join(templatesDir, file), join(changeDir, file));
+  cpSync(src, join(changeDir, file));
 }
 
 console.log(`Created change '${name}' at ${changeDir}/`);

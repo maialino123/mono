@@ -7,7 +7,16 @@
 3. **Update**: After each task, mark `- [x]` in `tasks.md` and add an entry to `workflow.md` Revision Log. Only tick the overall "All tasks complete" checkbox in `workflow.md` once all tasks are done.
 4. **Adapt**: If implementation reveals design issues, update artifacts — workflow is fluid.
 5. **Merge**: After all parallel tracks complete, run the integration merge protocol.
-6. **Verify**: Run the verification pipeline (see below), then mark verify checkbox in `workflow.md`.
+6. **Verify — Final Verify Gate**: Run the **Verify** commands from top of `tasks.md` (`check-types`, `check`, `test`). All must pass.
+7. **Review — Oracle** (mandatory): Run the `oracle` tool on all changed files. Focus: semantic correctness vs spec/design, edge cases, regression risks, security violations, architectural alignment. Output: **must-fix** and **nice-to-fix** items.
+8. **Review — Code Review** (mandatory): Load the `code-review` skill and run `code_review` tool on the change's diff. Focus: naming, formatting, idioms, duplication, test quality, repo conventions.
+9. **Review Fix Loop** (max 3 rounds):
+   - **must-fix** items: apply fixes automatically, re-run Verify (step 6), then re-run reviews (steps 7-8).
+   - **nice-to-fix** items: auto-fix only if trivial (localized rename/formatting, no behavioral change). Otherwise list for user.
+   - If a fix requires **choosing between solutions**: STOP and present options to user. Resume after user decides.
+   - If no must-fix items remain after a round: exit loop and proceed.
+   - After 3 rounds: STOP and present remaining must-fix and nice-to-fix separately. **Do not proceed** if any must-fix remains unresolved without explicit user approval.
+10. **Gate: all tasks done + verification passed** — only mark this after steps 6-9 are all complete.
 
 ## Parallel Execution Protocol
 
@@ -42,16 +51,12 @@ For each task in `tasks.md`:
 4. **GREEN — Make it pass**: Make the minimal code change to pass the test.
 5. **REFACTOR — Clean up**: Restructure while keeping tests green. Keep behavior constant.
 6. Run verification: in **single-track mode**, run the full **Verify** commands from top of `tasks.md`. In **parallel mode**, run lint + typecheck (e.g., `check-types`, `check`) and task-scoped/targeted tests only — the full test suite runs during the merge gate.
-7. Record self-check log (see Verification Pipeline Phase 0): test added, commands run, deviations.
+7. Record self-check log (see Author Self-Check section below): test added, commands run, deviations.
 8. Mark task complete: `- [x]` (main agent updates `tasks.md` in parallel mode).
 
 > **Test-first is mandatory** for any task that changes observable behavior. Skip only for pure refactors, doc-only, or config-only changes — note justification as a sub-bullet under the task's **Done** field in `tasks.md`.
 
-## Verification Pipeline
-
-Phase 0 happens during task execution; Phases 1–3 happen after integration merge (or after all tasks in single-track mode).
-
-### Phase 0 — Author Self-Check (per task, during execution)
+## Author Self-Check (per task, during execution)
 
 Each agent must record per task:
 - **Single-track mode**: as a sub-bullet under the task in `tasks.md`.
@@ -61,32 +66,6 @@ Items to record:
 - What test was added/updated (RED→GREEN note).
 - Commands run and results.
 - Any intentional deviations from spec.
-
-### Phase 1 — Oracle Review (correctness / architecture / security)
-
-Run an Oracle review (a dedicated sub-agent with a correctness/security review prompt, using the `oracle` tool if available) over all changed files on the integrated code. Oracle focus:
-- Semantic correctness vs spec/design.
-- Edge cases and regression risks.
-- Security and invariant violations.
-- Architectural alignment with codebase patterns.
-
-Output: a list of **must-fix** and **nice-to-fix** items, each mapped to a file and suggested fix direction. Apply must-fix items before proceeding.
-
-### Phase 2 — Review Sub-Agent (style / conventions / consistency)
-
-Launch a review sub-agent (using the `code-review` skill if available, or a dedicated style-review prompt) on all changed files. Review agent focus:
-- Naming, formatting, idioms.
-- Duplication and minor refactors.
-- Test readability and quality.
-- Adherence to repo conventions (see `project.md`).
-
-Output: a list of suggestions. Apply reasonable suggestions; justify any skipped items.
-
-### Phase 3 — Final Verify Gate
-
-Run the **Verify** commands listed at the top of `tasks.md`.
-
-Only after Phases 0–3 are satisfied (every task has a self-check log entry, Oracle must-fixes applied, review suggestions addressed), mark "Verify" in `workflow.md`.
 
 ## Fluid Workflow
 
