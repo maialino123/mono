@@ -42,6 +42,7 @@
     "db:stop": "turbo -F @cyberk-flow/db db:stop",
     "db:down": "turbo -F @cyberk-flow/db db:down",
     "check": "biome check --write .",
+    "cf": "bun run .agents/skills/cyberk-flow/scripts/cf.ts",
     "prepare": "husky"
   },
   "dependencies": {

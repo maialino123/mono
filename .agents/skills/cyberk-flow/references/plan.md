@@ -1,0 +1,103 @@
+# Stage 1: Plan
+
+Flow: `context review` → `discovery` → `proposal` → `specs` → `design` → `verification` → `tasks` → `validation`
+
+**Global Rules**:
+
+- **Mermaid only**: All diagrams MUST use Mermaid syntax — never ASCII art.
+- **Approval gates**: STOP and present deliverables to the user before proceeding:
+  - After Discovery → present Mermaid decision diagram + pros/cons (if multiple viable solutions)
+  - After Verification → summarize spike outcomes + updated Risk Map + any spec deltas
+  - After Validation → final checklist status + unresolved open questions
+- **Risk matrix**:
+
+| Risk   | Review Required                        | Verification         |
+| ------ | -------------------------------------- | -------------------- |
+| LOW    | Owner self-review                      | Proceed              |
+| MEDIUM | + 1 domain peer                        | Interface sketch     |
+| HIGH   | + security / platform lead as relevant | Spike required       |
+
+- **Open questions**: Surface unresolved questions to the user after each artifact — don't bury uncertainties.
+
+**Templates**: Each stage follows its template in `cyberk-flow/templates/`. Artifacts go in `cyberk-flow/changes/<change-id>/`. Only stage-specific rules are listed below.
+
+**Tool fallback**: If primary tools (`gkg`, `librarian`, `deepwiki`, `git-mcp`) are unavailable, use `glob` + `Grep` + `Read` + `web_search` to replicate the intent.
+
+## 1. Context Review
+
+- Read `cyberk-flow/project.md`, run `bun run cf changes` and `bun run cf specs`.
+- Choose a unique verb-led `change-id`, scaffold: `bun run cf new "<change-id>"`
+
+## 2. Discovery
+
+Template: `discovery.md` — select relevant workstreams, run as parallel sub-agents, justify omissions.
+
+**Workstreams**:
+
+| Workstream                | When to use                             | Primary tools                                      |
+| ------------------------- | --------------------------------------- | -------------------------------------------------- |
+| **Architecture Snapshot** | Always                                  | `gkg repo_map`, `gkg search_codebase_definitions`  |
+| **Internal Patterns**     | Similar features exist in codebase      | `gkg get_references`                                |
+| **External Patterns**     | Novel architecture or unfamiliar domain | `librarian`                                         |
+| **Constraint Check**      | New dependencies or build changes       | `Read` (`package.json`, `tsconfig.json`)            |
+| **Documentation**         | New external library or API integration | `deepwiki`, `git-mcp`                               |
+
+**Guidelines**: Small changes → 1-2 workstreams. Large/novel → all applicable. Flag blockers for user input (scope ambiguity, credentials, competing libs, pattern conflicts).
+
+## 3. Proposal
+
+Template: `proposal.md` — fill why, appetite (`S ≤1d` / `M ≤3d` / `L ≤2w`), scope boundaries + cuts, capability list, impact, risk rating.
+
+## 4. Specs (Delta Format)
+
+Template: `spec.md` — one file per capability at `cyberk-flow/changes/<change-id>/specs/<capability-name>/spec.md`.
+
+**Rules**:
+- Sections: `ADDED` / `MODIFIED` / `REMOVED` / `RENAMED`. Use SHALL/MUST for normative requirements.
+- MODIFIED: quote original in blockquote (`>`), show changed version below, reference original spec path.
+- `#### Scenario:` — ≥1 per requirement. Scenarios MUST add info beyond the requirement; delete if redundant.
+- One scenario per distinct behavior, not per input variant. Inline constraints as bullets under one scenario.
+- Don't scenario infrastructure wiring. Omit obvious defaults unless AI is likely to miss them.
+
+## 5. Design
+
+Template: `design.md` — create if: cross-cutting, new external dep, or any MEDIUM/HIGH risk item.
+
+**Process**: Ask Oracle to generate design from {discovery, specs, proposal} using template. Oracle produces gap analysis, architecture decisions, and Risk Map. MEDIUM risk items require an interface sketch (Mermaid). Overall change risk = highest Risk Map item.
+
+## 6. Verification (Spikes)
+
+Templates: `spike.md` (definition) + `spike-learning.md` (results). Output: `cyberk-flow/spikes/<capability>/<spike-id>/`
+
+Create spikes **iff** design Risk Map has **HIGH** entries. 1 spike per HIGH item.
+
+**Workflow**:
+1. Create spike definition — question, hypothesis, success/failure criteria.
+2. Write throwaway code in `spikes/<capability>/<spike-id>/index.ts` to prove/disprove.
+3. Document learnings in `spikes/<capability>/<spike-id>/learnings.md` — decision, findings, plan deltas.
+
+**Timebox**: 30 min default, 2h hard cap. Stop early if criteria met or blocker hit.
+
+**Feed back**: update design Risk Map (downgrade if PASS, rewrite if FAIL), update specs only if requirement changes, update tasks to reflect validated approach. If FAIL and not viable within appetite → recommend abandon/defer and STOP for user.
+
+## 7. Tasks
+
+Template: `tasks.md` — execution-ordered checklist referencing specs (what) and design (how).
+
+- **Global Verify** at top (once): `bun run check-types`, `bun run check`, `bun test`.
+- **Spikes first**: section 0 (`0_x`), completed before any track starts.
+- Each task: **Track** (letter), **Deps**, **Refs** (spec/design anchors), **Done** (measurable criteria), **Files** (required when parallel tracks are used; optional for single-track).
+
+**Tracks**: A track is a sequential chain executed by one sub-agent. Different tracks run concurrently. A track may contain tasks from different sections. Tasks sharing files MUST be in the same track. Mermaid node IDs use `t` prefix (`t1_1`); labels show task ID (`"1_1"`). Every Deps entry MUST match a graph arrow.
+
+## 8. Validation
+
+- Ask Oracle to review plan completeness, task deps, and gaps.
+- Run: `bun run cf validate <change-id>` — fix any reported errors.
+- **Checklist** (present status at approval gate):
+  - [ ] Every spec requirement has ≥1 testable scenario
+  - [ ] Rollout/migration plan exists (if user-facing or data-changing)
+  - [ ] Security/privacy review triggered (if auth/data involved)
+  - [ ] Breaking changes have migration path documented
+  - [ ] Appetite is set and scope boundaries are clear
+  - [ ] All open questions from previous stages resolved or escalated

@@ -24,6 +24,7 @@
 | Component | Risk Level | Reason | Verification |
 | --------- | ---------- | ------ | ------------ |
 | ...       | LOW        | Pattern exists | Proceed |
+| ...       | MEDIUM     | Variation of existing | Interface sketch (Mermaid) |
 | ...       | HIGH       | New external dep | Spike required |
 
 ## Migration Plan

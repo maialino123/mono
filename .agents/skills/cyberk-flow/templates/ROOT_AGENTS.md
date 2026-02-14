@@ -8,33 +8,28 @@ description:
 
 For tech stack, architecture, and code conventions, see `cyberk-flow/project.md`.
 
-
 # Skill Loader
 
 Automatically use skills in the following contexts:
 
-| Skill | Usage Context |
-| :--- | :--- |
+| Skill         | Usage Context                          |
+| :------------ | :------------------------------------- |
 | `cyberk-flow` | proposal, spec, change, plan, kế hoạch |
-| `cyberk-fsd-fe` | Web-related development |
-| `next-best-practices` | Next.js framework patterns |
-| `next-cache-components` | Next.js cache UI components |
-| `vercel-react-best-practices` | React best practices and patterns |
 
 # Tool Selection Guide
 
-| Need | Tool |
-| --- | --- |
-| Codebase structure | `gkg repo_map` |
-| Find definitions | `gkg search_codebase_definitions` |
-| Find usages / references | `gkg get_references` |
-| Re-index project | `gkg index_project` |
-| How OSS projects solve it | `librarian` |
-| Library docs / integration guides | `deepwiki`, `git-mcp` |
-| API docs, recent releases | `web_search` |
-| Gap analysis / risk assessment | `oracle` |
-| Visualize architecture / flows | `mermaid` |
-| Create spec files | `create_file` / `edit_file` |
+| Need                              | Tool                              |
+| --------------------------------- | --------------------------------- |
+| Codebase structure                | `gkg repo_map`                    |
+| Find definitions                  | `gkg search_codebase_definitions` |
+| Find usages / references          | `gkg get_references`              |
+| Re-index project                  | `gkg index_project`               |
+| How OSS projects solve it         | `librarian`                       |
+| Library docs / integration guides | `deepwiki`, `git-mcp`             |
+| API docs, recent releases         | `web_search`                      |
+| Gap analysis / risk assessment    | `oracle`                          |
+| Visualize architecture / flows    | `mermaid`                         |
+| Create spec files                 | `create_file` / `edit_file`       |
 
 **Note:** If primary tool unavailable, use built-in tools: `finder`, `Grep`, `Read`...
 
@@ -46,14 +41,6 @@ Automatically use skills in the following contexts:
 ## Commands
 
 - `bun install` - Install dependencies
-- `bun run dev` - Start all apps (server + web)
-- `bun run dev:server` - Start server only (Hono on port 3000)
-- `bun run dev:web` - Start web only (Next.js on port 3001)
-- `bun run check-types` - Typecheck all packages
-- `bun run check` - Lint/format with Biome (`biome check --write .`)
-- `bun run db:start` - Start PostgreSQL via Docker
-- `bun run db:push` - Push schema changes to database
-- `bun test <file>` - Run single test file (e.g., `bun test packages/api/src/foo.test.ts`)
 
 ## Language Requirements
 
