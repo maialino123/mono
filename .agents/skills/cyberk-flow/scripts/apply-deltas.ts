@@ -7,6 +7,16 @@ import {
   type RequirementBlock,
 } from "./lib/parse-delta";
 
+function tickApplyDeltasCheckbox(workflowPath: string) {
+  if (!existsSync(workflowPath)) return;
+  const content = readFileSync(workflowPath, "utf-8");
+  const re = /^(\s*-\s*\[)\s(\]\s+Apply deltas:.*)$/m;
+  const updated = content.replace(re, "$1x$2");
+  if (updated !== content) {
+    writeFileSync(workflowPath, updated, "utf-8");
+  }
+}
+
 export function applyDeltasToSpec(
   deltaContent: string,
   mainContent: string | null,
@@ -234,6 +244,9 @@ function main() {
     console.log(s);
   }
   console.log(`Applied deltas to ${summaries.length} spec(s)`);
+
+  const workflowPath = join("cyberk-flow", "changes", name, "workflow.md");
+  tickApplyDeltasCheckbox(workflowPath);
 }
 
 if (import.meta.main) {

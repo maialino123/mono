@@ -8,14 +8,26 @@
 4. **Adapt**: If implementation reveals design issues, update artifacts — workflow is fluid.
 5. **Merge**: After all parallel tracks complete, run the integration merge protocol.
 6. **Verify — Final Verify Gate**: Run the **Verify** commands from top of `tasks.md` (`check-types`, `check`, `test`). All must pass.
-7. **Review — Oracle** (mandatory): Run the `oracle` tool on all changed files. Focus: semantic correctness vs spec/design, edge cases, regression risks, security violations, architectural alignment. Output: **must-fix** and **nice-to-fix** items.
-8. **Review — Code Review** (mandatory): Load the `code-review` skill and run `code_review` tool on the change's diff. Focus: naming, formatting, idioms, duplication, test quality, repo conventions.
-9. **Review Fix Loop** (max 3 rounds):
-   - **must-fix** items: apply fixes automatically, re-run Verify (step 6), then re-run reviews (steps 7-8).
-   - **nice-to-fix** items: auto-fix only if trivial (localized rename/formatting, no behavioral change). Otherwise list for user.
-   - If a fix requires **choosing between solutions**: STOP and present options to user. Resume after user decides.
-   - If no must-fix items remain after a round: exit loop and proceed.
-   - After 3 rounds: STOP and present remaining must-fix and nice-to-fix separately. **Do not proceed** if any must-fix remains unresolved without explicit user approval.
+7. **Review — Oracle** (mandatory tool invocation): Run the `oracle` tool on **all files changed in this change since the base branch** (including newly added files). Focus: semantic correctness vs spec/design, edge cases, regression risks, security violations, architectural alignment. Categorize output into **must-fix** (blocking) and **nice-to-fix** (non-blocking).
+8. **Review — Code Review** (mandatory tool invocation): Load the `code-review` skill and run the `code_review` tool on the **full diff vs base branch** (not just last commit). Categorize output into **must-fix** (blocking) and **nice-to-fix** (non-blocking).
+9. **Review Fix Loop** (max 3 rounds; tool-driven; no self-assessment):
+
+   Repeat up to **3 rounds**. A "round" is complete only after executing **9.1 → 9.4** in order.
+
+   9.1 **Fix** all **must-fix** from the **latest** Oracle + Code Review outputs (latest outputs are canonical; includes any newly discovered items). If multiple valid fixes → **STOP** and ask user.
+
+   9.2 **Nice-to-fix**: auto-fix only if trivial (localized rename/formatting; no behavioral change). Otherwise list for user. Avoid opportunistic refactors during fix loop — minimal fixes only.
+
+   9.3 **Re-Verify**: Re-run step 6 (all Verify commands). All must pass before continuing.
+
+   9.4 **Re-Review** (mandatory, cannot be skipped or self-assessed):
+       - Re-run step 7 (`oracle` tool) on all changed files.
+       - Re-run step 8 (load `code-review` skill + run `code_review` tool) on the full diff.
+       - **Record** the updated must-fix/nice-to-fix lists from both tools — this is the **only source of truth** for loop decisions. If a must-fix is disputed or unclear → **STOP** and ask user.
+
+   **Exit (only after 9.4):** If the **latest** Oracle AND Code Review outputs both have **0 must-fix** → exit loop. Otherwise → next round.
+
+   **After 3 rounds**: **STOP and wait for user decision**. Present remaining **must-fix** and **nice-to-fix** separately. Do not run further steps or mark gates complete.
 10. **Gate: all tasks done + verification passed** — only mark this after steps 6-9 are all complete.
 
 ## Parallel Execution Protocol
