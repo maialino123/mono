@@ -5,7 +5,11 @@ import { Button } from "@/shared/shadcn/button";
 
 export function LinkGoogleButton() {
   const handleClick = () => {
-    authClient.linkSocial({ provider: "google", callbackURL: window.location.href });
+    authClient.linkSocial({
+      provider: "google",
+      callbackURL: window.location.href,
+      errorCallbackURL: window.location.href,
+    });
   };
 
   return (

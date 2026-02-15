@@ -9,13 +9,17 @@
       "default": "./src/*.ts"
     }
   },
-  "scripts": {},
+  "scripts": {
+    "test": "bun test",
+    "test:watch": "bun test --watch"
+  },
   "dependencies": {
     "@better-auth/expo": "catalog:",
     "@cyberk-flow/db": "workspace:*",
     "@cyberk-flow/env": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
+    "viem": "^2.45.1",
     "zod": "catalog:"
   },
   "devDependencies": {

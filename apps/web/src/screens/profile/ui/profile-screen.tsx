@@ -2,19 +2,27 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { accountQueries } from "@/entities/account";
-import { LinkGoogleButton, UnlinkProviderButton } from "@/features/auth/link-provider";
+import { LinkGoogleButton, LinkWalletButton, UnlinkProviderButton } from "@/features/auth/link-provider";
 import { authClient } from "@/shared/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/shadcn/card";
 import { Separator } from "@/shared/shadcn/separator";
 import { Skeleton } from "@/shared/shadcn/skeleton";
 import Loader from "@/shared/ui/loader";
 
+const LINK_ERROR_MESSAGES: Record<string, string> = {
+  account_already_linked_to_different_user: "This account is already linked to another user",
+  "email_doesn't_match": "Email doesn't match your account",
+  unable_to_link_account: "Unable to link account",
+};
+
 const PROVIDER_LABELS: Record<string, string> = {
   credential: "Email & Password",
   google: "Google",
+  siwe: "Ethereum Wallet",
 };
 
 function ProviderIcon({ providerId }: { providerId: string }) {
@@ -40,6 +48,15 @@ function ProviderIcon({ providerId }: { providerId: string }) {
       </svg>
     );
   }
+  if (providerId === "siwe") {
+    return (
+      <svg className="h-5 w-5 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" role="img" aria-label="Wallet">
+        <rect x="2" y="6" width="20" height="14" rx="2" />
+        <path d="M2 10h20" />
+        <circle cx="17" cy="14" r="1.5" />
+      </svg>
+    );
+  }
   return (
     <svg className="h-5 w-5 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" role="img" aria-label="Email">
       <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -50,8 +67,20 @@ function ProviderIcon({ providerId }: { providerId: string }) {
 
 export function ProfileScreen() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const { data: accounts, isPending: accountsPending } = useQuery(accountQueries.list());
+
+  const shownErrorRef = useRef<string | null>(null);
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error && shownErrorRef.current !== error) {
+      shownErrorRef.current = error;
+      const message = LINK_ERROR_MESSAGES[error] ?? `Failed to link account: ${error}`;
+      toast.error(message);
+      router.replace("/profile");
+    }
+  }, [searchParams, router]);
 
   useEffect(() => {
     if (!sessionPending && !session) {
@@ -69,6 +98,7 @@ export function ProfileScreen() {
 
   const user = session.user;
   const hasGoogle = accounts?.some((a) => a.providerId === "google");
+  const hasSiwe = accounts?.some((a) => a.providerId === "siwe");
   const canUnlink = (accounts?.length ?? 0) > 1;
 
   return (
@@ -87,8 +117,8 @@ export function ProfileScreen() {
             </div>
           )}
           <div>
-            <p className="font-medium text-lg">{user.name}</p>
-            <p className="text-muted-foreground text-sm">{user.email}</p>
+            <p className="font-medium text-lg">{user.name || "Wallet User"}</p>
+            <p className="text-muted-foreground text-sm">{user.email || "No email linked"}</p>
           </div>
         </CardContent>
       </Card>
@@ -122,6 +152,13 @@ export function ProfileScreen() {
                 <>
                   <Separator />
                   <LinkGoogleButton />
+                </>
+              )}
+
+              {!hasSiwe && (
+                <>
+                  <Separator />
+                  <LinkWalletButton />
                 </>
               )}
             </div>

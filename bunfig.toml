@@ -1,0 +1,3 @@
+[test]
+# Preload mocks for better-auth/test compatibility (better-sqlite3 → bun:sqlite, vitest → bun:test)
+preload = ["./packages/auth/src/__tests__/preload.ts"]

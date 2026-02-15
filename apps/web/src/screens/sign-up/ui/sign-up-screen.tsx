@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { GoogleSignInButton } from "@/features/auth/sign-in";
+import { GoogleSignInButton, WalletSignInButton } from "@/features/auth/sign-in";
 import { SignUpForm } from "@/features/auth/sign-up";
 import { useAuthRedirect } from "@/shared/lib";
 import {
@@ -40,6 +40,7 @@ export function SignUpScreen() {
             <Separator className="flex-1" />
           </div>
           <GoogleSignInButton redirectTo={redirectTo} />
+          <WalletSignInButton redirectTo={redirectTo} />
         </CardContent>
         <p className="pb-6 text-center text-muted-foreground text-sm">
           Already have an account?{" "}
