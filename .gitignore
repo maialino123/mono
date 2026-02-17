@@ -51,3 +51,7 @@ temp
 
 __pycache__
 drafts
+
+.cache-synpress
+playwright-report
+test-results

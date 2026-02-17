@@ -42,6 +42,10 @@
     "db:stop": "turbo -F @cyberk-flow/db db:stop",
     "db:down": "turbo -F @cyberk-flow/db db:down",
     "check": "biome check --write .",
+    "e2e:cache": "dotenv -e .env.e2e.local -- synpress e2e/wallet-setup --headless",
+    "e2e:cache:force": "dotenv -e .env.e2e.local -- synpress e2e/wallet-setup --headless --force",
+    "e2e:test": "dotenv -e .env.e2e.local -- playwright test",
+    "e2e:test:siwe": "dotenv -e .env.e2e.local -- playwright test e2e/specs/siwe-sign-in.spec.ts",
     "cf": "bun run .agents/skills/cyberk-flow/scripts/cf.ts",
     "prepare": "husky"
   },
@@ -53,7 +57,10 @@
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",
     "@cyberk-flow/config": "workspace:*",
+    "@playwright/test": "1.48.2",
+    "@synthetixio/synpress": "4.0.6",
     "@types/bun": "catalog:",
+    "dotenv-cli": "^11.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "turbo": "^2.6.3",
@@ -61,7 +68,7 @@
   },
   "lint-staged": {
     "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
-      "biome check --write ."
+      "biome check --write"
     ]
   },
   "packageManager": "bun@1.3.6"
