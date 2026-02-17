@@ -66,6 +66,7 @@ Notes:
 - Use a dedicated test wallet only.
 - `.env.e2e.local` is gitignored via `.env*.local` and should stay local-only.
 - Dev servers are auto-started by Playwright via `webServer` config (`reuseExistingServer: true` skips if already running).
+- **Important**: webServer commands run the actual server commands directly (not via turbo) to prevent orphaned processes. See `docs/knowledge/playwright-webserver-orphan-process.md`.
 
 ## Local Workflow
 

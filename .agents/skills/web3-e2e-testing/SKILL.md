@@ -63,7 +63,11 @@ Create `playwright.config.ts` at project root. Key constraints for Synpress:
 - CI guard on trace/video to prevent secret leakage
 
 ```ts
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "@playwright/test";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   testDir: "./e2e/specs",
@@ -80,19 +84,29 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: "<dev-server-command>",
+      command: "bun run dev", // runs each app's own dev script directly
       port: <SERVER_PORT>,
-      reuseExistingServer: true,
+      reuseExistingServer: !process.env.CI,
+      cwd: path.resolve(__dirname, "<server-app-dir>"), // e.g. "apps/server"
     },
     {
-      command: "<dev-web-command>",
+      command: "bun run dev",
       port: <WEB_PORT>,
-      reuseExistingServer: true,
+      reuseExistingServer: !process.env.CI,
+      cwd: path.resolve(__dirname, "<web-app-dir>"), // e.g. "apps/web"
     },
   ],
   projects: [{ name: "chromium" }],
 });
 ```
+
+> **⚠️ Critical: webServer process cleanup rules**
+> 1. **Do NOT use turbo/nx/lerna** in webServer commands — they create independent process groups that escape Playwright's cleanup (EADDRINUSE).
+> 2. **Use absolute `cwd`** via `path.resolve(__dirname, ...)` — prevents failures when Playwright is invoked from non-root directories.
+> 3. **Use `!process.env.CI`** for `reuseExistingServer` — CI should fail fast on leaked processes, local reuses existing servers.
+> 4. **Use each app's own `dev` script** (`bun run dev`) — avoids `bunx` resolution surprises and keeps parity with normal dev workflow.
+>
+> See `docs/knowledge/playwright-webserver-orphan-process.md` for full root cause analysis.
 
 ### Step 4: Create E2E Directory Structure
 
@@ -188,3 +202,4 @@ The templates use RainbowKit selectors. Adapt the wallet setup's connect flow fo
 | Works in CLI, fails in UI mode | Use CLI as baseline; UI mode is debug-only |
 | Missing env var error | Check `.env.e2e.local` has all required values |
 | Origin mismatch (cache vs test) | Ensure `baseURL` in playwright config matches the URL used in wallet setup |
+| EADDRINUSE after tests finish | **Do NOT use turbo/nx in webServer commands.** Run actual server commands directly with `cwd`. See knowledge doc. |

@@ -1,4 +1,8 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "@playwright/test";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   testDir: "./e2e/specs",
@@ -15,14 +19,16 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: "bun run dev:server",
+      command: "bun run dev",
       port: 3000,
-      reuseExistingServer: true,
+      reuseExistingServer: !process.env.CI,
+      cwd: path.resolve(__dirname, "apps/server"),
     },
     {
-      command: "bun run dev:web",
+      command: "bun run dev",
       port: 3001,
-      reuseExistingServer: true,
+      reuseExistingServer: !process.env.CI,
+      cwd: path.resolve(__dirname, "apps/web"),
     },
   ],
   projects: [
