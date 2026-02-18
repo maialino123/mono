@@ -16,6 +16,7 @@ Automatically use skills in the following contexts:
 | Skill | Usage Context |
 | :--- | :--- |
 | `cyberk-flow` | proposal, spec, change, plan, kế hoạch |
+| `e2e-testing` | E2E testing, acceptance tests, test plans |
 | `cyberk-fsd-fe` | Web-related development |
 | `next-best-practices` | Next.js framework patterns |
 | `next-cache-components` | Next.js cache UI components |

@@ -7,7 +7,7 @@
 3. **Update**: After each task, mark `- [x]` in `tasks.md` and add an entry to `workflow.md` Revision Log. Only tick the overall "All tasks complete" checkbox in `workflow.md` once all tasks are done.
 4. **Adapt**: If implementation reveals design issues, update artifacts — workflow is fluid.
 5. **Merge**: After all parallel tracks complete, run the integration merge protocol.
-6. **Verify — Final Verify Gate**: Run the **Verify** commands from top of `tasks.md` (`check-types`, `check`, `test`). All must pass.
+6. **Verify — Final Verify Gate**: Run the **Verify** commands from top of `tasks.md` (may include type-check, lint, unit tests, E2E tests, etc.). All must pass.
 7. **Review — Oracle** (mandatory tool invocation): Run the `oracle` tool on **all files changed in this change since the base branch** (including newly added files). Focus: semantic correctness vs spec/design, edge cases, regression risks, security violations, architectural alignment. Categorize output into **must-fix** (blocking) and **nice-to-fix** (non-blocking).
 8. **Review — Code Review** (mandatory tool invocation): Load the `code-review` skill and run the `code_review` tool on the **full diff vs base branch** (not just last commit). Categorize output into **must-fix** (blocking) and **nice-to-fix** (non-blocking).
 9. **Review Fix Loop** (max 3 rounds; tool-driven; no self-assessment):
@@ -59,7 +59,7 @@ For each task in `tasks.md`:
 
 1. Read the task description, **Refs** (specs + design sections), and **Done** criteria.
 2. Confirm the task's `Files:` list (from `tasks.md`) is complete. If implementation requires touching a file not listed, STOP and request re-assignment (main agent updates `tasks.md`). Use design/discovery only to validate `Files:` completeness, not to expand it unilaterally.
-3. **RED — Write a failing test first**: Identify the observable behavior change for the task. Add or update the smallest appropriate automated test (unit/integration/contract) that demonstrates the behavior change. Confirm the test fails. If the baseline suite is not green, stop and fix baseline first (as its own task).
+3. **RED — Write a failing test first**: Identify the observable behavior change for the task. Add or update the smallest appropriate automated test (unit/integration/contract/e2e) that demonstrates the behavior change. Confirm the test fails. If the baseline suite is not green, stop and fix baseline first (as its own task). For UI acceptance behavior, the RED test may be an E2E spec — see [e2e-integration.md](e2e-integration.md).
 4. **GREEN — Make it pass**: Make the minimal code change to pass the test.
 5. **REFACTOR — Clean up**: Restructure while keeping tests green. Keep behavior constant.
 6. Run verification: in **single-track mode**, run the full **Verify** commands from top of `tasks.md`. In **parallel mode**, run lint + typecheck (e.g., `check-types`, `check`) and task-scoped/targeted tests only — the full test suite runs during the merge gate.

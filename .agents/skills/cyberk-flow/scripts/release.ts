@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "fs";
 import { join } from "path";
 
 const BUMP_TYPES = ["major", "minor", "patch"] as const;
@@ -89,15 +89,11 @@ export function updateChangelog(
 
   const afterUnreleased = idx + unreleasedHeader.length;
   const nextSectionMatch = changelogContent.slice(afterUnreleased).match(/\n## \[/);
-  const insertPos = nextSectionMatch ? afterUnreleased + nextSectionMatch.index! : changelogContent.length;
+  const insertPos = nextSectionMatch
+    ? afterUnreleased + nextSectionMatch.index!
+    : changelogContent.length;
 
-  return (
-    changelogContent.slice(0, insertPos).trimEnd() +
-    "\n\n" +
-    entry +
-    "\n" +
-    changelogContent.slice(insertPos).trimStart()
-  );
+  return changelogContent.slice(0, insertPos).trimEnd() + "\n\n" + entry + "\n" + changelogContent.slice(insertPos).trimStart();
 }
 
 function main() {

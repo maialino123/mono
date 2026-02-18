@@ -9,7 +9,7 @@ import {
 
 function tickApplyDeltasCheckbox(workflowPath: string) {
   if (!existsSync(workflowPath)) return;
-  const content = readFileSync(workflowPath, "utf-8");
+  let content = readFileSync(workflowPath, "utf-8");
   const re = /^(\s*-\s*\[)\s(\]\s+Apply deltas:.*)$/m;
   const updated = content.replace(re, "$1x$2");
   if (updated !== content) {

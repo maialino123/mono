@@ -57,7 +57,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",
     "@cyberk-flow/config": "workspace:*",
-    "@playwright/test": "1.48.2",
+    "@playwright/test": "^1.58.2",
     "@synthetixio/synpress": "4.0.6",
     "@types/bun": "catalog:",
     "dotenv-cli": "^11.0.0",
@@ -68,7 +68,7 @@
   },
   "lint-staged": {
     "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
-      "biome check --write"
+      "biome check --write --no-errors-on-unmatched"
     ]
   },
   "packageManager": "bun@1.3.6"

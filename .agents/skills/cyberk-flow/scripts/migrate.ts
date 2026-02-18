@@ -1,10 +1,12 @@
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, cpSync, rmSync, readdirSync, statSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join, resolve } from "path";
 import { init } from "./init.ts";
 import { findSkillTemplatesDir } from "./lib/find-templates.ts";
 
 const CYBERK_FLOW_DIR = "cyberk-flow";
-const OPENSPEC_SKILL_DIRS = [join(".agents", "skills", "openspec")];
+const OPENSPEC_SKILL_DIRS = [
+  join(".agents", "skills", "openspec"),
+];
 
 interface MigrateCounts {
   specs: number;
@@ -14,12 +16,7 @@ interface MigrateCounts {
   skipped: number;
 }
 
-function copyDirRecursive(
-  src: string,
-  dest: string,
-  counts: MigrateCounts,
-  countKey: "specs" | "changes" | "archived",
-): void {
+function copyDirRecursive(src: string, dest: string, counts: MigrateCounts, countKey: "specs" | "changes" | "archived"): void {
   if (!existsSync(dest)) {
     mkdirSync(dest, { recursive: true });
   }
@@ -177,7 +174,7 @@ async function migrate(source = "openspec", options: MigrateOptions = {}): Promi
     console.log(`\n⚠  ${counts.skipped} file(s) were skipped due to conflicts — keeping ${source}/ for manual review.`);
     console.log(`   Remove manually after resolving: rm -rf ${srcPath}`);
   } else {
-    console.log("\n⚠  Source is not the canonical openspec/ — skipping auto-delete.");
+    console.log(`\n⚠  Source is not the canonical openspec/ — skipping auto-delete.`);
     console.log(`   Remove manually if desired: rm -rf ${srcPath}`);
   }
 

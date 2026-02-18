@@ -28,6 +28,8 @@ Initialize cyberk-flow in your project → [references/init.md](references/init.
 | **Implement** | Executing tasks       | [references/implement.md](references/implement.md) |
 | **Archive**   | After merge/deploy    | [references/archive.md](references/archive.md)     |
 
+**Integration**: [E2E Testing](references/e2e-integration.md) — when changes affect user-visible UI behavior
+
 ## Mandatory Workflow Rules
 
 Every change has a `workflow.md` that tracks state. Follow these rules:

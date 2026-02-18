@@ -1,6 +1,15 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "fs";
 import { join } from "path";
 
+export function formatArchiveName(date: Date, changeId: string): string {
+  const y = String(date.getUTCFullYear()).slice(-2);
+  const mo = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(date.getUTCDate()).padStart(2, "0");
+  const h = String(date.getUTCHours()).padStart(2, "0");
+  const mi = String(date.getUTCMinutes()).padStart(2, "0");
+  return `${y}${mo}${d}-${h}${mi}-${changeId}`;
+}
+
 function extractArchiveSection(content: string): string | null {
   const normalized = content.replace(/\r\n?/g, "\n");
   const match = normalized.match(/^##\s+Archive\s*$/m);
@@ -10,7 +19,9 @@ function extractArchiveSection(content: string): string | null {
   if (startOfBody === -1) return null;
 
   const nextSection = normalized.indexOf("\n## ", startOfBody + 1);
-  return nextSection === -1 ? normalized.slice(startOfBody) : normalized.slice(startOfBody, nextSection);
+  return nextSection === -1
+    ? normalized.slice(startOfBody)
+    : normalized.slice(startOfBody, nextSection);
 }
 
 function validateArchiveSection(workflowPath: string): string[] {
@@ -51,45 +62,42 @@ function tickArchiveCheckbox(workflowPath: string) {
   }
 }
 
-const name = process.argv[2];
-if (!name) {
-  console.error("Usage: bun run cf archive <change-name>");
-  process.exit(1);
-}
-
-const changeDir = join("cyberk-flow", "changes", name);
-if (!existsSync(changeDir)) {
-  console.error(`Error: Change '${name}' not found at ${changeDir}`);
-  process.exit(1);
-}
-
-const workflowPath = join(changeDir, "workflow.md");
-const unchecked = validateArchiveSection(workflowPath);
-if (unchecked.length > 0) {
-  console.error("ERROR: Cannot archive — incomplete workflow steps in ## Archive:");
-  for (const item of unchecked) {
-    console.error(`  - [ ] ${item}`);
+if (import.meta.main) {
+  const name = process.argv[2];
+  if (!name) {
+    console.error("Usage: bun run cf archive <change-name>");
+    process.exit(1);
   }
-  process.exit(1);
+
+  const changeDir = join("cyberk-flow", "changes", name);
+  if (!existsSync(changeDir)) {
+    console.error(`Error: Change '${name}' not found at ${changeDir}`);
+    process.exit(1);
+  }
+
+  const workflowPath = join(changeDir, "workflow.md");
+  const unchecked = validateArchiveSection(workflowPath);
+  if (unchecked.length > 0) {
+    console.error("ERROR: Cannot archive — incomplete workflow steps in ## Archive:");
+    for (const item of unchecked) {
+      console.error(`  - [ ] ${item}`);
+    }
+    process.exit(1);
+  }
+
+  tickArchiveCheckbox(workflowPath);
+
+  const now = new Date();
+  const archiveName = formatArchiveName(now, name);
+  const archiveDir = join("cyberk-flow", "changes", "archive", archiveName);
+
+  if (existsSync(archiveDir)) {
+    console.error(`Error: Archive '${archiveName}' already exists`);
+    process.exit(1);
+  }
+
+  mkdirSync(join("cyberk-flow", "changes", "archive"), { recursive: true });
+  renameSync(changeDir, archiveDir);
+
+  console.log(`Archived '${name}' → archive/${archiveName}/`);
 }
-
-tickArchiveCheckbox(workflowPath);
-
-const now = new Date();
-const y = now.getUTCFullYear();
-const mo = String(now.getUTCMonth() + 1).padStart(2, "0");
-const d = String(now.getUTCDate()).padStart(2, "0");
-const h = String(now.getUTCHours()).padStart(2, "0");
-const mi = String(now.getUTCMinutes()).padStart(2, "0");
-const archiveName = `${y}-${mo}-${d}-${h}${mi}-${name}`;
-const archiveDir = join("cyberk-flow", "changes", "archive", archiveName);
-
-if (existsSync(archiveDir)) {
-  console.error(`Error: Archive '${archiveName}' already exists`);
-  process.exit(1);
-}
-
-mkdirSync(join("cyberk-flow", "changes", "archive"), { recursive: true });
-renameSync(changeDir, archiveDir);
-
-console.log(`Archived '${name}' → archive/${archiveName}/`);
