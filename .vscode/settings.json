@@ -22,6 +22,10 @@
   "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
+  "amp.permissions": [
+    { "tool": "Read", "matches": { "path": ["*.env", "*.env.*", "**/.env", "**/.env.*", "**/secrets/**", "**/*.pem", "**/*.key"] }, "action": "reject" },
+    { "tool": "Bash", "matches": { "cmd": ["*cat*.env*", "*less*.env*", "*head*.env*", "*tail*.env*", "*echo*ENV*", "*cat*secrets*", "*cat*.pem*", "*cat*.key*"] }, "action": "reject" }
+  ],
   "amp.mcpServers": {
     "shadcn-studio-mcp": {
       "command": "npx",

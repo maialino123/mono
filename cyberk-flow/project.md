@@ -38,6 +38,13 @@ CyberK Flow is a full-stack TypeScript monorepo (web + mobile + API server) buil
 - **Charts**: Recharts 3 — `apps/web/package.json`
 - **Forms**: TanStack Form — `apps/web`, `apps/native`
 
+## Commands
+
+- **Type check**: `bun run check-types`
+- **Lint**: `bun run check`
+- **Test**: `bun test`
+- **E2E**: `bun run e2e:test`
+
 ## Conventions
 
 ### Code Style
