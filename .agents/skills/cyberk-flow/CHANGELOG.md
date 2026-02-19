@@ -4,6 +4,21 @@ All notable changes to the **cyberk-flow** skill will be documented in this file
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-02-19
+
+### Changed
+
+- redesign-release: Current release model creates 1 version per change (`cf release <id> <bump>`), leading to version inflation. There's no natural grouping of changes into releases. A git-based approach is simpler: unreleased = committed but not pushed, release = bump version + push.
+
+- add-hooks: Users need a way to run custom scripts before/after cyberk-flow CLI commands (e.g., auto-format after apply-deltas, notify after archive). Currently there is no extensibility point.
+- fix-plan-workflow: Two bugs in cyberk-flow planning stage: 1. `cf new` copies unnecessary templates (`project.md`, `ROOT_AGENTS.md`, `spike.md`, `spike-learning.md`, `task.md`) into every change — these are global/on-demand templates, not per-change artifacts. 2. Step 8 (Validation) is effectively invisible — its checklist only exists in `references/plan.md`, not in the change's `workflow.md`. The agent skips validation because it only sees a single checkbox.
+- add-openspec-migration: Projects currently using the `openspec/` directory structure need a way to migrate to the new `cyberk-flow/` format. The formats are very similar but cyberk-flow adds new artifacts (workflow.md), richer templates (proposal with Appetite/Scope/Risk, tasks with Tracks/Deps), and uses `cyberk-flow/` as root directory instead of `openspec/`.
+- add-update-command: Users need a simple way to update cyberk-flow skills to the latest version. Currently there's no built-in command — users must manually run external tools.
+- shorten-archive-format: Current archive format `yyyy-MM-dd-HHmm-<name>` is verbose (15 chars for date). Shorten to `yyMMdd-HHmm-<name>` (11 chars) for cleaner directory listings while retaining sortability and time precision.
+- integrate-e2e-testing: e2e-testing skill hardcodes cyberk-flow workflow stages (inverted dependency). cyberk-flow doesn't reference e2e-testing, so users following cyberk-flow never discover E2E planning. Need to fix dependency direction and add E2E touchpoints in cyberk-flow.
+- integrate-biome: The project has no automated code quality tooling — style conventions exist only as prose in AGENTS.md. Adding Biome provides fast, unified linting + formatting + import sorting with a single dependency.
+- redesign-release: Redesign release workflow — git-based versioning with unreleased accumulation.
+
 ## [1.1.3] - 2026-02-15
 
 ### Changed

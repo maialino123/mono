@@ -1,5 +1,6 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
-import { join } from "path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { runHook } from "./lib/hooks.ts";
 import {
   extractRequirementsSection,
   normalizeRequirementName,
@@ -9,7 +10,7 @@ import {
 
 function tickApplyDeltasCheckbox(workflowPath: string) {
   if (!existsSync(workflowPath)) return;
-  let content = readFileSync(workflowPath, "utf-8");
+  const content = readFileSync(workflowPath, "utf-8");
   const re = /^(\s*-\s*\[)\s(\]\s+Apply deltas:.*)$/m;
   const updated = content.replace(re, "$1x$2");
   if (updated !== content) {
@@ -213,6 +214,8 @@ function main() {
     process.exit(1);
   }
 
+  if (!runHook("pre-apply-deltas", [name])) process.exit(1);
+
   const summaries: string[] = [];
   const results: Array<{ path: string; content: string }> = [];
 
@@ -247,6 +250,8 @@ function main() {
 
   const workflowPath = join("cyberk-flow", "changes", name, "workflow.md");
   tickApplyDeltasCheckbox(workflowPath);
+
+  runHook("post-apply-deltas", [name]);
 }
 
 if (import.meta.main) {

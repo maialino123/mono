@@ -1,15 +1,12 @@
-import { existsSync, mkdirSync, cpSync } from "fs";
-import { join, resolve } from "path";
+import { cpSync, existsSync, mkdirSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { findSkillTemplatesDir } from "./lib/find-templates.ts";
 
 const CYBERK_FLOW_DIR = "cyberk-flow";
 const OPENSPEC_DIR = "openspec";
 const MARKER_FILE = join(CYBERK_FLOW_DIR, "project.md");
 
-const DIRS = [
-  join(CYBERK_FLOW_DIR, "changes", "archive"),
-  join(CYBERK_FLOW_DIR, "specs"),
-];
+const DIRS = [join(CYBERK_FLOW_DIR, "changes", "archive"), join(CYBERK_FLOW_DIR, "specs")];
 
 function isInitialized(): boolean {
   return existsSync(MARKER_FILE);

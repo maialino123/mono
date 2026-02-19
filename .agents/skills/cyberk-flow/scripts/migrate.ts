@@ -1,12 +1,10 @@
-import { existsSync, mkdirSync, cpSync, rmSync, readdirSync, statSync, readFileSync, writeFileSync } from "fs";
-import { dirname, join, resolve } from "path";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { init } from "./init.ts";
 import { findSkillTemplatesDir } from "./lib/find-templates.ts";
 
 const CYBERK_FLOW_DIR = "cyberk-flow";
-const OPENSPEC_SKILL_DIRS = [
-  join(".agents", "skills", "openspec"),
-];
+const OPENSPEC_SKILL_DIRS = [join(".agents", "skills", "openspec")];
 
 interface MigrateCounts {
   specs: number;
@@ -16,7 +14,12 @@ interface MigrateCounts {
   skipped: number;
 }
 
-function copyDirRecursive(src: string, dest: string, counts: MigrateCounts, countKey: "specs" | "changes" | "archived"): void {
+function copyDirRecursive(
+  src: string,
+  dest: string,
+  counts: MigrateCounts,
+  countKey: "specs" | "changes" | "archived",
+): void {
   if (!existsSync(dest)) {
     mkdirSync(dest, { recursive: true });
   }

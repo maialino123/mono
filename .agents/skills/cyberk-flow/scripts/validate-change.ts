@@ -1,5 +1,6 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "fs";
-import { join } from "path";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { runHook } from "./lib/hooks.ts";
 import type { DeltaPlan, RequirementBlock } from "./lib/parse-delta.js";
 import { normalizeRequirementName, parseDeltaSpec } from "./lib/parse-delta.js";
 
@@ -89,7 +90,6 @@ export function validateChange(changeDir: string): ValidationResult {
       removedDups.add(normalized);
     }
 
-    const addedNames = new Set(delta.added.map((r) => normalizeRequirementName(r.name)));
     const modifiedNames = new Set(delta.modified.map((r) => normalizeRequirementName(r.name)));
     const removedNames = new Set(delta.removed.map((r) => normalizeRequirementName(r)));
 
@@ -187,6 +187,8 @@ if (import.meta.main) {
     process.exit(1);
   }
 
+  if (!runHook("pre-validate-change", [name])) process.exit(1);
+
   const result = validateChange(changeDir);
 
   for (const issue of result.issues) {
@@ -201,4 +203,6 @@ if (import.meta.main) {
   } else {
     console.log("Validation passed");
   }
+
+  runHook("post-validate-change", [name]);
 }

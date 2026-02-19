@@ -1,6 +1,7 @@
-import { cpSync, existsSync, mkdirSync } from "fs";
-import { join } from "path";
+import { cpSync, existsSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 import { findSkillTemplatesDir } from "./lib/find-templates.ts";
+import { runHook } from "./lib/hooks.ts";
 
 const name = process.argv[2];
 if (!name) {
@@ -18,6 +19,8 @@ if (existsSync(changeDir)) {
   console.error(`Error: Change '${name}' already exists at ${changeDir}`);
   process.exit(1);
 }
+
+if (!runHook("pre-new-change", [name])) process.exit(1);
 
 mkdirSync(join(changeDir, "specs"), { recursive: true });
 
@@ -38,3 +41,5 @@ for (const file of REQUIRED_TEMPLATES) {
 }
 
 console.log(`Created change '${name}' at ${changeDir}/`);
+
+runHook("post-new-change", [name]);

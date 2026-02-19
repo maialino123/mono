@@ -1,5 +1,5 @@
-import { existsSync } from "fs";
-import { join, resolve } from "path";
+import { existsSync } from "node:fs";
+import { join, resolve } from "node:path";
 
 /**
  * Resolve the skill templates directory from known install locations.

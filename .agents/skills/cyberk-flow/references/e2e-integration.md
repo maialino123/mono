@@ -18,6 +18,6 @@ Changes that affect **user-visible UI behavior**: new pages/routes, auth flows, 
 
 When E2E is in scope, these workflow artifacts MUST be updated:
 
-- **`tasks.md` Verify line**: append the repo's E2E command (e.g., `bun run e2e:test`)
+- **`tasks.md` Verify line**: use `bun run cf verify --e2e` (E2E command defined in `cyberk-flow/project.md` § Commands)
 - **`tasks.md` task list**: add explicit E2E task(s) with spec Refs and measurable Done criteria
 - **Verify gate**: E2E command must pass alongside other verify commands

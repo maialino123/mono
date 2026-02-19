@@ -94,7 +94,7 @@ Create spikes **iff** design Risk Map has **HIGH** entries. 1 spike per HIGH ite
 
 Template: `tasks.md` — execution-ordered checklist referencing specs (what) and design (how).
 
-- **Global Verify** at top (once): `bun run check-types`, `bun run check`, `bun test`.
+- **Global Verify** at top (once): `bun run cf verify` (reads commands from `cyberk-flow/project.md` § Commands).
 - **E2E testing**: If the change affects user-visible UI behavior, see [e2e-integration.md](e2e-integration.md) for touchpoints and workflow contract.
 - **Spikes first**: section 0 (`0_x`), completed before any track starts.
 - Each task: **Track** (letter), **Deps**, **Refs** (spec/design anchors), **Done** (measurable criteria), **Files** (required when parallel tracks are used; optional for single-track).

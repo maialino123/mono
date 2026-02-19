@@ -1,5 +1,6 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "fs";
-import { join } from "path";
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { runHook } from "./lib/hooks.ts";
 
 export function formatArchiveName(date: Date, changeId: string): string {
   const y = String(date.getUTCFullYear()).slice(-2);
@@ -19,9 +20,7 @@ function extractArchiveSection(content: string): string | null {
   if (startOfBody === -1) return null;
 
   const nextSection = normalized.indexOf("\n## ", startOfBody + 1);
-  return nextSection === -1
-    ? normalized.slice(startOfBody)
-    : normalized.slice(startOfBody, nextSection);
+  return nextSection === -1 ? normalized.slice(startOfBody) : normalized.slice(startOfBody, nextSection);
 }
 
 function validateArchiveSection(workflowPath: string): string[] {
@@ -85,6 +84,8 @@ if (import.meta.main) {
     process.exit(1);
   }
 
+  if (!runHook("pre-archive-change", [name])) process.exit(1);
+
   tickArchiveCheckbox(workflowPath);
 
   const now = new Date();
@@ -100,4 +101,6 @@ if (import.meta.main) {
   renameSync(changeDir, archiveDir);
 
   console.log(`Archived '${name}' → archive/${archiveName}/`);
+
+  runHook("post-archive-change", [name]);
 }

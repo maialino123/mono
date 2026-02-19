@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, readdirSync, writeFileSync } from "fs";
-import { join } from "path";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 const BUMP_TYPES = ["major", "minor", "patch"] as const;
 type BumpType = (typeof BUMP_TYPES)[number];
@@ -14,7 +14,7 @@ function getChangelogPath(): string {
 
 function parseVersion(version: string): [number, number, number] {
   const parts = version.split(".").map(Number);
-  if (parts.length !== 3 || parts.some(isNaN)) {
+  if (parts.length !== 3 || parts.some(Number.isNaN)) {
     throw new Error(`Invalid version: ${version}`);
   }
   return parts as [number, number, number];
@@ -44,64 +44,98 @@ function updateSkillVersion(content: string, newVersion: string): string {
   return content.replace(/^(version:\s*).+$/m, `$1${newVersion}`);
 }
 
-function findChangeDir(changeId: string): string {
-  const activeDir = join("cyberk-flow", "changes", changeId);
-  if (existsSync(activeDir)) return activeDir;
-
-  const archiveDir = join("cyberk-flow", "changes", "archive");
-  if (existsSync(archiveDir)) {
-    const entries = readdirSync(archiveDir, { withFileTypes: true })
-      .filter((e) => e.isDirectory() && e.name.endsWith(`-${changeId}`))
-      .sort((a, b) => b.name.localeCompare(a.name));
-    if (entries.length > 0) return join(archiveDir, entries[0].name);
-  }
-
-  throw new Error(`Change '${changeId}' not found in active or archived changes`);
-}
-
-function extractWhySection(proposalContent: string): string {
-  const lines = proposalContent.split("\n");
-  const whyIdx = lines.findIndex((l) => /^##\s+Why/i.test(l));
-  if (whyIdx === -1) return "No description available.";
-
-  const contentLines: string[] = [];
-  for (let i = whyIdx + 1; i < lines.length; i++) {
-    if (/^##\s/.test(lines[i])) break;
-    contentLines.push(lines[i]);
-  }
-  const raw = contentLines.join(" ").replace(/\s+/g, " ").trim();
-  return raw || "No description available.";
-}
-
-export function updateChangelog(
-  changelogContent: string,
-  newVersion: string,
-  date: string,
-  changeId: string,
-  summary: string,
-): string {
-  const entry = `## [${newVersion}] - ${date}\n\n### Changed\n\n- ${changeId}: ${summary}\n`;
+/**
+ * Extract the content between `## [Unreleased]` and the next `## [` section.
+ * Returns the trimmed body text (without the header itself).
+ */
+export function extractUnreleasedContent(changelogContent: string): string {
   const unreleasedHeader = "## [Unreleased]";
   const idx = changelogContent.indexOf(unreleasedHeader);
   if (idx === -1) {
     throw new Error("No '## [Unreleased]' section found in CHANGELOG.md");
   }
 
-  const afterUnreleased = idx + unreleasedHeader.length;
-  const nextSectionMatch = changelogContent.slice(afterUnreleased).match(/\n## \[/);
-  const insertPos = nextSectionMatch
-    ? afterUnreleased + nextSectionMatch.index!
+  const afterHeader = idx + unreleasedHeader.length;
+  const nextSectionMatch = changelogContent.slice(afterHeader).match(/\n## \[/);
+  const endPos = nextSectionMatch
+    ? // biome-ignore lint/style/noNonNullAssertion: index is guaranteed defined when match is truthy
+      afterHeader + nextSectionMatch.index!
     : changelogContent.length;
 
-  return changelogContent.slice(0, insertPos).trimEnd() + "\n\n" + entry + "\n" + changelogContent.slice(insertPos).trimStart();
+  return changelogContent.slice(afterHeader, endPos).trim();
+}
+
+/**
+ * Freeze the `[Unreleased]` section into a versioned entry.
+ * Moves all content under `[Unreleased]` into `## [version] - date` and clears `[Unreleased]`.
+ */
+export function freezeChangelog(changelogContent: string, newVersion: string, date: string): string {
+  const unreleasedContent = extractUnreleasedContent(changelogContent);
+  if (!unreleasedContent) {
+    throw new Error("Nothing to release — [Unreleased] section is empty");
+  }
+
+  const unreleasedHeader = "## [Unreleased]";
+  const idx = changelogContent.indexOf(unreleasedHeader);
+  const afterHeader = idx + unreleasedHeader.length;
+  const nextSectionMatch = changelogContent.slice(afterHeader).match(/\n## \[/);
+  // biome-ignore lint/style/noNonNullAssertion: index is guaranteed defined when match is truthy
+  const endPos = nextSectionMatch ? afterHeader + nextSectionMatch.index! : changelogContent.length;
+
+  const versionEntry = `## [${newVersion}] - ${date}\n\n${unreleasedContent}\n`;
+
+  return (
+    changelogContent.slice(0, idx) +
+    unreleasedHeader +
+    "\n\n" +
+    versionEntry +
+    "\n" +
+    changelogContent.slice(endPos).trimStart()
+  );
+}
+
+/**
+ * Append a change entry under the `[Unreleased]` section.
+ */
+export function addUnreleasedEntry(changelogContent: string, changeId: string, summary: string): string {
+  const unreleasedHeader = "## [Unreleased]";
+  const idx = changelogContent.indexOf(unreleasedHeader);
+  if (idx === -1) {
+    throw new Error("No '## [Unreleased]' section found in CHANGELOG.md");
+  }
+
+  const afterHeader = idx + unreleasedHeader.length;
+  const nextSectionMatch = changelogContent.slice(afterHeader).match(/\n## \[/);
+  // biome-ignore lint/style/noNonNullAssertion: index is guaranteed defined when match is truthy
+  const endPos = nextSectionMatch ? afterHeader + nextSectionMatch.index! : changelogContent.length;
+
+  const existingContent = changelogContent.slice(afterHeader, endPos).trim();
+  const newEntry = `- ${changeId}: ${summary}`;
+
+  let newUnreleasedBody: string;
+  if (existingContent.includes("### Changed")) {
+    newUnreleasedBody = existingContent.replace(/(### Changed\n)/, `$1\n${newEntry}\n`);
+  } else if (existingContent) {
+    newUnreleasedBody = `${existingContent}\n${newEntry}`;
+  } else {
+    newUnreleasedBody = `### Changed\n\n${newEntry}`;
+  }
+
+  return (
+    changelogContent.slice(0, idx) +
+    unreleasedHeader +
+    "\n\n" +
+    newUnreleasedBody +
+    "\n\n" +
+    changelogContent.slice(endPos).trimStart()
+  );
 }
 
 function main() {
-  const changeId = process.argv[2];
-  const bumpType = process.argv[3] as BumpType;
+  const bumpType = process.argv[2] as BumpType;
 
-  if (!changeId || !bumpType) {
-    console.error("Usage: bun run cf release <change-id> <major|minor|patch>");
+  if (!bumpType) {
+    console.error("Usage: bun run cf release <major|minor|patch>");
     process.exit(1);
   }
 
@@ -123,15 +157,12 @@ function main() {
     process.exit(1);
   }
 
-  const changeDir = findChangeDir(changeId);
-  const proposalPath = join(changeDir, "proposal.md");
-  if (!existsSync(proposalPath)) {
-    console.error(`Error: proposal.md not found at ${proposalPath}`);
+  const changelogContent = readFileSync(changelogPath, "utf-8");
+  const unreleasedContent = extractUnreleasedContent(changelogContent);
+  if (!unreleasedContent) {
+    console.error("Error: Nothing to release — [Unreleased] section is empty");
     process.exit(1);
   }
-
-  const proposalContent = readFileSync(proposalPath, "utf-8");
-  const summary = extractWhySection(proposalContent);
 
   const skillContent = readFileSync(skillMdPath, "utf-8");
   const currentVersion = readSkillVersion(skillContent);
@@ -143,8 +174,7 @@ function main() {
   const now = new Date();
   const date = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
 
-  const changelogContent = readFileSync(changelogPath, "utf-8");
-  const updatedChangelog = updateChangelog(changelogContent, newVersion, date, changeId, summary);
+  const updatedChangelog = freezeChangelog(changelogContent, newVersion, date);
   writeFileSync(changelogPath, updatedChangelog);
 
   console.log(`Released ${currentVersion} → ${newVersion}`);

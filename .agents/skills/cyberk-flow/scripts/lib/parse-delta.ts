@@ -153,7 +153,7 @@ export function extractRequirementsSection(content: string): RequirementsSection
 
   if (headerIndex === -1) {
     return {
-      before: normalized.trimEnd() + "\n\n",
+      before: `${normalized.trimEnd()}\n\n`,
       headerLine: "## Requirements",
       preamble: "",
       bodyBlocks: [],

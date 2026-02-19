@@ -1,4 +1,4 @@
-**Verify**: `bun run check-types` · `bun run check` · `bun test`
+**Verify**: `bun run cf verify` · add `--e2e` if E2E is in scope
 
 <!-- Dependency graph: a track is a sequential chain of tasks executed by one sub-agent. -->
 <!-- Different tracks run as concurrent sub-agents. -->

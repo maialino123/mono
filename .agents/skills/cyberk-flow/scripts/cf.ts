@@ -1,20 +1,21 @@
-import { resolve } from "path";
-import { spawnSync } from "child_process";
+import { spawnSync } from "node:child_process";
+import { resolve } from "node:path";
 
 const SCRIPTS_DIR = resolve(import.meta.dir);
 
 const COMMANDS: Record<string, { script: string; args?: string[]; desc: string }> = {
-  init:     { script: "init.ts",            desc: "Initialize cyberk-flow in project" },
-  changes:  { script: "list.ts",            args: ["changes"], desc: "List changes with task progress" },
-  specs:    { script: "list.ts",            args: ["specs"], desc: "List specs with requirement count" },
-  new:      { script: "new-change.ts",      desc: "Create new change (kebab-case)" },
+  init: { script: "init.ts", desc: "Initialize cyberk-flow in project" },
+  changes: { script: "list.ts", args: ["changes"], desc: "List changes with task progress" },
+  specs: { script: "list.ts", args: ["specs"], desc: "List specs with requirement count" },
+  new: { script: "new-change.ts", desc: "Create new change (kebab-case)" },
   validate: { script: "validate-change.ts", desc: "Validate delta specs" },
-  apply:    { script: "apply-deltas.ts",    desc: "Apply delta specs to main specs" },
-  archive:  { script: "archive-change.ts",  desc: "Move change to archive/" },
-  release:  { script: "release.ts",         desc: "Create a release (bump version + changelog)" },
-  migrate:  { script: "migrate.ts",         desc: "Migrate openspec/ to cyberk-flow/" },
+  apply: { script: "apply-deltas.ts", desc: "Apply delta specs to main specs" },
+  verify: { script: "verify.ts", desc: "Run verify commands from project.md (--e2e to include E2E)" },
+  archive: { script: "archive-change.ts", desc: "Move change to archive/" },
+  release: { script: "release.ts", desc: "Create a release (bump version + changelog)" },
+  migrate: { script: "migrate.ts", desc: "Migrate openspec/ to cyberk-flow/" },
   "migrate-archive": { script: "migrate-archive.ts", desc: "Rename old archive dirs to yyMMdd-HHmm format" },
-  update:   { script: "update.ts",          desc: "Update skills from cyberk-dev/cyberk-skills" },
+  update: { script: "update.ts", desc: "Update skills from cyberk-dev/cyberk-skills" },
 };
 
 const HELP_FLAGS = new Set(["help", "-h", "--help"]);

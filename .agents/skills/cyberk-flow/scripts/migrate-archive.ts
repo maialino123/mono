@@ -1,5 +1,5 @@
-import { existsSync, readdirSync, renameSync } from "fs";
-import { join } from "path";
+import { existsSync, readdirSync, renameSync } from "node:fs";
+import { join } from "node:path";
 
 // Old format with time: yyyy-MM-dd-HHmm-<name>
 const OLD_WITH_TIME = /^(\d{4})-(\d{2})-(\d{2})-(\d{4})-(.+)$/;
