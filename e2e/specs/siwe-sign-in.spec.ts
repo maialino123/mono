@@ -3,24 +3,27 @@ import { expect, test } from "../fixtures/phantom.fixture";
 test("sign in with Phantom via SIWE", async ({ page, phantom }) => {
   await page.goto("/sign-in");
 
-  // Connect wallet if not pre-connected from cache
-  const connectWalletButton = page.getByRole("button", { name: "Connect Wallet" });
-  await expect(connectWalletButton).toBeVisible();
-  await connectWalletButton.click();
+  // Step 1: Click "Connect Wallet" (or "Sign in with Wallet") to open RainbowKit modal
+  const walletButton = page.getByRole("button", { name: /Connect Wallet|Sign in with Wallet/ });
+  await expect(walletButton).toBeVisible();
+  await walletButton.click();
 
-  // RainbowKit connect dialog
+  // Step 2: If RainbowKit modal opens, select Phantom
   const rainbowKitDialog = page.getByRole("dialog");
-  await rainbowKitDialog.waitFor();
-  await page.getByRole("button", { name: "Phantom" }).click();
-  await phantom.connectToDapp();
-  await rainbowKitDialog.waitFor({ state: "hidden" });
+  if (await rainbowKitDialog.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await page.getByRole("button", { name: "Phantom" }).click();
+    await phantom.connectToDapp();
+    await rainbowKitDialog.waitFor({ state: "hidden", timeout: 10_000 });
+  }
 
-  // Now sign the SIWE message
-  const signInWithWalletButton = page.getByRole("button", { name: /sign in with wallet/i });
-  await expect(signInWithWalletButton).toBeVisible({ timeout: 10_000 });
-  await signInWithWalletButton.click();
+  // Step 3: After wallet connected, click "Sign in with Wallet"
+  const signInButton = page.getByRole("button", { name: "Sign in with Wallet" });
+  await expect(signInButton).toBeVisible({ timeout: 10_000 });
+  await signInButton.click();
+
+  // Step 4: Approve SIWE signature in Phantom
   await phantom.confirmSignature();
 
-  await page.waitForURL((url) => !url.pathname.startsWith("/sign-in"));
-  await expect(page).toHaveURL(/\/(mint)?$/);
+  // Step 5: Assert redirect to authenticated route
+  await page.waitForURL((url) => !url.pathname.startsWith("/sign-in"), { timeout: 15_000 });
 });

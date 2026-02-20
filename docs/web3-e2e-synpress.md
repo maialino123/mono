@@ -71,7 +71,7 @@ The E2E pipeline is split into three stages defined in `package.json`:
 | Script | Command | Purpose |
 |--------|---------|---------|
 | `e2e:download-phantom` | `bun run e2e/scripts/download-phantom.ts` | Download Phantom CRX extension file |
-| `e2e:enable-testnet` | `dotenv -e .env.e2e.local -- bun run e2e/scripts/enable-phantom-testnet.ts` | Enable testnet mode in cached Phantom profile |
+| `e2e:enable-testnet` | `bun run e2e/scripts/enable-phantom-testnet.ts` | Enable testnet mode in cached Phantom profile (via chrome.storage.local) |
 | `e2e:cache` | `e2e:download-phantom` → `synpress --phantom` → `e2e:enable-testnet` | Full cache build pipeline |
 | `e2e:cache:force` | Same as `e2e:cache` but with `--force` flag | Force rebuild ignoring existing cache |
 | `e2e:test` | `dotenv -e .env.e2e.local -- playwright test` | Run all E2E tests |
@@ -120,7 +120,11 @@ Phantom is not available in the Chrome Web Store as a direct CRX download. The `
 
 ### Testnet Toggle
 
-Phantom does not expose testnet networks by default. The `e2e/scripts/enable-phantom-testnet.ts` script launches a browser with the cached Phantom profile and programmatically enables the testnet toggle in Phantom's developer settings. This runs as the final step of `e2e:cache`, after wallet import.
+Phantom does not expose testnet networks by default. The `e2e/scripts/enable-phantom-testnet.ts` script launches a browser with the cached Phantom profile and enables testnet mode by directly writing to Phantom's `chrome.storage.local` via the extension's service worker (`serviceWorker.evaluate()`). This avoids brittle UI automation — no password unlock, no selector dependencies.
+
+**Storage location:** `mmkv:items:localStorage` → `accounts:developerMode` → `{ isDeveloperMode: true }`
+
+This runs as the final step of `e2e:cache`, after wallet import. If Phantom changes its internal storage schema, the script will fail with diagnostic output listing available storage keys.
 
 ## Common Issues and Fixes
 
@@ -155,6 +159,7 @@ Symptoms:
 
 Fix:
 - Run `bun run e2e:enable-testnet` manually, or rebuild cache with `bun run e2e:cache:force`.
+- If the enable script fails with `MMKV blob not found` or `Write verification failed`, Phantom may have changed its internal storage schema. See the troubleshooting section in `.agents/skills/e2e-testing/references/troubleshooting/web3-phantom.md` for key rediscovery steps.
 
 ### 4. Playwright UI mode instability
 

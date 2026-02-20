@@ -32,10 +32,10 @@ Pipeline: download CRX → build cache → enable testnet → run tests.
 ```json
 {
   "e2e:download-phantom": "bun run e2e/scripts/download-phantom.ts",
-  "e2e:enable-testnet": "dotenv -e .env.e2e.local -- bun run e2e/scripts/enable-phantom-testnet.ts",
-  "e2e:cache": "bun run e2e:download-phantom && dotenv -e .env.e2e.local -- synpress e2e/wallet-setup --headless --phantom && bun run e2e:enable-testnet",
-  "e2e:cache:force": "bun run e2e:download-phantom && dotenv -e .env.e2e.local -- synpress e2e/wallet-setup --headless --phantom --force && bun run e2e:enable-testnet",
-  "e2e:test:siwe": "dotenv -e .env.e2e.local -- playwright test e2e/specs/siwe-sign-in.spec.ts"
+  "e2e:enable-testnet": "dotenv-cli -e .env.e2e.local -- bun run e2e/scripts/enable-phantom-testnet.ts",
+  "e2e:cache": "bun run e2e:download-phantom && dotenv-cli -e .env.e2e.local -- synpress e2e/wallet-setup --headless --phantom && bun run e2e:enable-testnet",
+  "e2e:cache:force": "bun run e2e:download-phantom && dotenv-cli -e .env.e2e.local -- synpress e2e/wallet-setup --headless --phantom --force && bun run e2e:enable-testnet",
+  "e2e:test:siwe": "dotenv-cli -e .env.e2e.local -- playwright test e2e/specs/siwe-sign-in.spec.ts"
 }
 ```
 
@@ -74,9 +74,11 @@ bun run e2e:test:siwe
 Two-phase approach:
 
 1. **Cache build** — `defineWalletSetup` imports wallet only (minimal → stable cache hash)
-2. **Post-cache fixup** — standard Playwright script configures testnet mode, dismisses popups
+2. **Post-cache fixup** — enables testnet mode via direct `chrome.storage.local` manipulation (no UI automation)
 
-This avoids Synpress's `extractWalletSetupFunction` regex limits (3 levels of brace nesting) and keeps the cache hash stable across code changes.
+The fixup script uses Playwright's `serviceWorker.evaluate()` to write directly to Phantom's internal MMKV storage (`mmkv:items:localStorage` → `accounts:developerMode`). This avoids brittle UI selectors that break on Phantom updates.
+
+This also avoids Synpress's `extractWalletSetupFunction` regex limits (3 levels of brace nesting) and keeps the cache hash stable across code changes.
 
 ## Wallet UI Adapting
 

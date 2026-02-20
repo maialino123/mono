@@ -1,6 +1,6 @@
 # download-phantom.ts
 
-Downloads Phantom CRX from Chrome Web Store. Required because Synpress's built-in URL (`crx-backup.phantom.dev`) is broken.
+Downloads Phantom CRX from Chrome Web Store. Required because Synpress's built-in URL (`crx-backup.phantom.dev`) is broken. Synpress extracts this `.crx` into `.cache-synpress/phantom-chrome-latest/` (unpacked dir) during cache build.
 
 ```ts
 import fs from "node:fs";

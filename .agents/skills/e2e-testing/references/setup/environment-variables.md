@@ -16,7 +16,7 @@ E2E_WALLET_SEED_PHRASE="test test test test test test test test test test test j
 
 ## Loading
 
-Uses `dotenv-cli` — all e2e scripts prefix with `dotenv -e .env.e2e.local --`. See [web3-synpress.md](web3-synpress.md#step-2-scripts) for full script definitions.
+Uses `dotenv-cli` (installed as devDependency) — all e2e scripts prefix with `dotenv-cli -e .env.e2e.local --`. Use `dotenv-cli` (not bare `dotenv`) to avoid conflicts with system-level `dotenv` utilities. See [web3-synpress.md](web3-synpress.md#step-2-scripts) for full script definitions.
 
 Validation: use `requireEnv()` helper (see [required-env.md](../templates/web3/required-env.md)) to fail fast on missing vars.
 

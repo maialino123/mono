@@ -56,4 +56,5 @@ drafts
 playwright-report
 test-results
 .playwright-cli
+.env.e2e.local
 cyberk-flow/memory.db*

@@ -176,4 +176,5 @@ Phantom wallet automation via Synpress. Adds constraints: single worker, version
 | Base seed test | [templates/base/seed-spec.md](references/templates/base/seed-spec.md) |
 | Web3 templates | [templates/web3/](references/templates/web3/) (phantom-setup, fixture, download, testnet enabler, SIWE spec) |
 | **Troubleshooting** | |
+| Web3/Phantom issues | [troubleshooting/web3-phantom.md](references/troubleshooting/web3-phantom.md) |
 | webServer orphans | [troubleshooting/webserver-orphans.md](references/troubleshooting/webserver-orphans.md) |
