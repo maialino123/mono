@@ -48,6 +48,8 @@ Template: `discovery.md` — select relevant workstreams, run as parallel sub-ag
 
 Template: `proposal.md` — fill why, appetite (`S ≤1d` / `M ≤3d` / `L ≤2w`), scope boundaries + cuts, capability list, impact, risk rating.
 
+- **MANDATORY**: Determine whether the change affects **user-visible UI behavior** (new pages, form interactions, navigation, etc.). Record the decision in `proposal.md` § "UI Impact & E2E". If YES → E2E is **in scope** by default; follow [e2e-integration.md](e2e-integration.md). If UI Impact = YES but E2E = NOT REQUIRED, **STOP at the gate** and request explicit user approval of the justification.
+
 ## 4. Specs (Delta Format)
 
 Create ONE spec file per capability. **Path**: `cyberk-flow/changes/<change-id>/specs/<capability-name>/spec.md`.
@@ -94,8 +96,7 @@ Create spikes **iff** design Risk Map has **HIGH** entries. 1 spike per HIGH ite
 
 Template: `tasks.md` — execution-ordered checklist referencing specs (what) and design (how).
 
-- **Global Verify** at top (once): `bun run cf verify` (reads commands from `cyberk-flow/project.md` § Commands).
-- **E2E testing**: If the change affects user-visible UI behavior, see [e2e-integration.md](e2e-integration.md) for touchpoints and workflow contract.
+- **E2E testing (mandatory when `proposal.md` marks E2E = REQUIRED)**: Add explicit E2E task(s) with spec **Refs** and measurable **Done** criteria. Implement will run the **E2E** command from `project.md` § Commands. See [e2e-integration.md](e2e-integration.md) for the workflow contract.
 - **Spikes first**: section 0 (`0_x`), completed before any track starts.
 - Each task: **Track** (letter), **Deps**, **Refs** (spec/design anchors), **Done** (measurable criteria), **Files** (required when parallel tracks are used; optional for single-track).
 

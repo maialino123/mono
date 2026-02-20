@@ -4,15 +4,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { TodoList, todoQueries } from "@/entities/todo";
-import { CreateTodoForm, useDeleteTodo, useToggleTodo } from "@/features/todo";
+import { CreateTodoForm, useDeleteTodo, useEditTodo, useToggleTodo } from "@/features/todo";
 import { Button } from "@/shared/shadcn/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/shadcn/card";
 
 export function TodosScreen() {
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useQuery(todoQueries.list({ page }));
+  const { data, isLoading } = useQuery(todoQueries.list({ page, sortBy: "createdAt", sortOrder: "desc" }));
   const toggleMutation = useToggleTodo();
   const deleteMutation = useDeleteTodo();
+  const editMutation = useEditTodo();
 
   const handleToggle = (id: number, completed: boolean) => {
     toggleMutation.mutate({ id, completed: !completed });
@@ -20,6 +21,10 @@ export function TodosScreen() {
 
   const handleDelete = (id: number) => {
     deleteMutation.mutate({ id });
+  };
+
+  const handleEdit = (id: number, text: string) => {
+    editMutation.mutate({ id, text });
   };
 
   const totalPages = data?.totalPages ?? 1;
@@ -36,7 +41,7 @@ export function TodosScreen() {
         </CardHeader>
         <CardContent className="space-y-4">
           <CreateTodoForm />
-          <TodoList todos={data?.items} isLoading={isLoading} onToggle={handleToggle} onDelete={handleDelete} />
+          <TodoList todos={data?.items} isLoading={isLoading} onToggle={handleToggle} onDelete={handleDelete} onEdit={handleEdit} />
           {totalPages > 1 && (
             <div className="flex items-center justify-between pt-4">
               <Button variant="outline" size="sm" onClick={() => setPage((p) => p - 1)} disabled={page <= 1}>

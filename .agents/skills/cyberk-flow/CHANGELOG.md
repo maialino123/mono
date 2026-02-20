@@ -4,6 +4,14 @@ All notable changes to the **cyberk-flow** skill will be documented in this file
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-02-19
+
+### Changed
+
+- add-semantic-embeddings: Memory search currently degrades to keyword-only (FTS5) because the default `NoopEmbeddingProvider` produces no vectors. Queries like "login" cannot find documents about "authentication". A real embedding provider enables semantic similarity search, completing the hybrid search pipeline.
+
+- memory-graph: Currently cyberk-flow has no search capability — agents must read files one-by-one to find relevant specs, archived changes, or docs. A local memory/search system enables instant semantic + keyword retrieval across all project knowledge, making agents significantly more effective at understanding context.
+
 ## [1.2.0] - 2026-02-19
 
 ### Changed

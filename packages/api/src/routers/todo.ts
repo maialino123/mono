@@ -65,7 +65,7 @@ export const todoRouter = {
     }),
 
   create: publicProcedure
-    .input(z.object({ text: z.string().min(1) }))
+    .input(z.object({ text: z.string().trim().min(1).max(500) }))
     .use(orpcInvalidate({ tags: CACHE_KEYS.tag }))
     .handler(async ({ input }) => {
       return await db.insert(todo).values({
@@ -78,6 +78,13 @@ export const todoRouter = {
     .use(orpcInvalidate({ tags: CACHE_KEYS.tag, keys: (input) => CACHE_KEYS.byId(input.id) }))
     .handler(async ({ input }) => {
       return await db.update(todo).set({ completed: input.completed }).where(eq(todo.id, input.id));
+    }),
+
+  update: publicProcedure
+    .input(z.object({ id: z.number(), text: z.string().trim().min(1).max(500) }))
+    .use(orpcInvalidate({ tags: CACHE_KEYS.tag, keys: (input) => CACHE_KEYS.byId(input.id) }))
+    .handler(async ({ input }) => {
+      return await db.update(todo).set({ text: input.text }).where(eq(todo.id, input.id));
     }),
 
   delete: publicProcedure

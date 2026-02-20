@@ -1,6 +1,6 @@
 ---
 name: e2e-testing
-description: "Playwright-based E2E testing with optional Web3/MetaMask module. Use when adding UI acceptance tests, creating test plans, generating specs from plans, or healing failing tests."
+description: "Playwright-based E2E testing with optional Web3/Phantom module. Use when adding UI acceptance tests, creating test plans, generating specs from plans, or healing failing tests."
 ---
 
 # E2E Testing
@@ -13,7 +13,7 @@ Playwright-based E2E testing skill with two browser automation backends (CLI def
 - Regression safety for auth, navigation, critical journeys
 - Generating E2E tests from specs or test plans
 - Healing/fixing broken E2E tests automatically
-- Web3 wallet flows (MetaMask connect, SIWE sign-in, transactions) — optional module
+- Web3 wallet flows (Phantom connect, SIWE sign-in, transactions) — optional module
 
 ## Artifacts
 
@@ -84,14 +84,16 @@ Standard Playwright E2E — parallel-friendly, no special constraints.
 
 ### Web3 / Synpress (optional)
 
-MetaMask wallet automation via Synpress. Adds constraints:
+Phantom wallet automation via Synpress. **Phantom replaces MetaMask** — MetaMask was abandoned due to MV3 service worker idle bug. Adds constraints:
 - **Single worker** (`workers: 1`, `fullyParallel: false`)
-- **Synpress version pinning** — keep Playwright + Synpress versions compatible
-- **Cache-based setup** — wallet state persisted, tests skip connect UI
-- **Env vars** — `E2E_WALLET_PASSWORD`, `E2E_METAMASK_SEED_PHRASE`
+- **Pinned versions** — Synpress 4.1.2 + Phantom + Playwright 1.48.2
+- **Cache pipeline** — `download-phantom` → `synpress cache --phantom` → `enable-testnet`
+- **Synpress CLI** — always pass `--phantom` flag
+- **Workarounds** — Synpress's built-in Phantom CRX URL is dead; custom download script needed. Synpress's `phantom.toggleTestnetMode()` broken with Phantom v26; custom post-cache script needed for testnet enablement.
+- **Env vars** — `E2E_WALLET_PASSWORD`, `E2E_WALLET_SEED_PHRASE`
 
 → Setup: [references/setup/web3-synpress.md](references/setup/web3-synpress.md)
-→ Templates: [references/templates/web3/metamask-setup.md](references/templates/web3/metamask-setup.md) | [metamask-fixture.md](references/templates/web3/metamask-fixture.md) | [playwright-web3-config.md](references/templates/web3/playwright-web3-config.md)
+→ Templates: [references/templates/web3/phantom-setup.md](references/templates/web3/phantom-setup.md) | [phantom-fixture.md](references/templates/web3/phantom-fixture.md) | [playwright-web3-config.md](references/templates/web3/playwright-web3-config.md)
 
 ## References
 
@@ -110,8 +112,8 @@ MetaMask wallet automation via Synpress. Adds constraints:
 | **Templates** | |
 | Base config template | [templates/base/playwright-config.md](references/templates/base/playwright-config.md) |
 | Base seed test | [templates/base/seed-spec.md](references/templates/base/seed-spec.md) |
-| Web3 wallet setup | [templates/web3/metamask-setup.md](references/templates/web3/metamask-setup.md) |
-| Web3 fixture | [templates/web3/metamask-fixture.md](references/templates/web3/metamask-fixture.md) |
+| Web3 wallet setup | [templates/web3/phantom-setup.md](references/templates/web3/phantom-setup.md) |
+| Web3 fixture | [templates/web3/phantom-fixture.md](references/templates/web3/phantom-fixture.md) |
 | Web3 config | [templates/web3/playwright-web3-config.md](references/templates/web3/playwright-web3-config.md) |
 | Web3 SIWE spec | [templates/web3/siwe-sign-in-spec.md](references/templates/web3/siwe-sign-in-spec.md) |
 | **Troubleshooting** | |

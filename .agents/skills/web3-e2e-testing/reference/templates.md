@@ -39,7 +39,7 @@ import { getExtensionId, MetaMask } from "@synthetixio/synpress/playwright";
 import { requireEnv } from "../fixtures/required-env";
 
 const walletPassword = requireEnv("E2E_WALLET_PASSWORD");
-const seedPhrase = requireEnv("E2E_METAMASK_SEED_PHRASE");
+const seedPhrase = requireEnv("E2E_WALLET_SEED_PHRASE");
 const dappBaseUrl = process.env.E2E_BASE_URL ?? "http://localhost:3001";
 
 const metamaskSetup = defineWalletSetup(walletPassword, async (context, walletPage) => {
@@ -118,7 +118,7 @@ test("sign in with MetaMask via SIWE", async ({ page, metamask }) => {
 
 ```bash
 E2E_WALLET_PASSWORD="your-wallet-password"
-E2E_METAMASK_SEED_PHRASE="word1 word2 ... word12"
+E2E_WALLET_SEED_PHRASE="word1 word2 ... word12"
 ```
 
 ## .gitignore additions

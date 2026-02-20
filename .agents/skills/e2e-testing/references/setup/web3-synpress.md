@@ -1,138 +1,105 @@
-# Web3 / Synpress Setup
+# Web3 / Synpress Setup (Phantom)
 
-MetaMask wallet automation via Synpress v4. This is an **optional module** — only needed for Web3 wallet flows.
+Phantom wallet automation via Synpress v4. This is an **optional module** — only needed for Web3 wallet flows.
+
+**Why Phantom over MetaMask:** MetaMask v13's MV3 service worker goes idle before state persistence fires, causing a fundamental Synpress bug that could not be worked around after 10+ attempts. Phantom works reliably with Synpress 4.1.2.
 
 ## Prerequisites
-
-- Base Playwright setup completed (see [base-playwright.md](base-playwright.md))
+- Base Playwright setup completed
 - Dedicated test wallet (seed phrase with no real funds)
 - Testnet only (e.g., Sepolia)
 
 ## Constraints
-
-| Constraint | Reason |
-|------------|--------|
-| `workers: 1` | MetaMask extension shares browser state |
-| `fullyParallel: false` | Single browser context required |
-| Version pinning | Synpress is tightly coupled to specific Playwright versions |
-
-**Always pin exact versions** — no caret (`^`). Upgrade Playwright + Synpress together and rebuild cache.
+- workers: 1 — wallet extension shares browser state
+- fullyParallel: false — single browser context required
+- Version pinning — Synpress 4.1.2 + Playwright 1.48.2 (pinned due to synpress-cache peerDependency on playwright-core 1.48.2)
 
 ## Step 1: Install Dependencies
-
 ```bash
-# Use your package manager — pin exact versions (no caret)
-<pm> add -D @synthetixio/synpress@4.0.6
+<pm> add -D @synthetixio/synpress@4.1.2
+<pm> add -D @playwright/test@1.48.2
 <pm> add -D dotenv-cli
 ```
 
-Check Synpress release notes for compatible Playwright version before upgrading.
+## Step 2: Phantom CRX Download Script
+Synpress's built-in Phantom CRX URL (crx-backup.phantom.dev) is dead. Create `e2e/scripts/download-phantom.ts` to fetch from Chrome Web Store using extension ID `bfnaelmomeimhlpmgjnjophhpkkoljpa`. Places CRX at `.cache-synpress/phantom-chrome-latest.crx`.
 
-## Step 2: Add Scripts
+## Step 3: Enable Testnet Script
+Synpress's built-in `phantom.toggleTestnetMode()` doesn't work with Phantom v26 (outdated selectors). Create `e2e/scripts/enable-phantom-testnet.ts` as a post-cache step that unlocks the wallet and navigates the v26 UI to enable testnet mode.
 
+## Step 4: Add Scripts
 ```json
 {
-  "e2e:cache": "dotenv -e .env.e2e.local -- synpress <wallet-setup-dir> --headless",
-  "e2e:cache:force": "dotenv -e .env.e2e.local -- synpress <wallet-setup-dir> --headless --force",
-  "e2e:test:web3": "dotenv -e .env.e2e.local -- playwright test <web3-specs-dir>"
+  "e2e:download-phantom": "bun run e2e/scripts/download-phantom.ts",
+  "e2e:enable-testnet": "dotenv -e .env.e2e.local -- bun run e2e/scripts/enable-phantom-testnet.ts",
+  "e2e:cache": "bun run e2e:download-phantom && dotenv -e .env.e2e.local -- synpress e2e/wallet-setup --headless --phantom && bun run e2e:enable-testnet",
+  "e2e:cache:force": "bun run e2e:download-phantom && dotenv -e .env.e2e.local -- synpress e2e/wallet-setup --headless --phantom --force && bun run e2e:enable-testnet",
+  "e2e:test": "dotenv -e .env.e2e.local -- playwright test",
+  "e2e:test:siwe": "dotenv -e .env.e2e.local -- playwright test e2e/specs/siwe-sign-in.spec.ts"
 }
 ```
+Note: Synpress CLI requires `--phantom` flag for Phantom wallet.
 
-Replace `<wallet-setup-dir>` and `<web3-specs-dir>` with your project paths.
-
-## Step 3: Environment Variables
-
-Create `.env.e2e.example` (committed) and `.env.e2e.local` (gitignored):
-
+## Step 5: Environment Variables
+Same as before: `.env.e2e.example` (committed) and `.env.e2e.local` (gitignored):
 ```bash
 E2E_WALLET_PASSWORD="your-wallet-password"
-E2E_METAMASK_SEED_PHRASE="word1 word2 ... word12"
-E2E_BASE_URL="http://localhost:3001"   # must match playwright.config baseURL
+E2E_WALLET_SEED_PHRASE="word1 word2 ... word12"
+E2E_BASE_URL="http://localhost:3001"
 ```
 
-Add to `.gitignore`:
-```
-.cache-synpress
-.env.e2e.local
-```
-
-## Step 4: Directory Structure
-
-Extends the base structure:
-
+## Step 6: Directory Structure
 ```
 e2e/
 ├── fixtures/
-│   ├── base.fixture.ts          # Plain Playwright fixture
-│   ├── metamask.fixture.ts      # Synpress fixture composition
-│   └── required-env.ts          # Env var validation
+│   ├── phantom.fixture.ts        # Synpress Phantom fixture
+│   └── required-env.ts           # Env var validation
+├── scripts/
+│   ├── download-phantom.ts       # CRX download from Chrome Web Store
+│   └── enable-phantom-testnet.ts # Post-cache testnet enablement
 ├── wallet-setup/
-│   └── metamask.setup.ts        # Cached wallet setup (runs once)
+│   └── phantom.setup.ts          # Cached wallet setup (runs once)
 └── specs/
-    ├── ui/                      # Plain UI tests (parallel OK)
-    └── web3/                    # Web3 tests (single worker)
-        └── siwe-sign-in.spec.ts
+    └── siwe-sign-in.spec.ts      # SIWE sign-in test
 ```
 
-## Step 5: Create Files
-
-See templates under `references/templates/web3/` for complete files:
+## Step 7: Create Files
+See templates under `references/templates/web3/`:
 - `required-env.ts` — fail-fast env validation
-- `metamask.fixture.ts` — Synpress fixture wiring
-- `metamask.setup.ts` — wallet import + dapp pre-connect
-- `siwe-sign-in.spec.ts` — example SIWE test
+- `phantom-fixture.ts` — Synpress Phantom fixture
+- `phantom-setup.ts` — wallet import
+- `siwe-sign-in-spec.ts` — example SIWE test with Phantom
 
-## Step 6: Build Cache and Run
-
+## Step 8: Build Cache and Run
+Cache pipeline: download CRX → build Synpress cache → enable testnet mode
 ```bash
-# Start dev servers first (cache requires running app)
-<pm> run dev
-
-# Build wallet cache (one-time, or after setup changes)
-<pm> run e2e:cache
-
-# Run Web3 tests
-<pm> run e2e:test:web3
+bun run dev        # Start dev servers first
+bun run e2e:cache  # Build wallet cache (one-time)
+bun run e2e:test   # Run tests
 ```
 
-## Architecture: Pre-Connect in Cache
-
-The wallet setup performs the **full connection flow** (wallet UI modal → MetaMask approval) during cache build. Tests skip the connect UI entirely.
-
-This works because:
-1. **Synpress cache** persists MetaMask extension state + browser localStorage
-2. **wagmi/RainbowKit auto-reconnect** detects existing permission on reload
-3. **Same-origin requirement** — cache and tests must use identical origin (`E2E_BASE_URL`)
-
-**Performance**: ~90s (full modal flow) → ~9s (sign only)
-
-### Critical: `connectToDapp()` Does NOT Trigger the Popup
-
-Synpress's `connectToDapp()` only **approves** the MetaMask permission popup. The wallet selection UI (RainbowKit, ConnectKit, etc.) must be clicked first to trigger the popup.
+## Phantom-Specific Workarounds
+1. **CRX Download**: Synpress's built-in URL dead → custom script fetches from Chrome Web Store
+2. **Testnet Toggle**: Synpress's `toggleTestnetMode()` broken with Phantom v26 → custom post-cache script
+3. **No pre-connect in cache**: Unlike MetaMask approach, Phantom setup only imports wallet. The SIWE test handles the full RainbowKit connect flow each time (~13s total).
 
 ## Adapting to Different Wallet UIs
-
 | Library | Connect Flow |
 |---------|-------------|
-| RainbowKit | `button "Connect Wallet"` → dialog → `button "MetaMask"` |
-| ConnectKit | `button "Connect"` → modal → `button "MetaMask"` |
-| Web3Modal | `w3m-connect-button` → `w3m-wallet-button[name="MetaMask"]` |
+| RainbowKit | `button "Connect Wallet"` → dialog → `button "Phantom"` |
+| ConnectKit | `button "Connect"` → modal → `button "Phantom"` |
 | Custom | Find your connect button and wallet option selectors |
 
 ## Cache Lifecycle
-
-Cache is hash-based: changing wallet setup code generates a new hash.
-
-**Rebuild when:**
-- `metamask.setup.ts` changes
-- Wallet connect UI in app changes
+Cache is hash-based. Rebuild when:
+- `phantom.setup.ts` changes
 - After clearing `.cache-synpress/`
+- After Phantom extension updates
 
-**Command**: `e2e:cache:force` (or `rm -rf .cache-synpress && e2e:cache`)
+Command: `e2e:cache:force`
 
 ## Safety
-
-- Use a **dedicated test wallet** with no real funds
-- **Testnet only** — never configure mainnet in test setup
-- Disable traces/videos in CI (`process.env.CI ? "off" : ...`)
+- Use a dedicated test wallet with no real funds
+- Testnet only
+- Disable traces/videos in CI
 - Never commit seed phrases or passwords

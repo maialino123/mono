@@ -1,4 +1,5 @@
-import { cpSync, existsSync, mkdirSync } from "node:fs";
+import { execSync } from "node:child_process";
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { findSkillTemplatesDir } from "./lib/find-templates.ts";
 
@@ -50,7 +51,23 @@ async function init(force = false, options: InitOptions = {}): Promise<void> {
     console.warn("  ⚠  Could not find skill templates directory. Skipping project.md copy.");
   }
 
-  // 3. Auto-migrate from openspec if detected
+  // 3. Ensure @huggingface/transformers is installed (for semantic memory search)
+  const pkgJsonPath = resolve("package.json");
+  if (existsSync(pkgJsonPath)) {
+    const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf-8"));
+    const devDeps = pkg.devDependencies ?? {};
+    if (!devDeps["@huggingface/transformers"]) {
+      console.log("\n  📦 Installing @huggingface/transformers (semantic memory search)...");
+      pkg.devDependencies = { ...devDeps, "@huggingface/transformers": "latest" };
+      writeFileSync(pkgJsonPath, JSON.stringify(pkg, null, 2) + "\n");
+      execSync("bun install", { stdio: "inherit" });
+      console.log("  ✓  @huggingface/transformers installed.");
+    } else {
+      console.log("\n  ✓  @huggingface/transformers (already installed)");
+    }
+  }
+
+  // 4. Auto-migrate from openspec if detected
   if (autoMigrate && existsSync(OPENSPEC_DIR)) {
     console.log(`\n  🔄 Detected ${OPENSPEC_DIR}/, auto-migrating...`);
     const { migrate } = await import("./migrate.ts");

@@ -124,7 +124,15 @@ Add the following to `.vscode/settings.json` under the `"amp.mcpServers"` field:
   curl -s -o /dev/null -w "%{http_code}" http://localhost:27495/mcp
   ```
 
-## 7. Verify
+## 7. Semantic Search Dependency
+
+`cf init` auto-installs `@huggingface/transformers` as a dev dependency for semantic memory search. If you need to install it manually:
+
+```bash
+bun add -d @huggingface/transformers
+```
+
+## 8. Verify
 
 ```bash
 bun run cf changes

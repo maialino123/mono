@@ -12,9 +12,10 @@ For tech stack, architecture, and code conventions, see `cyberk-flow/project.md`
 
 Automatically use skills in the following contexts:
 
-| Skill         | Usage Context                          |
-| :------------ | :------------------------------------- |
-| `cyberk-flow` | proposal, spec, change, plan, kế hoạch |
+| Skill          | Usage Context                                                          |
+| :------------- | :--------------------------------------------------------------------- |
+| `cyberk-flow`  | proposal, spec, change, plan, kế hoạch                                 |
+| `e2e-testing`  | e2e, playwright, end-to-end, acceptance test, UI test                  |
 
 # Tool Selection Guide
 

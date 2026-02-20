@@ -7,9 +7,10 @@ export interface TodoListProps {
   isLoading: boolean;
   onToggle: (id: number, completed: boolean) => void;
   onDelete: (id: number) => void;
+  onEdit: (id: number, text: string) => void;
 }
 
-export function TodoList({ todos, isLoading, onToggle, onDelete }: TodoListProps) {
+export function TodoList({ todos, isLoading, onToggle, onDelete, onEdit }: TodoListProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center py-4">
@@ -32,6 +33,7 @@ export function TodoList({ todos, isLoading, onToggle, onDelete }: TodoListProps
           completed={todo.completed}
           onToggle={onToggle}
           onDelete={onDelete}
+          onEdit={onEdit}
         />
       ))}
     </ul>

@@ -1,6 +1,6 @@
 ---
 name: cyberk-flow
-version: 1.2.0
+version: 1.3.0
 description: |
   Spec-driven development workflow using Cyberk Flow for creating, validating, and managing change proposals.
   Use when:
@@ -91,7 +91,8 @@ Requires `package.json` script: `"cf": "bun run .agents/skills/cyberk-flow/scrip
 | `bun run cf new <change-id>`      | Create new change (kebab-case)    |
 | `bun run cf validate <change-id>` | Validate delta specs              |
 | `bun run cf apply <change-id>`    | Apply delta specs to main specs   |
-| `bun run cf verify [--e2e]`       | Run verify commands from project.md |
 | `bun run cf archive <change-id>`  | Move change to archive/           |
 | `bun run cf release <change-id> <bump>` | Create a release (bump version + changelog) |
 | `bun run cf migrate [source-dir]` | Migrate openspec/ to cyberk-flow/ |
+
+> **Note:** `@huggingface/transformers` is required for memory semantic search and is auto-installed by `cf init`.

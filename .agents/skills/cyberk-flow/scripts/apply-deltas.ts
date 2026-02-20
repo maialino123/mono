@@ -192,7 +192,7 @@ function checkConflicts(
   }
 }
 
-function main() {
+async function main() {
   const name = process.argv[2];
   if (!name) {
     console.error("Usage: bun run apply-deltas.ts <change-name>");
@@ -252,8 +252,24 @@ function main() {
   tickApplyDeltasCheckbox(workflowPath);
 
   runHook("post-apply-deltas", [name]);
+
+  // Auto-index specs after apply
+  try {
+    const { createMemoryStore } = await import("./lib/memory/index");
+    const store = createMemoryStore(process.cwd());
+    try {
+      const summary = await store.index();
+      console.log(
+        `Memory re-indexed: ${summary.added} new, ${summary.updated} updated, ${summary.removed} removed, ${summary.unchanged} unchanged`,
+      );
+    } finally {
+      store.close();
+    }
+  } catch {
+    // Memory indexing is best-effort; don't fail apply
+  }
 }
 
 if (import.meta.main) {
-  main();
+  await main();
 }

@@ -19,6 +19,12 @@
 - **New**: `specs/<new-cap>/spec.md`
 - **Modified**: `specs/<existing-cap>/spec.md` (delta)
 
+## UI Impact & E2E
+- **User-visible UI behavior affected?** <!-- YES | NO -->
+- **E2E required?** <!-- REQUIRED | NOT REQUIRED — defaults to REQUIRED when UI behavior is affected -->
+- **Justification**: <!-- If NOT REQUIRED, explain why (API-only, config-only, refactor-only, etc.) -->
+- **Target user journeys** (if REQUIRED): <!-- e.g., create todo, edit todo inline, delete todo -->
+
 ## Risk Level
 <!-- LOW | MEDIUM | HIGH — per Global Rules review matrix -->
 

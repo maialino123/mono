@@ -103,4 +103,20 @@ if (import.meta.main) {
   console.log(`Archived '${name}' → archive/${archiveName}/`);
 
   runHook("post-archive-change", [name]);
+
+  // Auto-index archive after archiving
+  try {
+    const { createMemoryStore } = await import("./lib/memory/index");
+    const store = createMemoryStore(process.cwd());
+    try {
+      const summary = await store.index();
+      console.log(
+        `Memory re-indexed: ${summary.added} new, ${summary.updated} updated, ${summary.removed} removed, ${summary.unchanged} unchanged`,
+      );
+    } finally {
+      store.close();
+    }
+  } catch {
+    // Memory indexing is best-effort; don't fail archive
+  }
 }

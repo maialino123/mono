@@ -168,6 +168,41 @@ export function validateChange(changeDir: string): ValidationResult {
     issues.push({ level: "ERROR", specFile: changeDir, message: "No deltas found across all spec files" });
   }
 
+  // E2E consistency: proposal UI Impact vs tasks.md
+  const proposalPath = join(changeDir, "proposal.md");
+  const tasksPath = join(changeDir, "tasks.md");
+  if (existsSync(proposalPath)) {
+    const proposalContent = readFileSync(proposalPath, "utf-8");
+    const uiImpactMatch = proposalContent.match(/User-visible UI behavior affected\?\*{0,2}\s*(?:<!--\s*)?(YES|NO)/i);
+    const e2eRequiredMatch = proposalContent.match(/E2E required\?\*{0,2}\s*(?:<!--\s*)?(REQUIRED|NOT REQUIRED)/i);
+
+    if (!uiImpactMatch) {
+      issues.push({
+        level: "WARNING",
+        specFile: proposalPath,
+        message: "UI Impact & E2E section: 'User-visible UI behavior affected?' not filled (expected YES or NO)",
+      });
+    }
+    if (uiImpactMatch && uiImpactMatch[1].toUpperCase() === "YES" && !e2eRequiredMatch) {
+      issues.push({
+        level: "ERROR",
+        specFile: proposalPath,
+        message: "UI Impact = YES but 'E2E required?' not filled (expected REQUIRED or NOT REQUIRED)",
+      });
+    }
+    if (e2eRequiredMatch && e2eRequiredMatch[1].toUpperCase() === "REQUIRED" && existsSync(tasksPath)) {
+      const tasksContent = readFileSync(tasksPath, "utf-8");
+      const hasE2eTask = /^\s*-\s*\[[\sx]\]\s*.*\b(e2e|end[- ]to[- ]end|ui\s*test|playwright)\b/im.test(tasksContent);
+      if (!hasE2eTask) {
+        issues.push({
+          level: "ERROR",
+          specFile: tasksPath,
+          message: "E2E is REQUIRED in proposal but tasks.md has no E2E task",
+        });
+      }
+    }
+  }
+
   const errors = issues.filter((i) => i.level === "ERROR").length;
   const warnings = issues.filter((i) => i.level === "WARNING").length;
 

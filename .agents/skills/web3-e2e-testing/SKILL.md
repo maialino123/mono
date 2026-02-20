@@ -136,7 +136,7 @@ Create `.env.e2e.example` (committed) and `.env.e2e.local` (gitignored):
 
 ```bash
 E2E_WALLET_PASSWORD="your-wallet-password"
-E2E_METAMASK_SEED_PHRASE="word1 word2 ... word12"
+E2E_WALLET_SEED_PHRASE="word1 word2 ... word12"
 ```
 
 Add to `.gitignore`:

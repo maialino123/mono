@@ -14,5 +14,5 @@ test("seed", async ({ page }) => {
 ## Notes
 
 - The seed test should import from your project's custom fixture if you have one
-- For Web3 projects, create a separate seed that imports from `metamask.fixture.ts`
+- For Web3 projects, create a separate seed that imports from `phantom.fixture.ts`
 - Keep the seed test minimal — it's a bootstrap, not a real test

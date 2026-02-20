@@ -154,6 +154,11 @@ This is a general-purpose web application platform. Specific domain features (in
 - `bun test <file>` — Run individual test files
 - Vitest available in `packages/cache` for unit tests
 - Tests should follow existing patterns when found in codebase
+- **E2E**: Playwright + Synpress (Phantom wallet) for Web3 flows
+  - `bun run e2e:cache` — Build wallet cache (download Phantom CRX + Synpress cache + enable testnet)
+  - `bun run e2e:test` — Run all E2E tests
+  - `bun run e2e:test:siwe` — Run SIWE sign-in test only
+  - Pinned: Synpress 4.1.2 + Playwright 1.48.2
 
 ## Git Workflow
 

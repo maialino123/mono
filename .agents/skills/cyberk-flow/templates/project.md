@@ -14,7 +14,7 @@
 
 ## Commands
 
-<!-- Define the verify commands for this project. These are used in tasks.md Verify line. -->
+<!-- Define the commands for this project. Run these directly during implementation. -->
 <!-- Examples: "npm run typecheck", "cargo clippy", "make lint", "pytest" -->
 
 - **Lint**: <!-- e.g., bun run check, npm run lint, cargo clippy -->

@@ -6,10 +6,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   testDir: "./e2e/specs",
-  timeout: 90_000,
+  timeout: 60_000,
   fullyParallel: false,
   workers: 1,
-  retries: 0,
+  retries: process.env.CI ? 1 : 0,
   reporter: [["html", { outputFolder: "playwright-report", open: "never" }], ["list"]],
   use: {
     baseURL: "http://localhost:3001",

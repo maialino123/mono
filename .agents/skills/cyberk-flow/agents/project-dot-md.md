@@ -24,7 +24,7 @@ Analyze the current codebase and fill out the `project.md` template with accurat
    - **Commands:** Identify type-check, lint, test, and e2e scripts from `package.json` scripts, `Makefile` targets, `Cargo.toml`, `pyproject.toml`, or CI configs. Map them to the `## Commands` section (Type check, Lint, Test, E2E).
 
 3. **Fill the template** — Write concise, 1-line values. Cite source files where helpful (e.g., `Vite (vite.config.ts)`).
-   - **Commands section**: Fill with backtick-wrapped commands (e.g., `` `npm run typecheck` ``). Use `N/A` if no matching script exists. These commands power `bun run cf verify`.
+   - **Commands section**: Fill with backtick-wrapped commands (e.g., `` `npm run typecheck` ``). Use `N/A` if no matching script exists. These commands are run directly during implementation.
 
 4. **Deduplicate with AGENTS.md / CLAUDE.md** — Compare the generated `project.md` against existing root config files. If overlap exists, suggest concrete edits to reduce redundancy. Present suggestions to the user — do **not** auto-apply.
 

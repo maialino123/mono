@@ -39,13 +39,13 @@ For Web3 tests, import from Synpress fixture instead of vanilla Playwright. Adju
 
 ```ts
 // For e2e/specs/web3/<file>.spec.ts → use "../../fixtures/..."
-import { expect, test } from "../../fixtures/metamask.fixture";
+import { expect, test } from "../../fixtures/phantom.fixture";
 
 test.describe("Web3 Feature", () => {
-  test("Scenario Name", async ({ page, metamask }) => {
+  test("Scenario Name", async ({ page, phantom }) => {
     await page.goto("/page");
     await page.getByRole("button", { name: "Sign" }).click();
-    await metamask.confirmSignature();
+    await phantom.confirmSignature();
     await expect(page.getByText("Signed")).toBeVisible();
   });
 });
