@@ -1,7 +1,5 @@
 # phantom.fixture.ts
 
-Fixture wiring for Phantom wallet tests.
-
 ```ts
 import { testWithSynpress } from "@synthetixio/synpress";
 import { phantomFixtures } from "@synthetixio/synpress/playwright";

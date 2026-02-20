@@ -44,7 +44,7 @@ export default defineConfig({
 
 | Setting | Base | Web3 |
 |---------|------|------|
-| `timeout` | 30s | 90s (Phantom wallet interactions are slower) |
+| `timeout` | 30s | 90s |
 | `fullyParallel` | `true` | `false` |
 | `workers` | auto | `1` |
 | `retries` | CI: 2 | `0` |

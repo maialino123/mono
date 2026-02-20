@@ -5,7 +5,7 @@ description: "Playwright-based E2E testing with optional Web3/Phantom module. Us
 
 # E2E Testing
 
-Playwright-based E2E testing skill with two browser automation backends (CLI default, Test Agents MCP optional) and optional Web3/Synpress module. Can integrate with spec-driven workflows.
+Playwright-based E2E testing skill with two browser automation backends (CLI default, Test Agents MCP optional) and optional Web3/Synpress module (Phantom wallet). Can integrate with spec-driven workflows.
 
 ## When to Use
 
@@ -30,6 +30,74 @@ Playwright-based E2E testing skill with two browser automation backends (CLI def
 2. **Test isolation** — each test should be independent and runnable in any order.
 3. **Resilient selectors** — prefer `getByRole()` > `getByText()` > `getByLabel()` > `getByTestId()` > CSS.
 4. **CI safety** — disable traces/videos in CI to prevent secrets leakage.
+
+## Escalation & Time-Boxing (MANDATORY)
+
+These rules prevent wasting time in debugging loops. **Violations are considered skill failures.**
+
+### Definitions
+
+- **Fix attempt** = any code change intended to address the failure.
+- **Retry cycle** = `run single test → analyze artifacts → 1 fix attempt`. Each cycle increments `attempt` counter.
+- **Wall time** = total elapsed time on this test, including test runtime + tool calls + analysis.
+
+### Budget Limits
+
+| Scope | Hard Limit | Action on Breach |
+|-------|-----------|-----------------|
+| **Single test debug** | **2 retry cycles** | STOP retrying, escalate to next tool |
+| **Single test wall time** | **180 seconds** total | Abandon current approach, escalate |
+| **Single run >60s** | Only **1 retry** allowed | Escalate immediately after 1 failed fix |
+| **Full suite** | **5 minutes** total debug time | Stop, summarize failures, ask user |
+
+### Mandatory Budget Log
+
+After EVERY test run during debugging, you MUST print a status line:
+
+```
+🔄 Budget: test=<name>, attempt=<N>/2, elapsed=<Xs>/180s, snapshot_taken=<yes/no>, next=<action>
+```
+
+Example: `🔄 Budget: test=edit-todo, attempt=1/2, elapsed=45s/180s, snapshot_taken=yes, next=web_search`
+
+This is **not optional**. Skipping the budget log is a skill violation.
+
+### Escalation Ladder (State Machine)
+
+Per failing test, follow this exact sequence — **do NOT skip steps when tool is available**:
+
+1. **Isolate** — Run only the failing test with `--grep` or `test.only`, with `--timeout 15000`.
+2. **Snapshot** — Before ANY fix, capture DOM state:
+   - Primary: `playwright-cli snapshot` or `browser_snapshot`
+   - Fallback (if unavailable): `--trace on-first-retry` → view trace artifact
+   - Last resort: `page.screenshot()` in the test itself
+3. **Fix attempt 1** — Make one targeted fix based on the snapshot. Re-run isolated. Print budget log.
+4. **Web search** (if attempt 1 failed) — Search for the specific error + framework combo (e.g., `"playwright getByRole input value" site:playwright.dev`).
+5. **Fix attempt 2** — Apply web search findings. Re-run isolated. Print budget log.
+6. **Oracle** (if attempt 2 failed) — Ask oracle with: test code + error message + DOM snapshot/trace.
+7. **Final fix** — Apply oracle suggestion. Re-run. Print budget log.
+8. **Bail out** (if still failing):
+   - **Critical/blocking test** → STOP and ask user for guidance. Do NOT auto-fixme.
+   - **Non-critical test** → Mark `test.fixme("Selector: <what>, Attempted: <what>, Snapshot: <path>")` and move on.
+
+### Anti-Patterns (NEVER DO)
+
+- ❌ Retrying the same locator strategy with minor variations (e.g., `hasText` → `hasText` with different string)
+- ❌ Waiting for full timeout (60-90s) before investigating — always use `--timeout 15000` when debugging
+- ❌ Debugging without a DOM snapshot — snapshot is REQUIRED before every fix
+- ❌ Running the entire suite repeatedly to debug a single test — isolate with `test.only` or `--grep`
+- ❌ Spending >2 minutes on a single locator — if `getByRole` doesn't work, snapshot and pivot
+- ❌ Skipping the budget log line after a test run
+
+### Quick Diagnostic Checklist
+
+Before retrying a failing test, answer these questions:
+
+1. **Did I take a snapshot?** If no → snapshot first
+2. **Is the element actually in the DOM?** If no → the app has a bug, not the test
+3. **Is the element in a different state?** (e.g., inside an input instead of a span) → change locator strategy entirely
+4. **Is there stale data?** → add cleanup in `beforeEach`
+5. **Am I hitting a framework-specific pattern?** → web_search for that framework + Playwright
 
 ## Browser Automation Backends
 
@@ -84,16 +152,9 @@ Standard Playwright E2E — parallel-friendly, no special constraints.
 
 ### Web3 / Synpress (optional)
 
-Phantom wallet automation via Synpress. **Phantom replaces MetaMask** — MetaMask was abandoned due to MV3 service worker idle bug. Adds constraints:
-- **Single worker** (`workers: 1`, `fullyParallel: false`)
-- **Pinned versions** — Synpress 4.1.2 + Phantom + Playwright 1.48.2
-- **Cache pipeline** — `download-phantom` → `synpress cache --phantom` → `enable-testnet`
-- **Synpress CLI** — always pass `--phantom` flag
-- **Workarounds** — Synpress's built-in Phantom CRX URL is dead; custom download script needed. Synpress's `phantom.toggleTestnetMode()` broken with Phantom v26; custom post-cache script needed for testnet enablement.
-- **Env vars** — `E2E_WALLET_PASSWORD`, `E2E_WALLET_SEED_PHRASE`
+Phantom wallet automation via Synpress. Adds constraints: single worker, version pinning (`@playwright/test@1.48.2`), cache-based setup with post-cache fixup pattern.
 
-→ Setup: [references/setup/web3-synpress.md](references/setup/web3-synpress.md)
-→ Templates: [references/templates/web3/phantom-setup.md](references/templates/web3/phantom-setup.md) | [phantom-fixture.md](references/templates/web3/phantom-fixture.md) | [playwright-web3-config.md](references/templates/web3/playwright-web3-config.md)
+→ Setup: [references/setup/web3-synpress.md](references/setup/web3-synpress.md) | Env vars: [references/setup/environment-variables.md](references/setup/environment-variables.md)
 
 ## References
 
@@ -104,6 +165,7 @@ Phantom wallet automation via Synpress. **Phantom replaces MetaMask** — MetaMa
 | Base Playwright setup | [setup/base-playwright.md](references/setup/base-playwright.md) |
 | Test Agents MCP setup | [setup/test-agents-mcp.md](references/setup/test-agents-mcp.md) |
 | Web3/Synpress setup | [setup/web3-synpress.md](references/setup/web3-synpress.md) |
+| Environment variables | [setup/environment-variables.md](references/setup/environment-variables.md) |
 | webServer integration | [setup/webserver-integration.md](references/setup/webserver-integration.md) |
 | **Workflows — Test Agents MCP** | |
 | MCP planner | [workflows/test-agents-mcp/planner.md](references/workflows/test-agents-mcp/planner.md) |
@@ -112,9 +174,6 @@ Phantom wallet automation via Synpress. **Phantom replaces MetaMask** — MetaMa
 | **Templates** | |
 | Base config template | [templates/base/playwright-config.md](references/templates/base/playwright-config.md) |
 | Base seed test | [templates/base/seed-spec.md](references/templates/base/seed-spec.md) |
-| Web3 wallet setup | [templates/web3/phantom-setup.md](references/templates/web3/phantom-setup.md) |
-| Web3 fixture | [templates/web3/phantom-fixture.md](references/templates/web3/phantom-fixture.md) |
-| Web3 config | [templates/web3/playwright-web3-config.md](references/templates/web3/playwright-web3-config.md) |
-| Web3 SIWE spec | [templates/web3/siwe-sign-in-spec.md](references/templates/web3/siwe-sign-in-spec.md) |
+| Web3 templates | [templates/web3/](references/templates/web3/) (phantom-setup, fixture, download, testnet enabler, SIWE spec) |
 | **Troubleshooting** | |
 | webServer orphans | [troubleshooting/webserver-orphans.md](references/troubleshooting/webserver-orphans.md) |

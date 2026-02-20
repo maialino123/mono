@@ -1,105 +1,93 @@
-# Web3 / Synpress Setup (Phantom)
+# Web3 / Synpress Setup (Phantom Wallet)
 
-Phantom wallet automation via Synpress v4. This is an **optional module** — only needed for Web3 wallet flows.
+Phantom wallet automation via Synpress v4. Optional module — only needed for Web3 wallet flows.
 
-**Why Phantom over MetaMask:** MetaMask v13's MV3 service worker goes idle before state persistence fires, causing a fundamental Synpress bug that could not be worked around after 10+ attempts. Phantom works reliably with Synpress 4.1.2.
+> **Why Phantom?** MetaMask v13 (MV3) has critical Synpress issues: service worker idle before persistence, regex limits, hash sensitivity, LavaMoat scuttling.
 
 ## Prerequisites
-- Base Playwright setup completed
-- Dedicated test wallet (seed phrase with no real funds)
-- Testnet only (e.g., Sepolia)
+
+- Base Playwright setup completed (see [base-playwright.md](base-playwright.md))
+- Dedicated test wallet with no real funds, testnet only
 
 ## Constraints
-- workers: 1 — wallet extension shares browser state
-- fullyParallel: false — single browser context required
-- Version pinning — Synpress 4.1.2 + Playwright 1.48.2 (pinned due to synpress-cache peerDependency on playwright-core 1.48.2)
 
-## Step 1: Install Dependencies
+| Constraint | Reason |
+|------------|--------|
+| `workers: 1` | Wallet extension shares browser state |
+| `fullyParallel: false` | Single browser context required |
+| `@playwright/test@1.48.2` | Pinned due to `@synthetixio/synpress-cache` peer dependency |
+
+**Always pin exact versions** — no caret (`^`). Upgrade Playwright + Synpress together and rebuild cache.
+
+## Step 1: Install
+
 ```bash
-<pm> add -D @synthetixio/synpress@4.1.2
-<pm> add -D @playwright/test@1.48.2
-<pm> add -D dotenv-cli
+bun add -D @synthetixio/synpress@4.1.2 dotenv-cli
 ```
 
-## Step 2: Phantom CRX Download Script
-Synpress's built-in Phantom CRX URL (crx-backup.phantom.dev) is dead. Create `e2e/scripts/download-phantom.ts` to fetch from Chrome Web Store using extension ID `bfnaelmomeimhlpmgjnjophhpkkoljpa`. Places CRX at `.cache-synpress/phantom-chrome-latest.crx`.
+## Step 2: Scripts
 
-## Step 3: Enable Testnet Script
-Synpress's built-in `phantom.toggleTestnetMode()` doesn't work with Phantom v26 (outdated selectors). Create `e2e/scripts/enable-phantom-testnet.ts` as a post-cache step that unlocks the wallet and navigates the v26 UI to enable testnet mode.
+Pipeline: download CRX → build cache → enable testnet → run tests.
 
-## Step 4: Add Scripts
 ```json
 {
   "e2e:download-phantom": "bun run e2e/scripts/download-phantom.ts",
   "e2e:enable-testnet": "dotenv -e .env.e2e.local -- bun run e2e/scripts/enable-phantom-testnet.ts",
   "e2e:cache": "bun run e2e:download-phantom && dotenv -e .env.e2e.local -- synpress e2e/wallet-setup --headless --phantom && bun run e2e:enable-testnet",
   "e2e:cache:force": "bun run e2e:download-phantom && dotenv -e .env.e2e.local -- synpress e2e/wallet-setup --headless --phantom --force && bun run e2e:enable-testnet",
-  "e2e:test": "dotenv -e .env.e2e.local -- playwright test",
   "e2e:test:siwe": "dotenv -e .env.e2e.local -- playwright test e2e/specs/siwe-sign-in.spec.ts"
 }
 ```
-Note: Synpress CLI requires `--phantom` flag for Phantom wallet.
 
-## Step 5: Environment Variables
-Same as before: `.env.e2e.example` (committed) and `.env.e2e.local` (gitignored):
-```bash
-E2E_WALLET_PASSWORD="your-wallet-password"
-E2E_WALLET_SEED_PHRASE="word1 word2 ... word12"
-E2E_BASE_URL="http://localhost:3001"
-```
+## Step 3: Environment Variables
 
-## Step 6: Directory Structure
+→ See [environment-variables.md](environment-variables.md) for full reference and `.env.e2e.example` template.
+
+## Step 4: Create Files
+
+See [templates/web3/](../templates/web3/) for all template files:
+
 ```
 e2e/
 ├── fixtures/
-│   ├── phantom.fixture.ts        # Synpress Phantom fixture
-│   └── required-env.ts           # Env var validation
+│   ├── phantom.fixture.ts       # → phantom-fixture.md
+│   └── required-env.ts          # → required-env.md
 ├── scripts/
-│   ├── download-phantom.ts       # CRX download from Chrome Web Store
-│   └── enable-phantom-testnet.ts # Post-cache testnet enablement
+│   ├── download-phantom.ts      # → download-phantom.md
+│   └── enable-phantom-testnet.ts  # → enable-phantom-testnet.md
 ├── wallet-setup/
-│   └── phantom.setup.ts          # Cached wallet setup (runs once)
+│   └── phantom.setup.ts         # → phantom-setup.md
 └── specs/
-    └── siwe-sign-in.spec.ts      # SIWE sign-in test
+    └── siwe-sign-in.spec.ts     # → siwe-sign-in-spec.md
 ```
 
-## Step 7: Create Files
-See templates under `references/templates/web3/`:
-- `required-env.ts` — fail-fast env validation
-- `phantom-fixture.ts` — Synpress Phantom fixture
-- `phantom-setup.ts` — wallet import
-- `siwe-sign-in-spec.ts` — example SIWE test with Phantom
+## Step 5: Build Cache and Run
 
-## Step 8: Build Cache and Run
-Cache pipeline: download CRX → build Synpress cache → enable testnet mode
 ```bash
-bun run dev        # Start dev servers first
-bun run e2e:cache  # Build wallet cache (one-time)
-bun run e2e:test   # Run tests
+bun run dev          # start dev servers first
+bun run e2e:cache    # build wallet cache (one-time)
+bun run e2e:test:siwe
 ```
 
-## Phantom-Specific Workarounds
-1. **CRX Download**: Synpress's built-in URL dead → custom script fetches from Chrome Web Store
-2. **Testnet Toggle**: Synpress's `toggleTestnetMode()` broken with Phantom v26 → custom post-cache script
-3. **No pre-connect in cache**: Unlike MetaMask approach, Phantom setup only imports wallet. The SIWE test handles the full RainbowKit connect flow each time (~13s total).
+## Architecture: Post-Cache Fixup
 
-## Adapting to Different Wallet UIs
+Two-phase approach:
+
+1. **Cache build** — `defineWalletSetup` imports wallet only (minimal → stable cache hash)
+2. **Post-cache fixup** — standard Playwright script configures testnet mode, dismisses popups
+
+This avoids Synpress's `extractWalletSetupFunction` regex limits (3 levels of brace nesting) and keeps the cache hash stable across code changes.
+
+## Wallet UI Adapting
+
+`connectToDapp()` only **approves** the permission popup — you must click the wallet button in your app's UI first.
+
 | Library | Connect Flow |
 |---------|-------------|
 | RainbowKit | `button "Connect Wallet"` → dialog → `button "Phantom"` |
 | ConnectKit | `button "Connect"` → modal → `button "Phantom"` |
-| Custom | Find your connect button and wallet option selectors |
+| Web3Modal | `w3m-connect-button` → `w3m-wallet-button[name="Phantom"]` |
 
 ## Cache Lifecycle
-Cache is hash-based. Rebuild when:
-- `phantom.setup.ts` changes
-- After clearing `.cache-synpress/`
-- After Phantom extension updates
 
-Command: `e2e:cache:force`
-
-## Safety
-- Use a dedicated test wallet with no real funds
-- Testnet only
-- Disable traces/videos in CI
-- Never commit seed phrases or passwords
+Hash-based: changing `phantom.setup.ts` generates a new hash. Rebuild with `e2e:cache:force` or `rm -rf .cache-synpress`.

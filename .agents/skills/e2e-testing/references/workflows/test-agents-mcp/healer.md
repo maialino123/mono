@@ -31,7 +31,11 @@
 - If test is correct but app behavior changed, mark as `test.fixme()` with explanation
 - Never use `networkidle` or deprecated APIs
 - Document reasoning for each fix
-- Continue until all tests pass or are marked `test.fixme()`
+- Continue until all tests pass, time-box triggers, or suite budget exceeded — then stop and summarize
+
+## Time-Boxing (MANDATORY)
+
+⚠️ **Follow SKILL.md → "Escalation & Time-Boxing" section exactly.** All budget limits, the escalation ladder, mandatory budget log, and anti-patterns defined there apply to this workflow. Do NOT exceed 2 retry cycles per test or 5 minutes per healer session.
 
 ## Available MCP Tools
 
