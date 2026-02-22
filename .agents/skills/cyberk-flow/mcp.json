@@ -1,0 +1,10 @@
+{
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@brave/brave-search-mcp-server"],
+      "includeTools": [
+        "brave_web_search",
+        "brave_summarizer"
+      ]
+    }
+}

@@ -6,6 +6,7 @@ import { findSkillTemplatesDir } from "./lib/find-templates.ts";
 const CYBERK_FLOW_DIR = "cyberk-flow";
 const OPENSPEC_DIR = "openspec";
 const MARKER_FILE = join(CYBERK_FLOW_DIR, "project.md");
+const ROOT_AGENTS_FILE = "AGENTS.md";
 
 const DIRS = [join(CYBERK_FLOW_DIR, "changes", "archive"), join(CYBERK_FLOW_DIR, "specs")];
 
@@ -51,7 +52,18 @@ async function init(force = false, options: InitOptions = {}): Promise<void> {
     console.warn("  ⚠  Could not find skill templates directory. Skipping project.md copy.");
   }
 
-  // 3. Ensure @huggingface/transformers is installed (for semantic memory search)
+  // 3. Create root AGENTS.md from template if it doesn't exist
+  if (skillTemplatesDir) {
+    const agentsMdSrc = join(skillTemplatesDir, "ROOT_AGENTS.md");
+    if (!existsSync(ROOT_AGENTS_FILE) && existsSync(agentsMdSrc)) {
+      cpSync(agentsMdSrc, ROOT_AGENTS_FILE);
+      console.log(`  📄 Created ${ROOT_AGENTS_FILE}`);
+    } else {
+      console.log(`  ✓  ${ROOT_AGENTS_FILE} (exists — agent will merge missing sections after init)`);
+    }
+  }
+
+  // 4. Ensure @huggingface/transformers is installed (for semantic memory search)
   const pkgJsonPath = resolve("package.json");
   if (existsSync(pkgJsonPath)) {
     const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf-8"));
@@ -67,7 +79,7 @@ async function init(force = false, options: InitOptions = {}): Promise<void> {
     }
   }
 
-  // 4. Auto-migrate from openspec if detected
+  // 5. Auto-migrate from openspec if detected
   if (autoMigrate && existsSync(OPENSPEC_DIR)) {
     console.log(`\n  🔄 Detected ${OPENSPEC_DIR}/, auto-migrating...`);
     const { migrate } = await import("./migrate.ts");

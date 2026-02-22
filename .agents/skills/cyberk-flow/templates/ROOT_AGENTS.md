@@ -8,7 +8,7 @@ description:
 
 For tech stack, architecture, and code conventions, see `cyberk-flow/project.md`.
 
-# Skill Loader
+## Skill Loader
 
 Automatically use skills in the following contexts:
 
@@ -17,7 +17,7 @@ Automatically use skills in the following contexts:
 | `cyberk-flow`  | proposal, spec, change, plan, implement, triển khai, kế hoạch          |
 | `e2e-testing`  | e2e, playwright, end-to-end, acceptance test, UI test                  |
 
-# Tool Selection Guide
+## Tool Selection Guide
 
 | Need                              | Tool                              |
 | --------------------------------- | --------------------------------- |

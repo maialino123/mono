@@ -53,13 +53,17 @@ Spawn a sub-agent to introspect the codebase and generate `cyberk-flow/project.m
 Task("Generate project.md: Follow the agent instructions in .agents/skills/cyberk-flow/agents/project-dot-md.md to introspect the codebase and fill out cyberk-flow/project.md.")
 ```
 
-## 4. Generate root AGENTS.md
+## 4. Merge root AGENTS.md
 
-Spawn a sub-agent to generate or update the root `AGENTS.md` with agent-only directives (no project info — that lives in `cyberk-flow/project.md`):
+**Always run this step** — even on re-init. `cf init` only creates `AGENTS.md` from template when it doesn't exist. When it already exists, the agent must merge missing sections.
 
-```
-Task("Generate/update root AGENTS.md: Read the template at .agents/skills/cyberk-flow/templates/ROOT_AGENTS.md and create or update ./AGENTS.md following its structure (including YAML front matter). The file must contain only agent instructions: skill loader, tool selection guide, sub-agent best practices, commands, language/security requirements. Do NOT include project-specific info — only reference cyberk-flow/project.md for that. If AGENTS.md already exists, merge missing sections while preserving manually-added content. Output: updated AGENTS.md + brief summary of changes.")
-```
+Read the template at `.agents/skills/cyberk-flow/templates/ROOT_AGENTS.md` and the existing `./AGENTS.md`, then:
+1. Compare sections (by `##` headings) between template and existing file.
+2. **Add** any sections from the template that are missing in the existing file (append at end).
+3. **Preserve** all existing content — do NOT modify or remove any manually-added sections or edits.
+4. Ensure YAML front matter (`trigger: always_on`) exists at the top.
+
+If no sections are missing, skip silently.
 
 ## 5. Set up security permissions
 

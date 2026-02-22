@@ -8,35 +8,36 @@ CyberK Flow is a full-stack TypeScript monorepo (web + mobile + API server) buil
 
 1. **Continuous Technology Adoption** — Always adopt the latest technologies to keep up with the rapidly evolving software industry.
 2. **AI-Driven Development** — Integrate AI tools to optimize the development workflow:
-   - **Spec Management**: OpenSpec for requirements and change proposal management
-   - **Task Management**: OpenSpec (using open spec to manage tasks)
-   - **Knowledge Management**: Knowledge Skill (temporary)
+   - **Spec Management**: Cyberk Flow for requirements and change proposal management
+   - **Task Management**: Cyberk Flow (using specs to manage tasks)
    - **Code Intelligence**: MCP GKG for querying indexed source code locally
 
 ## Tech Stack
 
-- **Language**: TypeScript (strict mode, ESM) — `tsconfig.base.json`
+- **Language**: TypeScript (strict mode, ESM) — `packages/config/tsconfig.base.json`
 - **Runtime**: Bun v1.3.6 (`packageManager` in root `package.json`)
-- **Monorepo**: Turborepo with Bun workspaces (`turbo.json`)
+- **Monorepo**: Turborepo 2.6+ with Bun workspaces (`turbo.json`)
 - **Frontend (Web)**: Next.js 16 (App Router, React Compiler enabled), React 19, TailwindCSS 4 — `apps/web`
 - **Frontend (Mobile)**: React Native 0.81 + Expo 54 — `apps/native`
-- **Backend**: Hono 4 HTTP server, oRPC (type-safe RPC + OpenAPI) — `apps/server`
+- **Backend**: Hono 4 HTTP server, oRPC 1.12+ (type-safe RPC + OpenAPI) — `apps/server`
 - **Database**: PostgreSQL (Docker), Drizzle ORM 0.45 — `packages/db`
 - **Cache**: Redis (Docker, redis-stack), ioredis — `packages/db/docker-compose.yml`, `packages/cache`
-- **Authentication**: better-auth — `packages/auth`
-- **AI**: Vercel AI SDK 6 with Google Gemini (`@ai-sdk/google`) — `apps/server/src/index.ts`
+- **Authentication**: better-auth 1.4+ — `packages/auth`
+- **AI**: Vercel AI SDK 6 with Google Gemini (`@ai-sdk/google`) — `apps/server`
 - **API Client**: oRPC client + TanStack Query 5 — `apps/web`, `apps/native`
-- **UI Components**: shadcn/ui (base-lyra style), Lucide icons, class-variance-authority, tailwind-merge — `apps/web/components.json`
-- **Web3**: wagmi + viem (EVM), Solana wallet-adapter — `apps/web/package.json`
+- **UI Components**: shadcn/ui (base-lyra style), Base UI, Lucide icons, class-variance-authority, tailwind-merge — `apps/web/components.json`
+- **Web3**: wagmi 3 + viem 2 (EVM), RainbowKit, Solana wallet-adapter — `apps/web/package.json`
 - **Build (server)**: tsdown — `apps/server/package.json`
 - **Build (web)**: Next.js built-in — `next build`
 - **Lint / Format**: Biome 2 — `biome.json`
 - **Formatter (TSX)**: Prettier + prettier-plugin-tailwindcss (Biome formatter disabled for `.tsx`) — `biome.json` overrides, `apps/web/prettier.config.mjs`
-- **Git hooks**: Husky + lint-staged — root `package.json`
-- **Test**: Vitest (used in `packages/cache`), Bun test runner — `bun test <file>`
-- **Env validation**: `@t3-oss/env-core` / `@t3-oss/env-nextjs` + Zod — `packages/env`
+- **Git hooks**: Husky 9 + lint-staged 16 — root `package.json`
+- **Test**: Vitest 3 (used in `packages/cache`), Bun test runner (`packages/auth`) — `bun test <file>`
+- **Env validation**: `@t3-oss/env-core` / `@t3-oss/env-nextjs` 0.13 + Zod — `packages/env`
 - **Charts**: Recharts 3 — `apps/web/package.json`
 - **Forms**: TanStack Form — `apps/web`, `apps/native`
+- **Markdown rendering**: streamdown — `apps/web/package.json`
+- **Toast notifications**: Sonner — `apps/web/package.json`
 
 ## Commands
 
@@ -49,10 +50,11 @@ CyberK Flow is a full-stack TypeScript monorepo (web + mobile + API server) buil
 
 ### Code Style
 
-- TypeScript strict mode: `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax` — `packages/config/tsconfig.base.json`
+- TypeScript strict mode: `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax`, `noFallthroughCasesInSwitch` — `packages/config/tsconfig.base.json`
 - ESM modules (`"type": "module"`) throughout
 - Biome: 2-space indent, 120 char line width, double quotes, auto-organize imports — `biome.json`
 - Biome linting: recommended rules + `useSortedClasses` (Tailwind class sorting via `clsx`/`cva`/`cn`)
+- Biome style rules: `noParameterAssign`, `useAsConstAssertion`, `useDefaultParameterLast`, `useEnumInitializers`, `useSelfClosingElements`, `useSingleVarDeclarator`, `noUnusedTemplateLiteral`, `useNumberNamespace`, `noInferrableTypes`, `noUselessElse` — all `error` level
 - TSX files: Prettier formatting (Biome formatter disabled via override)
 - Workspace catalog versions for shared dependencies (`catalog:` protocol) — root `package.json`
 - Zod 4 for runtime validation
@@ -77,8 +79,10 @@ cyberk-flow/
 │   ├── cache/         # Redis caching layer, rate-limiter store
 │   ├── config/        # Shared tsconfig.base.json
 │   ├── db/            # Drizzle ORM schema, migrations, Redis client, Docker Compose
-│   └── env/           # Zod-validated env vars (server / web / native exports)
-├── cyberk-flow/       # OpenSpec: specs, changes, templates
+│   ├── env/           # Zod-validated env vars (server / web / native exports)
+│   └── testing/       # Shared testing utilities
+├── cyberk-flow/       # Specs, changes, templates
+├── e2e/               # Playwright + Synpress E2E tests
 └── docs/              # Project documentation
 ```
 
@@ -152,13 +156,13 @@ This is a general-purpose web application platform. Specific domain features (in
 
 - `bun run check-types` — TypeScript type checking across all packages
 - `bun test <file>` — Run individual test files
-- Vitest available in `packages/cache` for unit tests
+- Vitest in `packages/cache` for unit tests; Bun test runner in `packages/auth`
 - Tests should follow existing patterns when found in codebase
-- **E2E**: Playwright + Synpress (Phantom wallet) for Web3 flows
+- **E2E**: Playwright 1.48.2 + Synpress 4.1.2 (Phantom wallet) for Web3 flows
   - `bun run e2e:cache` — Build wallet cache (download Phantom CRX + Synpress cache + enable testnet)
   - `bun run e2e:test` — Run all E2E tests
   - `bun run e2e:test:siwe` — Run SIWE sign-in test only
-  - Pinned: Synpress 4.1.2 + Playwright 1.48.2
+  - Playwright config: `playwright.config.ts` (testDir: `e2e/specs`, baseURL: `http://localhost:3001`, chromium only)
 
 ## Git Workflow
 
