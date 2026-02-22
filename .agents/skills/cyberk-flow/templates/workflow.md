@@ -38,8 +38,8 @@
 
 - [ ] Post-merge sanity check
 - [ ] Extract knowledge + retrospective
-- [ ] Apply deltas: `bun run cf apply <change-id>`
-- [ ] Archive change: `bun run cf archive <change-id>`
+- [ ] Apply deltas: `bun run cf apply <change-id>` <!-- auto-ticked by script -->
+- [ ] Archive change: `bun run cf archive <change-id>` <!-- auto-ticked by script -->
 
 ## Notes
 

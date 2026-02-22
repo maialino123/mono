@@ -4,6 +4,22 @@ All notable changes to the **cyberk-flow** skill will be documented in this file
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-02-22
+
+### Changed
+
+- integrate-knowledge-extraction: The standalone `knowledge` skill is redundant — its memory storage already depends on `cf learn`/`cf search` (cyberk-flow). The extraction workflow should live in archive.md as a handoff to a deep-mode thread, not a separate skill.
+
+- memory-knowledge-v2: The `knowledge` skill (thread extraction → doc updates) and the `cyberk-flow` memory system (SQLite + vector search + PageRank) are disconnected. Extracted knowledge doesn't enter the searchable memory store, and there's no quality gate to prevent memory bloat. Additionally, we lack structured knowledge categories (decisions, debugging/mistakes, patterns, research) that would make accumulated knowledge actually useful.
+
+## [1.4.0] - 2026-02-21
+
+### Changed
+
+- enhance-memory-intelligence: The memory store currently provides basic FTS5 keyword + vector hybrid search. Adding confidence scoring, access tracking, knowledge graph (PageRank), document type classification, consolidation, contradiction detection, and co-access patterns will make search results more relevant, surface relationships between documents, and keep the index clean over time.
+
+- integrate-memory-discovery: The memory-graph system (indexer + hybrid search) is fully built but only accessible via manual `cf search` commands. Agents performing discovery have no automatic access to prior specs, archived changes, or project docs. This creates a gap where agents re-discover context that already exists in the project's history — wasting time and producing less informed proposals.
+
 ## [1.3.0] - 2026-02-19
 
 ### Changed

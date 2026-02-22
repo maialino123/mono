@@ -36,13 +36,14 @@ Template: `discovery.md` — select relevant workstreams, run as parallel sub-ag
 
 | Workstream                | When to use                             | Primary tools                                      |
 | ------------------------- | --------------------------------------- | -------------------------------------------------- |
+| **Memory Recall**         | Always                                  | `bun run cf search`                                |
 | **Architecture Snapshot** | Always                                  | `gkg repo_map`, `gkg search_codebase_definitions`  |
 | **Internal Patterns**     | Similar features exist in codebase      | `gkg get_references`                                |
 | **External Patterns**     | Novel architecture or unfamiliar domain | `librarian`                                         |
 | **Constraint Check**      | New dependencies or build changes       | `Read` (`package.json`, `tsconfig.json`)            |
 | **Documentation**         | New external library or API integration | `deepwiki`, `git-mcp`                               |
 
-**Guidelines**: Small changes → 1-2 workstreams. Large/novel → all applicable. Flag blockers for user input (scope ambiguity, credentials, competing libs, pattern conflicts).
+**Guidelines**: Run Memory Recall first to seed context before other workstreams. Small changes → 1-2 workstreams. Large/novel → all applicable. Flag blockers for user input (scope ambiguity, credentials, competing libs, pattern conflicts).
 
 ## 3. Proposal
 

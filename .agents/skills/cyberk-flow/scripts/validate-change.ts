@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { checkContradictions } from "./lib/memory/contradiction.ts";
 import { runHook } from "./lib/hooks.ts";
 import type { DeltaPlan, RequirementBlock } from "./lib/parse-delta.js";
 import { normalizeRequirementName, parseDeltaSpec } from "./lib/parse-delta.js";
@@ -209,6 +210,29 @@ export function validateChange(changeDir: string): ValidationResult {
   return { issues, errors, warnings };
 }
 
+export async function validateChangeWithContradictions(
+  changeDir: string,
+  specsDir?: string,
+): Promise<ValidationResult> {
+  const result = validateChange(changeDir);
+  if (result.errors > 0) return result;
+
+  const resolvedSpecsDir = specsDir ?? join(process.cwd(), "cyberk-flow", "specs");
+  const contradictions = await checkContradictions(changeDir, resolvedSpecsDir);
+
+  for (const c of contradictions) {
+    if (c.level === "allow") continue;
+    const level = c.level === "reject" ? "ERROR" : "WARNING";
+    const message = `Contradiction: "${c.source}" vs "${c.target}" (energy: ${c.energy.toFixed(2)}) — ${c.details}`;
+    result.issues.push({ level, specFile: changeDir, message });
+  }
+
+  result.errors = result.issues.filter((i) => i.level === "ERROR").length;
+  result.warnings = result.issues.filter((i) => i.level === "WARNING").length;
+
+  return result;
+}
+
 if (import.meta.main) {
   const name = process.argv[2];
   if (!name) {
@@ -224,7 +248,7 @@ if (import.meta.main) {
 
   if (!runHook("pre-validate-change", [name])) process.exit(1);
 
-  const result = validateChange(changeDir);
+  const result = await validateChangeWithContradictions(changeDir);
 
   for (const issue of result.issues) {
     console.log(`${issue.level}: ${issue.specFile}: ${issue.message}`);

@@ -7,13 +7,25 @@
 
 | Workstream           | Used? | Justification |
 | -------------------- | ----- | ------------- |
+| Memory Recall        | ✅/⏭️  | ...           |
 | Architecture Snapshot | ✅/⏭️  | ...           |
 | Internal Patterns    | ✅/⏭️  | ...           |
 | External Patterns    | ✅/⏭️  | ...           |
 | Constraint Check     | ✅/⏭️  | ...           |
 | Documentation        | ✅/⏭️  | ...           |
 
-## 3. Architecture Snapshot
+## 3. Memory Recall
+
+### Related Results
+
+| Source | Path | Heading | Relevance Score |
+| ------ | ---- | ------- | --------------- |
+| ...    | ...  | ...     | ...             |
+
+### Key Findings
+- ...
+
+## 4. Architecture Snapshot
 
 ### Relevant Packages
 | Package        | Purpose | Key Files |
@@ -24,7 +36,7 @@
 - API: ...
 - UI: ...
 
-## 4. Internal Patterns
+## 5. Internal Patterns
 
 ### Similar Implementations
 | Feature | Location | Pattern Used |
@@ -35,23 +47,23 @@
 - Validation: ...
 - Error handling: ...
 
-## 5. Constraint Check
+## 6. Constraint Check
 - Dependencies: ...
 - Build Requirements: ...
 - Database: ...
 
-## 6. External Patterns & Documentation
+## 7. External Patterns & Documentation
 - Library Docs: ...
 - Similar Projects: ...
 - API Docs: ...
 
-## 7. Gap Analysis (Synthesized)
+## 8. Gap Analysis (Synthesized)
 | Component | Have        | Need          | Gap Size |
 | --------- | ----------- | ------------- | -------- |
 | API       | None        | POST /v1/auth | New      |
 | DB        | User Schema | 2FA Columns   | Small    |
 
-## 8. Key Decisions
+## 9. Key Decisions
 
 | Decision | Options Considered | Chosen | Rationale |
 | -------- | ------------------ | ------ | --------- |
@@ -59,7 +71,7 @@
 
 <!-- If multiple viable solutions, add decision diagram + pros/cons for approval gate -->
 
-## 9. Options Comparison _(only if multiple viable solutions)_
+## 10. Options Comparison _(only if multiple viable solutions)_
 
 ```mermaid
 flowchart TD
@@ -72,9 +84,9 @@ flowchart TD
 | Option A | ...  | ...  | ...            |
 | Option B | ...  | ...  | ...            |
 
-## 10. Risks & Constraints
+## 11. Risks & Constraints
 - **Must**: [hard constraints — security, compat, perf]
 - **Should**: [soft constraints — conventions, preferences]
 
-## 11. Open Questions
+## 12. Open Questions
 - [ ] ...

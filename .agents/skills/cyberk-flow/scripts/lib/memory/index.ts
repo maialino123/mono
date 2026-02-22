@@ -1,9 +1,20 @@
 import { join } from "node:path";
+import { getRelatedDocuments } from "./co-access";
+import { consolidate } from "./consolidation";
+import { checkContradictions } from "./contradiction";
 import { closeMemoryDb, type MemoryDb, openMemoryDb } from "./db";
 import { TransformersEmbeddingProvider } from "./embeddings";
 import { type IndexContext, indexDocuments } from "./indexer";
 import { searchMemory } from "./search";
-import type { EmbeddingProvider, IndexSummary, SearchOptions, SearchResult } from "./types";
+import type {
+  Contradiction,
+  ConsolidationResult,
+  EmbeddingProvider,
+  IndexSummary,
+  RelatedDocument,
+  SearchOptions,
+  SearchResult,
+} from "./types";
 
 export interface MemoryStoreOptions {
   provider?: EmbeddingProvider;
@@ -13,6 +24,9 @@ export interface MemoryStoreOptions {
 export interface MemoryStore {
   index(): Promise<IndexSummary>;
   search(query: string, options?: SearchOptions): Promise<SearchResult[]>;
+  gc(): Promise<ConsolidationResult>;
+  getRelated(path: string, limit?: number): RelatedDocument[];
+  checkContradictions(changePath: string): Promise<Contradiction[]>;
   close(): void;
 }
 
@@ -34,6 +48,19 @@ export function createMemoryStore(projectRoot: string, options: MemoryStoreOptio
 
     async search(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
       return searchMemory(memDb.db, memDb.vecAvailable, provider, query, options);
+    },
+
+    async gc(): Promise<ConsolidationResult> {
+      return consolidate(memDb.db, memDb.vecAvailable);
+    },
+
+    getRelated(path: string, limit?: number): RelatedDocument[] {
+      return getRelatedDocuments(memDb.db, path, limit);
+    },
+
+    async checkContradictions(changePath: string): Promise<Contradiction[]> {
+      const specsDir = join(projectRoot, "cyberk-flow", "specs");
+      return checkContradictions(changePath, specsDir);
     },
 
     close(): void {

@@ -1,10 +1,21 @@
 import { createMemoryStore } from "./lib/memory/index";
 import type { SearchMode, SearchResult } from "./lib/memory/types";
 
-function parseArgs(args: string[]): { query: string; mode: SearchMode; limit: number; json: boolean } {
+function parseArgs(args: string[]): {
+  query: string;
+  mode: SearchMode;
+  limit: number;
+  json: boolean;
+  labels: string[];
+  dedupe: boolean;
+  maxChunksPerDoc: number;
+} {
   let mode: SearchMode = "hybrid";
   let limit = 10;
   let json = false;
+  const labels: string[] = [];
+  let dedupe = true;
+  let maxChunksPerDoc = 1;
   const queryParts: string[] = [];
 
   for (let i = 0; i < args.length; i++) {
@@ -12,6 +23,12 @@ function parseArgs(args: string[]): { query: string; mode: SearchMode; limit: nu
       mode = args[++i] as SearchMode;
     } else if (args[i] === "--limit" && i + 1 < args.length) {
       limit = parseInt(args[++i], 10);
+    } else if (args[i] === "--label" && i + 1 < args.length) {
+      labels.push(args[++i]);
+    } else if (args[i] === "--no-dedupe") {
+      dedupe = false;
+    } else if (args[i] === "--max-chunks-per-doc" && i + 1 < args.length) {
+      maxChunksPerDoc = parseInt(args[++i], 10);
     } else if (args[i] === "--json") {
       json = true;
     } else {
@@ -19,7 +36,7 @@ function parseArgs(args: string[]): { query: string; mode: SearchMode; limit: nu
     }
   }
 
-  return { query: queryParts.join(" "), mode, limit, json };
+  return { query: queryParts.join(" "), mode, limit, json, labels, dedupe, maxChunksPerDoc };
 }
 
 function formatResult(r: SearchResult, i: number): string {
@@ -30,10 +47,12 @@ function formatResult(r: SearchResult, i: number): string {
 
 if (import.meta.main) {
   const args = process.argv.slice(2);
-  const { query, mode, limit, json } = parseArgs(args);
+  const { query, mode, limit, json, labels, dedupe, maxChunksPerDoc } = parseArgs(args);
 
   if (!query) {
-    console.error("Usage: bun run cf search <query> [--mode keyword|vector|hybrid] [--limit N] [--json]");
+    console.error(
+      "Usage: bun run cf search <query> [--mode keyword|vector|hybrid] [--limit N] [--label <value>]... [--no-dedupe] [--max-chunks-per-doc N] [--json]",
+    );
     process.exit(1);
   }
 
@@ -41,7 +60,13 @@ if (import.meta.main) {
   const store = createMemoryStore(projectRoot);
 
   try {
-    const results = await store.search(query, { mode, limit });
+    const results = await store.search(query, {
+      mode,
+      limit,
+      labels: labels.length > 0 ? labels : undefined,
+      dedupe,
+      maxChunksPerDoc,
+    });
 
     if (json) {
       console.log(JSON.stringify(results, null, 2));

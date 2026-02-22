@@ -40,8 +40,20 @@ export class TransformersEmbeddingProvider implements EmbeddingProvider {
 
     this.pipelinePromise = (async () => {
       try {
-        const { pipeline } = await import("@huggingface/transformers");
-        return await pipeline("feature-extraction", this.modelId);
+        const originalWarn = console.warn;
+        const warnFilter = (...args: unknown[]) => {
+          const msg = args.map(String).join(" ");
+          if (msg.includes("dtype")) return;
+          originalWarn(...args);
+        };
+        console.warn = warnFilter;
+        try {
+          const { pipeline } = await import("@huggingface/transformers");
+          const extractor = await pipeline("feature-extraction", this.modelId);
+          return extractor;
+        } finally {
+          if (console.warn === warnFilter) console.warn = originalWarn;
+        }
       } catch {
         this.failed = true;
         return null;

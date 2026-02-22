@@ -1,6 +1,7 @@
 import { Database } from "bun:sqlite";
+import { existsSync, unlinkSync } from "node:fs";
 
-const CURRENT_SCHEMA_VERSION = 1;
+const CURRENT_SCHEMA_VERSION = 4;
 
 const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS meta (
@@ -12,7 +13,12 @@ const SCHEMA_STATEMENTS = [
     path TEXT NOT NULL UNIQUE,
     content_hash TEXT NOT NULL,
     chunk_count INTEGER NOT NULL DEFAULT 0,
-    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    confidence REAL NOT NULL DEFAULT 0.8,
+    access_count INTEGER NOT NULL DEFAULT 0,
+    last_accessed_at TEXT,
+    pagerank REAL NOT NULL DEFAULT 0.0,
+    doc_type TEXT NOT NULL DEFAULT 'semantic'
   )`,
   `CREATE TABLE IF NOT EXISTS chunks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,6 +52,20 @@ const SCHEMA_STATEMENTS = [
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     PRIMARY KEY (model_id, content_hash)
   )`,
+  `CREATE TABLE IF NOT EXISTS co_access (
+    doc_id_a INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    doc_id_b INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    co_count INTEGER NOT NULL DEFAULT 1,
+    last_co_access TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (doc_id_a, doc_id_b),
+    CHECK (doc_id_a < doc_id_b)
+  )`,
+  `CREATE TABLE IF NOT EXISTS document_labels (
+    doc_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    label TEXT NOT NULL,
+    PRIMARY KEY (doc_id, label)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_document_labels_label_doc ON document_labels(label, doc_id)`,
   `CREATE INDEX IF NOT EXISTS idx_chunks_doc_id ON chunks(doc_id)`,
   `CREATE INDEX IF NOT EXISTS idx_documents_path ON documents(path)`,
 ];
@@ -72,9 +92,25 @@ function setSchemaVersion(db: Database, version: number): void {
   db.run("INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', ?)", [String(version)]);
 }
 
-function runMigrations(_db: Database, fromVersion: number): void {
-  // Future migrations go here as: if (fromVersion < 2) { ... }
-  void fromVersion;
+function runMigrations(db: Database, fromVersion: number): void {
+  if (fromVersion < 2) {
+    db.run("ALTER TABLE documents ADD COLUMN label TEXT NOT NULL DEFAULT ''");
+  }
+  if (fromVersion < 3) {
+    db.run("ALTER TABLE documents ADD COLUMN confidence REAL NOT NULL DEFAULT 0.8");
+    db.run("ALTER TABLE documents ADD COLUMN access_count INTEGER NOT NULL DEFAULT 0");
+    db.run("ALTER TABLE documents ADD COLUMN last_accessed_at TEXT");
+    db.run("ALTER TABLE documents ADD COLUMN pagerank REAL NOT NULL DEFAULT 0.0");
+    db.run("ALTER TABLE documents ADD COLUMN doc_type TEXT NOT NULL DEFAULT 'semantic'");
+    db.run(`CREATE TABLE IF NOT EXISTS co_access (
+      doc_id_a INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+      doc_id_b INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+      co_count INTEGER NOT NULL DEFAULT 1,
+      last_co_access TEXT NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (doc_id_a, doc_id_b),
+      CHECK (doc_id_a < doc_id_b)
+    )`);
+  }
 }
 
 export let sqliteVecAvailable = false;
@@ -125,7 +161,7 @@ export interface MemoryDb {
 }
 
 export function openMemoryDb(dbPath: string, embeddingDimensions = 384): MemoryDb {
-  const db = new Database(dbPath);
+  let db = new Database(dbPath);
   configurePragmas(db);
 
   const version = getSchemaVersion(db);
@@ -135,8 +171,19 @@ export function openMemoryDb(dbPath: string, embeddingDimensions = 384): MemoryD
     }
     setSchemaVersion(db, CURRENT_SCHEMA_VERSION);
   } else if (version < CURRENT_SCHEMA_VERSION) {
-    runMigrations(db, version);
+    // Recreate DB on schema mismatch (no migration for v4)
+    db.close();
+    if (existsSync(dbPath)) unlinkSync(dbPath);
+    // Remove WAL/SHM files if present
+    if (existsSync(`${dbPath}-wal`)) unlinkSync(`${dbPath}-wal`);
+    if (existsSync(`${dbPath}-shm`)) unlinkSync(`${dbPath}-shm`);
+    db = new Database(dbPath);
+    configurePragmas(db);
+    for (const stmt of SCHEMA_STATEMENTS) {
+      db.run(stmt);
+    }
     setSchemaVersion(db, CURRENT_SCHEMA_VERSION);
+    console.log(`Recreated memory.db due to schema change v${version}→v${CURRENT_SCHEMA_VERSION}`);
   }
 
   const storedDims = getStoredDimensions(db);

@@ -17,6 +17,8 @@ const COMMANDS: Record<string, { script: string; args?: string[]; desc: string }
   update: { script: "update.ts", desc: "Update skills from cyberk-dev/cyberk-skills" },
   index: { script: "index-memory.ts", desc: "Index project files for memory search" },
   search: { script: "search-memory.ts", desc: "Search indexed memory store" },
+  gc: { script: "gc-memory.ts", desc: "Consolidate memory (dedup + prune)" },
+  learn: { script: "learn.ts", desc: "Store knowledge entry to cyberk-flow/knowledge/" },
 };
 
 const HELP_FLAGS = new Set(["help", "-h", "--help"]);

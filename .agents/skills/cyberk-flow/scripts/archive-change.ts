@@ -48,7 +48,7 @@ function validateArchiveSection(workflowPath: string): string[] {
 
 function tickArchiveCheckbox(workflowPath: string) {
   if (!existsSync(workflowPath)) return;
-  let content = readFileSync(workflowPath, "utf-8");
+  let content = readFileSync(workflowPath, "utf-8").replace(/\r\n?/g, "\n");
 
   const section = extractArchiveSection(content);
   if (!section) return;
@@ -58,6 +58,7 @@ function tickArchiveCheckbox(workflowPath: string) {
   if (sectionTicked !== section) {
     content = content.replace(section, sectionTicked);
     writeFileSync(workflowPath, content, "utf-8");
+    console.log("✅ workflow.md: auto-ticked 'Archive change' checkbox (do not manually edit this line)");
   }
 }
 

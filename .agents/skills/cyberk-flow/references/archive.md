@@ -16,21 +16,18 @@
 
    > **Note**: Full code review (Oracle + code_review) is done in **Implement → "Review — Oracle" and "Review — Code Review"**. Archive does NOT repeat it unless escalation triggers fire.
 
-2. **Extract Knowledge**:
-   - Use `find_thread` to search for threads related to this change
-   - Look for: new patterns, bug fixes, gotchas, architectural decisions, lessons learned
-   - If valuable knowledge is found, invoke the `knowledge` skill to persist it (if available); otherwise document in `workflow.md` Notes
-
-3. **Retrospective** (lightweight):
+2. **Extract Knowledge + Retrospective**:
+   - Knowledge extraction is triggered by AGENTS.md auto-trigger rules (see `## Knowledge Extraction`)
    - **Estimate vs Actual**: Appetite was `__`, took `__`
    - **What worked**: [process feedback]
    - **What to improve**: [for next change]
    - Record in `workflow.md` Notes section
 
-4. **Apply Delta Specs**: `bun run cf apply <change-id>`
+3. **Apply Delta Specs**: `bun run cf apply <change-id>`
+   - Auto-ticks the "Apply deltas" checkbox in `workflow.md` — do NOT manually edit this line
 
-5. **Archive**: `bun run cf archive <change-id>`
-   - Automatically ticks the "Archive change" checkbox in `workflow.md` before moving
+4. **Archive**: `bun run cf archive <change-id>`
+   - Auto-ticks the "Archive change" checkbox in `workflow.md` — do NOT manually edit this line
    - Moves change to `archive/YYYY-MM-DD-HHmm-<change-id>/` (UTC timestamp)
 
 ## When to Archive

@@ -2,6 +2,7 @@ import { cpSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { findSkillTemplatesDir } from "./lib/find-templates.ts";
 import { runHook } from "./lib/hooks.ts";
+import { createMemoryStore } from "./lib/memory/index.ts";
 
 const name = process.argv[2];
 if (!name) {
@@ -43,3 +44,24 @@ for (const file of REQUIRED_TEMPLATES) {
 console.log(`Created change '${name}' at ${changeDir}/`);
 
 runHook("post-new-change", [name]);
+
+// Auto-search for related context (best-effort)
+try {
+  const searchQuery = name.replace(/-/g, " ");
+  const store = createMemoryStore(process.cwd());
+  try {
+    const results = await store.search(searchQuery, { limit: 5 });
+    if (results.length > 0) {
+      console.log("\n📚 Related context found:");
+      for (let i = 0; i < results.length; i++) {
+        const r = results[i];
+        const heading = r.heading ? ` > ${r.heading}` : "";
+        console.log(`  ${i + 1}. [${r.score.toFixed(3)}] ${r.path}${heading}`);
+      }
+    }
+  } finally {
+    store.close();
+  }
+} catch {
+  // Silently skip - DB may not exist
+}
