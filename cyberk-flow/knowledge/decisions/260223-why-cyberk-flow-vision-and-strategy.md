@@ -1,3 +1,11 @@
+---
+labels: [vision, ai-workflow, strategy]
+source: migrated-from-docs/why-cyberk-flow.md
+summary: Thế giới AI đang vận hành liên tục và không có dấu hiệu chậm lại. Sự ra đời của hàng loạt AI model và AI workflow như Claude Code, Cursor, GitHub Copilot Workspace, Devin, Windsurf, Amp, OpenClaw, ...
+---
+# Why CyberK Flow - Vision and Strategy
+**Date**: 2026-02-23
+
 # Tại sao CyberK tạo dự án này?
 
 ## 1. Bối cảnh: Thế giới AI đang thay đổi ngành phần mềm

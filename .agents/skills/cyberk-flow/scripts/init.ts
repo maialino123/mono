@@ -8,7 +8,13 @@ const OPENSPEC_DIR = "openspec";
 const MARKER_FILE = join(CYBERK_FLOW_DIR, "project.md");
 const ROOT_AGENTS_FILE = "AGENTS.md";
 
-const DIRS = [join(CYBERK_FLOW_DIR, "changes", "archive"), join(CYBERK_FLOW_DIR, "specs")];
+const KNOWLEDGE_CATEGORIES = ["decisions", "debugging", "patterns", "research", "conventions"];
+
+const DIRS = [
+  join(CYBERK_FLOW_DIR, "changes", "archive"),
+  join(CYBERK_FLOW_DIR, "specs"),
+  ...KNOWLEDGE_CATEGORIES.map((cat) => join(CYBERK_FLOW_DIR, "knowledge", cat)),
+];
 
 function isInitialized(): boolean {
   return existsSync(MARKER_FILE);
@@ -93,6 +99,12 @@ Directory structure:
   ${CYBERK_FLOW_DIR}/
   ├── changes/          # Active change proposals
   │   └── archive/      # Completed changes
+  ├── knowledge/        # Extracted knowledge
+  │   ├── decisions/    # Architecture & design decisions
+  │   ├── debugging/    # Bug root causes & fixes
+  │   ├── patterns/     # Code patterns & conventions
+  │   ├── research/     # Research results (auto-expires)
+  │   └── conventions/  # Project conventions
   ├── specs/            # Consolidated specifications
   └── project.md        # Project context (fill this out!)
 

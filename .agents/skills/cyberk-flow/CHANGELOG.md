@@ -4,6 +4,12 @@ All notable changes to the **cyberk-flow** skill will be documented in this file
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-02-23
+
+### Changed
+
+- improve-migrate: After migration from `openspec/` to `cyberk-flow/`, two legacy artifacts remain in target projects: 1. **`cyberk-flow/templates/`** — stale copies of templates that now live canonically in the skill's `templates/` directory. They cause confusion and drift. 2. **`docs/` and `docs/knowledge/`** — knowledge files scattered outside the `cyberk-flow/knowledge/<category>/` structure, making them invisible to the memory system (`cf search`, `cf index`).
+
 ## [1.5.0] - 2026-02-22
 
 ### Changed

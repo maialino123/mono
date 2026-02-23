@@ -1,3 +1,11 @@
+---
+labels: [auth, google, oauth, setup]
+source: migrated-from-docs/google-auth-setup.md
+summary: This guide explains how to configure Google OAuth for the CyberK Flow application.
+---
+# Google OAuth Setup Guide
+**Date**: 2026-02-23
+
 # Google OAuth Setup Guide
 
 This guide explains how to configure Google OAuth for the CyberK Flow application.

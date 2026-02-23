@@ -42,7 +42,7 @@
     "db:stop": "turbo -F @cyberk-flow/db db:stop",
     "db:down": "turbo -F @cyberk-flow/db db:down",
     "check": "biome check --write .",
-    "e2e:test": "playwright test",
+    "e2e:test": "dotenv -e .env.e2e.local -- playwright test",
     "e2e:test:headed": "playwright test --headed",
     "e2e:download-phantom": "bun run e2e/scripts/download-phantom.ts",
     "e2e:enable-testnet": "bun run e2e/scripts/enable-phantom-testnet.ts",

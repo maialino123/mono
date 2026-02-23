@@ -99,7 +99,8 @@ Template: `tasks.md` — execution-ordered checklist referencing specs (what) an
 
 - **E2E testing (mandatory when `proposal.md` marks E2E = REQUIRED)**: Add explicit E2E task(s) with spec **Refs** and measurable **Done** criteria. Implement will run the **E2E** command from `project.md` § Commands. See [e2e-integration.md](e2e-integration.md) for the workflow contract.
 - **Spikes first**: section 0 (`0_x`), completed before any track starts.
-- Each task: **Track** (letter), **Deps**, **Refs** (spec/design anchors), **Done** (measurable criteria), **Files** (required when parallel tracks are used; optional for single-track).
+- Each task: **Track** (letter), **Deps**, **Refs** (spec/design anchors), **Done** (measurable criteria), **Test** (test file path + type, or `N/A — reason`), **Files** (required when parallel tracks are used; optional for single-track).
+- **Test evidence (mandatory for behavior changes)**: Every task that changes observable behavior MUST declare a `**Test**` field with the test file path and type (unit/integration/e2e). Use `N/A — <reason>` only for doc-only, config-only, or pure refactor tasks. This is validated by `bun run cf validate`.
 
 **Tracks**: A track is a sequential chain executed by one sub-agent. Different tracks run concurrently. A track may contain tasks from different sections. Tasks sharing files MUST be in the same track. Mermaid node IDs use `t` prefix (`t1_1`); labels show task ID (`"1_1"`). Every Deps entry MUST match a graph arrow.
 

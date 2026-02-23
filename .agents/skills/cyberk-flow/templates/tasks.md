@@ -35,6 +35,7 @@ flowchart LR
   - **Track**: A
   - **Refs**: <!-- specs/<cap>/spec.md#RN; design.md#Section -->
   - **Done**: <!-- "Scenario X passes" or measurable criteria -->
+  - **Test**: <!-- path/to/file.test.ts (unit|integration|e2e) — or: N/A — reason (doc-only, config-only, pure refactor) -->
   - **Files** _(required for parallel tracks; optional for single-track)_: <!-- list all files this task will modify -->
 
 - [ ] 1_2 <!-- Verb-led task description -->
@@ -42,6 +43,7 @@ flowchart LR
   - **Deps**: 1_1
   - **Refs**: <!-- spec/design anchors -->
   - **Done**: <!-- measurable criteria -->
+  - **Test**: <!-- path/to/file.test.ts (type) — or: N/A — reason -->
 
 ## 2. <!-- Section name -->
 
@@ -49,12 +51,14 @@ flowchart LR
   - **Track**: B
   - **Refs**: <!-- spec/design anchors -->
   - **Done**: <!-- measurable criteria -->
+  - **Test**: <!-- path/to/file.test.ts (type) — or: N/A — reason -->
 
 - [ ] 2_2 <!-- Verb-led task description -->
   - **Track**: B
   - **Deps**: 2_1
   - **Refs**: <!-- spec/design anchors -->
   - **Done**: <!-- measurable criteria -->
+  - **Test**: <!-- path/to/file.test.ts (type) — or: N/A — reason -->
 
 ## 3. <!-- Section name -->
 
@@ -63,9 +67,11 @@ flowchart LR
   - **Deps**: 3_2, 2_2
   - **Refs**: <!-- spec/design anchors -->
   - **Done**: <!-- measurable criteria -->
+  - **Test**: <!-- path/to/file.test.ts (type) — or: N/A — reason -->
 
 - [ ] 3_2 <!-- Verb-led task description -->
   - **Track**: A
   - **Deps**: 1_2
   - **Refs**: <!-- spec/design anchors -->
   - **Done**: <!-- measurable criteria -->
+  - **Test**: <!-- path/to/file.test.ts (type) — or: N/A — reason -->

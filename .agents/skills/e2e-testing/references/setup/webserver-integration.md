@@ -54,4 +54,4 @@ export default defineConfig({
 
 ## Deep Dive
 
-For full root cause analysis, see `docs/knowledge/playwright-webserver-orphan-process.md`.
+For full root cause analysis, see `cyberk-flow/knowledge/playwright-webserver-orphan-process.md`.

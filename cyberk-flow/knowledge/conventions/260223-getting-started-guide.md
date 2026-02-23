@@ -1,3 +1,11 @@
+---
+labels: [setup, docker, development]
+source: migrated-from-docs/getting-started.md
+summary: Step-by-step guide to set up and run the cyberk-flow monorepo locally.
+---
+# Getting Started Guide
+**Date**: 2026-02-23
+
 # Getting Started
 
 Step-by-step guide to set up and run the **cyberk-flow** monorepo locally.

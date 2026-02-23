@@ -1,3 +1,11 @@
+---
+labels: [e2e, phantom, synpress, web3]
+source: migrated-from-docs/web3-e2e-synpress.md
+summary: This document describes the local-only setup for testing SIWE with Phantom wallet in this repository. Phantom replaces MetaMask as the primary wallet for E2E testing.
+---
+# Web3 E2E with Playwright Synpress Phantom
+**Date**: 2026-02-23
+
 # Web3 E2E with Playwright + Synpress (Phantom)
 
 This document describes the local-only setup for testing SIWE with Phantom wallet in this repository. Phantom replaces MetaMask as the primary wallet for E2E testing.

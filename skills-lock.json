@@ -4,7 +4,17 @@
     "cyberk-flow": {
       "source": "cyberk-dev/cyberk-skills",
       "sourceType": "github",
-      "computedHash": "630557e6a74ef9f340f0260620bdf4e1c89113bd76e727604b365404438f618e"
+      "computedHash": "99c68dedc4d115a648ed650e46651431362fc5041062d55be13124b81d57f414"
+    },
+    "e2e-testing": {
+      "source": "cyberk-dev/cyberk-skills",
+      "sourceType": "github",
+      "computedHash": "05be8e39dc587c266a5ef159438410b6daca83827955fbd1dd23cec4186681ad"
+    },
+    "playwright-cli": {
+      "source": "cyberk-dev/cyberk-skills",
+      "sourceType": "github",
+      "computedHash": "7075ab30f588019197a2f1518bb4c9d33d69d33352af079b5f9c60303ad3886e"
     }
   }
 }

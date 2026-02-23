@@ -169,9 +169,81 @@ export function validateChange(changeDir: string): ValidationResult {
     issues.push({ level: "ERROR", specFile: changeDir, message: "No deltas found across all spec files" });
   }
 
+  // Test evidence: behavior-changing tasks must declare test intent
+  const tasksPath = join(changeDir, "tasks.md");
+  if (totalDeltas > 0 && !existsSync(tasksPath)) {
+    issues.push({
+      level: "ERROR",
+      specFile: changeDir,
+      message: "Spec has behavior changes but tasks.md is missing — tasks.md is required for changes with spec deltas",
+    });
+  }
+  if (totalDeltas > 0 && existsSync(tasksPath)) {
+    const tasksContent = readFileSync(tasksPath, "utf-8");
+    // Match task lines like "- [ ] 1_1 ..." or "- [x] 2_3 ..."
+    const taskPattern = /^\s*-\s*\[[\sx ]\]\s*(\d+_\d+)\b/gm;
+    let taskMatch: RegExpExecArray | null;
+    const taskIds: string[] = [];
+    while ((taskMatch = taskPattern.exec(tasksContent)) !== null) {
+      // Skip spike tasks (0_x)
+      if (!taskMatch[1].startsWith("0_")) {
+        taskIds.push(taskMatch[1]);
+      }
+    }
+
+    if (taskIds.length > 0) {
+      // Check if any non-spike task has a **Test** field
+      const hasTestField = /^\s*-\s*\*\*Test\*\*\s*:/m.test(tasksContent);
+      if (!hasTestField) {
+        issues.push({
+          level: "ERROR",
+          specFile: tasksPath,
+          message:
+            "Spec has behavior changes but tasks.md has no **Test** field — every behavior-changing task must declare test evidence (file path + type) or N/A with justification",
+        });
+      } else {
+        // Check that all non-N/A Test fields have actual content (not just template comments)
+        const testFieldPattern = /^\s*-\s*\*\*Test\*\*\s*:\s*(.*)$/gm;
+        let testMatch: RegExpExecArray | null;
+        let hasRealTest = false;
+        let allNA = true;
+        let hasNAWithoutReason = false;
+        while ((testMatch = testFieldPattern.exec(tasksContent)) !== null) {
+          const value = testMatch[1].trim();
+          // Skip empty or template-only values (just HTML comments)
+          if (!value || /^<!--.*-->$/.test(value)) continue;
+          if (/^N\/A\b/i.test(value)) {
+            // N/A must include a reason after the dash
+            if (!/^N\/A\s*[—–-]\s*\S/i.test(value)) {
+              hasNAWithoutReason = true;
+            }
+          } else {
+            hasRealTest = true;
+            allNA = false;
+          }
+        }
+        if (hasNAWithoutReason) {
+          issues.push({
+            level: "ERROR",
+            specFile: tasksPath,
+            message:
+              "Test field declares N/A without justification — use format: N/A — <reason> (e.g., N/A — config-only change)",
+          });
+        }
+        if (allNA && taskIds.length > 0) {
+          issues.push({
+            level: "WARNING",
+            specFile: tasksPath,
+            message:
+              "All tasks declare Test as N/A — verify this is correct if spec has behavior-changing requirements",
+          });
+        }
+      }
+    }
+  }
+
   // E2E consistency: proposal UI Impact vs tasks.md
   const proposalPath = join(changeDir, "proposal.md");
-  const tasksPath = join(changeDir, "tasks.md");
   if (existsSync(proposalPath)) {
     const proposalContent = readFileSync(proposalPath, "utf-8");
     const uiImpactMatch = proposalContent.match(/User-visible UI behavior affected\?\*{0,2}\s*(?:<!--\s*)?(YES|NO)/i);

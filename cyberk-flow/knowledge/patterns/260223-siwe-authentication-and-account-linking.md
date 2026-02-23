@@ -1,3 +1,11 @@
+---
+labels: [siwe, auth, better-auth, wallet]
+source: migrated-from-docs/knowledge/siwe-auth-account-linking.md
+summary: > Source Threads:
+---
+# SIWE Authentication and Account Linking
+**Date**: 2026-02-23
+
 # SIWE Authentication & Account Linking
 
 > **Source Threads**:

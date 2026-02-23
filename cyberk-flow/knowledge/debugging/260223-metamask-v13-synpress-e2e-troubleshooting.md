@@ -1,3 +1,11 @@
+---
+labels: [e2e, metamask, synpress, playwright]
+source: migrated-from-docs/e2e-metamask-troubleshooting.md
+summary: > Purpose: Document ALL approaches tried across ~10 Amp threads to solve MetaMask v13 MV3 + Synpress 4.1.2 E2E test setup issues. Prevents future agents from repeating failed approaches.
+---
+# MetaMask v13 Synpress E2E Troubleshooting
+**Date**: 2026-02-23
+
 # MetaMask v13 + Synpress 4.1.2 E2E Troubleshooting Log
 
 > **Purpose**: Document ALL approaches tried across ~10 Amp threads to solve MetaMask v13 MV3 + Synpress 4.1.2 E2E test setup issues. Prevents future agents from repeating failed approaches.

@@ -1,3 +1,11 @@
+---
+labels: [playwright, webserver, process, turbo]
+source: migrated-from-docs/knowledge/playwright-webserver-orphan-process.md
+summary: > Source Thread:
+---
+# Playwright webServer Orphan Process Fix
+**Date**: 2026-02-23
+
 # Playwright webServer Orphan Process Fix
 
 > **Source Thread**:

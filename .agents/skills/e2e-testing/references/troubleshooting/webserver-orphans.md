@@ -32,4 +32,4 @@ See [setup/webserver-integration.md](../setup/webserver-integration.md) for the 
 
 ## Deep Dive
 
-For full root cause analysis (process groups, why `gracefulShutdown` is unavailable with Synpress, contributing factors), see `docs/knowledge/playwright-webserver-orphan-process.md`.
+For full root cause analysis (process groups, why `gracefulShutdown` is unavailable with Synpress, contributing factors), see `cyberk-flow/knowledge/playwright-webserver-orphan-process.md`.

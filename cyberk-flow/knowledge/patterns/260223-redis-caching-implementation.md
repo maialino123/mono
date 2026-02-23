@@ -1,3 +1,11 @@
+---
+labels: [redis, caching, hono, orpc]
+source: migrated-from-docs/knowledge/redis-caching-implementation.md
+summary: > Source Threads:
+---
+# Redis Caching Implementation
+**Date**: 2026-02-23
+
 # Redis Caching Implementation Knowledge
 
 > **Source Threads**:

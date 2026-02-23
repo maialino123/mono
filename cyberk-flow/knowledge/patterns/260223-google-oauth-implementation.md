@@ -1,3 +1,11 @@
+---
+labels: [auth, google, oauth, better-auth]
+source: migrated-from-docs/knowledge/google-oauth-implementation.md
+summary: > Source Thread: [T-019bf980-8b16-71ff-90a7-6a1c3932e1bf](https://ampcode.com/threads/T-019bf980-8b16-71ff-90a7-6a1c3932e1bf)
+---
+# Google OAuth Implementation
+**Date**: 2026-02-23
+
 # Google OAuth Implementation Knowledge
 
 > **Source Thread**: [T-019bf980-8b16-71ff-90a7-6a1c3932e1bf](https://ampcode.com/threads/T-019bf980-8b16-71ff-90a7-6a1c3932e1bf)  

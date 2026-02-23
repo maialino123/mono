@@ -91,14 +91,54 @@ function removeOpenspecSkill(): void {
   }
 }
 
+function removeLegacyTemplates(): void {
+  const templatesDir = join(CYBERK_FLOW_DIR, "templates");
+  if (existsSync(templatesDir)) {
+    rmSync(templatesDir, { recursive: true, force: true });
+    console.log("  🗑  Removed legacy cyberk-flow/templates/ (templates now live in skill)");
+  }
+}
+
+function collectMarkdownFiles(dir: string, basePath = ""): string[] {
+  const files: string[] = [];
+  if (!existsSync(dir)) return files;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const relPath = basePath ? join(basePath, entry.name) : entry.name;
+    if (entry.isDirectory()) {
+      files.push(...collectMarkdownFiles(join(dir, entry.name), relPath));
+    } else if (entry.isFile() && entry.name.endsWith(".md")) {
+      files.push(relPath);
+    }
+  }
+  return files.sort();
+}
+
+function printDocsKnowledgePrompt(projectRoot: string): void {
+  const docsDir = join(projectRoot, "docs");
+  if (!existsSync(docsDir)) return;
+
+  const mdFiles = collectMarkdownFiles(docsDir);
+  if (mdFiles.length === 0) return;
+
+  console.log(`
+📚 Found ${mdFiles.length} doc(s) in docs/ that should be migrated to cyberk-flow/knowledge/.
+
+Files found:
+${mdFiles.map((f) => `  - docs/${f}`).join("\n")}
+
+👉 Follow the instructions in references/migrate.md to classify and store each file using \`cf learn\`.
+   After all files are processed, delete the docs/ directory.
+`);
+}
+
 interface MigrateOptions {
   skipInit?: boolean;
 }
 
-async function migrate(source = "openspec", options: MigrateOptions = {}): Promise<void> {
-  const srcPath = resolve(source);
+async function migrate(source?: string, options: MigrateOptions = {}): Promise<void> {
+  const srcPath = source ? resolve(source) : null;
 
-  if (!existsSync(srcPath)) {
+  if (source && !existsSync(srcPath!)) {
     throw new Error(`Source directory '${source}' does not exist.`);
   }
 
@@ -108,81 +148,86 @@ async function migrate(source = "openspec", options: MigrateOptions = {}): Promi
     console.log("");
   }
 
-  console.log(`Migrating ${source}/ → ${CYBERK_FLOW_DIR}/...\n`);
-
   // Ensure cyberk-flow directories exist even with skipInit
   mkdirSync(join(CYBERK_FLOW_DIR, "specs"), { recursive: true });
   mkdirSync(join(CYBERK_FLOW_DIR, "changes", "archive"), { recursive: true });
 
   const counts: MigrateCounts = { specs: 0, changes: 0, archived: 0, workflows: 0, skipped: 0 };
 
-  // Copy specs/
-  const specsDir = join(srcPath, "specs");
-  if (existsSync(specsDir)) {
-    console.log("📁 Copying specs/...");
-    copyDirRecursive(specsDir, join(CYBERK_FLOW_DIR, "specs"), counts, "specs");
-  }
+  // Remove legacy templates directory
+  removeLegacyTemplates();
 
-  // Copy changes/
-  const changesDir = join(srcPath, "changes");
-  if (existsSync(changesDir)) {
-    console.log("📁 Copying changes/...");
-    for (const entry of readdirSync(changesDir)) {
-      const srcEntry = join(changesDir, entry);
-      const destEntry = join(CYBERK_FLOW_DIR, "changes", entry);
-      if (!statSync(srcEntry).isDirectory()) {
-        if (!existsSync(destEntry)) {
-          mkdirSync(dirname(destEntry), { recursive: true });
-          cpSync(srcEntry, destEntry);
-          counts.changes++;
-          console.log(`  📄 Copied ${destEntry}`);
-        } else {
-          counts.skipped++;
-          console.log(`  ⚠ Skipped existing: ${destEntry}`);
+  // Copy from source if provided
+  if (srcPath) {
+    console.log(`Migrating ${source}/ → ${CYBERK_FLOW_DIR}/...\n`);
+
+    // Copy specs/
+    const specsDir = join(srcPath, "specs");
+    if (existsSync(specsDir)) {
+      console.log("📁 Copying specs/...");
+      copyDirRecursive(specsDir, join(CYBERK_FLOW_DIR, "specs"), counts, "specs");
+    }
+
+    // Copy changes/
+    const changesDir = join(srcPath, "changes");
+    if (existsSync(changesDir)) {
+      console.log("📁 Copying changes/...");
+      for (const entry of readdirSync(changesDir)) {
+        const srcEntry = join(changesDir, entry);
+        const destEntry = join(CYBERK_FLOW_DIR, "changes", entry);
+        if (!statSync(srcEntry).isDirectory()) {
+          if (!existsSync(destEntry)) {
+            mkdirSync(dirname(destEntry), { recursive: true });
+            cpSync(srcEntry, destEntry);
+            counts.changes++;
+            console.log(`  📄 Copied ${destEntry}`);
+          } else {
+            counts.skipped++;
+            console.log(`  ⚠ Skipped existing: ${destEntry}`);
+          }
+          continue;
         }
-        continue;
-      }
-      if (entry === "archive") {
-        copyDirRecursive(srcEntry, destEntry, counts, "archived");
-      } else {
-        copyDirRecursive(srcEntry, destEntry, counts, "changes");
+        if (entry === "archive") {
+          copyDirRecursive(srcEntry, destEntry, counts, "archived");
+        } else if (entry === "templates") {
+          console.log("  ⏭  Skipped templates/ (templates now live in skill)");
+        } else {
+          copyDirRecursive(srcEntry, destEntry, counts, "changes");
+        }
       }
     }
+
+    // Copy project.md (always overwrite — user's project context takes priority over template default)
+    const projectMdSrc = join(srcPath, "project.md");
+    const projectMdDest = join(CYBERK_FLOW_DIR, "project.md");
+    if (existsSync(projectMdSrc)) {
+      cpSync(projectMdSrc, projectMdDest);
+      console.log(`  📄 Copied ${projectMdDest}`);
+    }
+
+    // Inject workflow.md into active changes
+    console.log("\n📝 Injecting workflow.md into active changes...");
+    injectWorkflows(counts);
+
+    // Delete source (only auto-delete canonical openspec path when no files were skipped)
+    const canonicalOpenspec = resolve("openspec");
+    if (srcPath === canonicalOpenspec && counts.skipped === 0) {
+      console.log(`\n🗑  Removing ${source}/...`);
+      rmSync(srcPath, { recursive: true, force: true });
+    } else if (counts.skipped > 0) {
+      console.log(`\n⚠  ${counts.skipped} file(s) were skipped due to conflicts — keeping ${source}/ for manual review.`);
+      console.log(`   Remove manually after resolving: rm -rf ${srcPath}`);
+    } else {
+      console.log(`\n⚠  Source is not the canonical openspec/ — skipping auto-delete.`);
+      console.log(`   Remove manually if desired: rm -rf ${srcPath}`);
+    }
+
+    // Remove old openspec skill
+    removeOpenspecSkill();
   }
 
-  // Copy project.md (always overwrite — user's project context takes priority over template default)
-  const projectMdSrc = join(srcPath, "project.md");
-  const projectMdDest = join(CYBERK_FLOW_DIR, "project.md");
-  if (existsSync(projectMdSrc)) {
-    cpSync(projectMdSrc, projectMdDest);
-    console.log(`  📄 Copied ${projectMdDest}`);
-  }
-
-  // Ensure templates are present
-  if (!options.skipInit) {
-    console.log("\n🔄 Ensuring templates are present...");
-    await init(true, { autoMigrate: false });
-  }
-
-  // Inject workflow.md into active changes
-  console.log("\n📝 Injecting workflow.md into active changes...");
-  injectWorkflows(counts);
-
-  // Delete source (only auto-delete canonical openspec path when no files were skipped)
-  const canonicalOpenspec = resolve("openspec");
-  if (srcPath === canonicalOpenspec && counts.skipped === 0) {
-    console.log(`\n🗑  Removing ${source}/...`);
-    rmSync(srcPath, { recursive: true, force: true });
-  } else if (counts.skipped > 0) {
-    console.log(`\n⚠  ${counts.skipped} file(s) were skipped due to conflicts — keeping ${source}/ for manual review.`);
-    console.log(`   Remove manually after resolving: rm -rf ${srcPath}`);
-  } else {
-    console.log(`\n⚠  Source is not the canonical openspec/ — skipping auto-delete.`);
-    console.log(`   Remove manually if desired: rm -rf ${srcPath}`);
-  }
-
-  // Remove old openspec skill
-  removeOpenspecSkill();
+  // Detect docs/ and print knowledge migration prompt
+  printDocsKnowledgePrompt(process.cwd());
 
   // Summary
   console.log(`
@@ -200,7 +245,7 @@ Summary:
 export { migrate };
 
 if (import.meta.main) {
-  const source = process.argv[2] || "openspec";
+  const source = process.argv[2] || undefined;
   try {
     await migrate(source);
   } catch (err) {

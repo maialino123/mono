@@ -1,3 +1,11 @@
+---
+labels: [wallet, evm, solana, rainbowkit]
+source: migrated-from-docs/knowledge/multi-chain-wallet-integration.md
+summary: > Source Threads:
+---
+# Multi-Chain Wallet Integration EVM Solana
+**Date**: 2026-02-23
+
 # Multi-Chain Wallet Integration (EVM + Solana)
 
 > **Source Threads**:

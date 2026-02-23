@@ -1,3 +1,11 @@
+---
+labels: [playwright, shadcn, e2e, locators]
+source: migrated-from-docs/knowledge/playwright-shadcn-baseui-locators.md
+summary: When writing Playwright E2E tests for components using shadcn/ui (which wraps @base-ui/react), standard locator strategies can fail due to how base-ui renders DOM elements.
+---
+# Playwright shadcn BaseUI Locator Patterns
+**Date**: 2026-02-23
+
 # Playwright E2E Testing with shadcn/ui + @base-ui/react
 
 ## Context

@@ -1,3 +1,11 @@
+---
+labels: [shadcn, fsd, ui, architecture]
+source: migrated-from-docs/knowledge/shadcn-ui-restructure.md
+summary: > Source Thread:
+---
+# shadcn UI Restructure and Studio Integration
+**Date**: 2026-02-23
+
 # shadcn UI Restructure & shadcn/studio Integration
 
 > **Source Thread**:

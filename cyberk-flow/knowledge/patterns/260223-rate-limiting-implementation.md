@@ -1,3 +1,11 @@
+---
+labels: [rate-limiting, hono, redis, middleware]
+source: migrated-from-docs/knowledge/rate-limiting-implementation.md
+summary: > Source Thread:
+---
+# Rate Limiting Implementation
+**Date**: 2026-02-23
+
 # Rate Limiting Implementation Knowledge
 
 > **Source Thread**:

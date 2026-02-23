@@ -40,8 +40,13 @@ This creates:
 cyberk-flow/
 ├── changes/          # Active change proposals
 │   └── archive/      # Completed changes
+├── knowledge/        # Extracted knowledge
+│   ├── decisions/    # Architecture & design decisions
+│   ├── debugging/    # Bug root causes & fixes
+│   ├── patterns/     # Code patterns & conventions
+│   ├── research/     # Research results (auto-expires)
+│   └── conventions/  # Project conventions
 ├── specs/            # Consolidated specifications
-├── templates/        # Templates for new changes
 └── project.md        # Project context
 ```
 
