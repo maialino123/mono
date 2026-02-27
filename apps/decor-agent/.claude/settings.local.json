@@ -1,0 +1,11 @@
+{
+  "enabledMcpjsonServers": [
+    "context7",
+    "human-mcp",
+    "chrome-devtools",
+    "sequential-thinking",
+    "gkg",
+    "deepwiki",
+    "git-mcp"
+  ]
+}

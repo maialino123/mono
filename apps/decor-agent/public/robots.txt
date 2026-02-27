@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /go/
+Disallow: /api/
+Disallow: /admin/
+
+Sitemap: https://ecomatehome.com/sitemap.xml
