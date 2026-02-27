@@ -1,0 +1,17 @@
+fragment ProductParts on Product {
+  __typename
+  title
+  image
+  description
+  affiliateUrl
+  category
+  featured
+  body
+}
+
+fragment ProfileParts on Profile {
+  __typename
+  name
+  avatar
+  body
+}
