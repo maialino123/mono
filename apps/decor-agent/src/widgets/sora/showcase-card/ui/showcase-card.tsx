@@ -62,11 +62,6 @@ export function ShowcaseCard({ product, onCTAClick }: ShowcaseCardProps) {
       data-testid="showcase-card"
       style={{ transformStyle: 'preserve-3d' }}
     >
-      {/* Badge */}
-      <div className="absolute top-4 right-4 flex items-center gap-2 bg-white/90 px-3 py-1.5 rounded-full">
-        <span className="text-xs font-medium text-gray-800">✦ Top Pick</span>
-      </div>
-
       {/* Pulse Ring SVG */}
       <div className="absolute inset-0 pointer-events-none">
         <svg className="w-full h-full opacity-50" aria-hidden="true">
@@ -101,7 +96,7 @@ export function ShowcaseCard({ product, onCTAClick }: ShowcaseCardProps) {
       </div>
 
       {/* Product Info */}
-      <h3 className="font-playfair text-2xl font-semibold text-white mb-2">
+      <h3 className="font-playfair text-2xl font-semibold text-sora-text-primary mb-2">
         {product.title}
       </h3>
       <p className="text-sora-text-secondary text-sm mb-4">
