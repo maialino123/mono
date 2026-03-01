@@ -1,6 +1,6 @@
 ---
 title: Bàn làm việc bàn gaming thiết kế hiện đại decor trang trí nhà
-image: /products/vn-11134207-7r98o-lue505b2ofmn9c.png
+image: /products/vn-11134207-7r98o-lue505b2pu73fe.png
 description: 'Chiếc bàn quốc dân cho các bạn sinh viên nè, tháo dời vận chuyển dễ nên ưu tiên số 1 cho các phòng trọ lun'
 affiliateUrl: 'https://s.shopee.vn/8fNFZbmhai'
 category: furniture
