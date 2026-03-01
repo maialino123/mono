@@ -1,6 +1,6 @@
 ---
 title: Bếp Gốm Hồng Ngoại Cao Cấp TATAMI Cảm Ứng Tương Thích Mọi Loại Nồi
-image: /products/vn-11134207-820l4-mdx4asv0b4le1d.png
+image: /products/vn-11134207-820l4-mdx4akt0579i1b.png
 description: 'Các sốp sinh viên nào cần tìm bếp từ okila thì tham khảo em này nhé, trộm vía dùng 3 năm vẫn ngon luôn'
 affiliateUrl: 'https://s.shopee.vn/3fyZbRdS4I'
 category: furniture
